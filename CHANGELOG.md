@@ -2,6 +2,21 @@
 
 格式参照 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/)，版本号遵循 [SemVer](https://semver.org/lang/zh-CN/)。
 
+## [0.4.1] - 2026-11-01
+
+### 修复
+
+- **键盘判定被页面缩放误触发**（真机：平板小窗 + 悬浮预设，底部导航栏整条消失）。`visualViewport.height` 会随页面缩放等比变化，150% 缩放下 826dp 窗口量出来是 551（差 275 ≥ 120 阈值）→ 被当成键盘弹出 → `data-dshm-ime` 生效、导航 `opacity: 0`。改为统一换算成「布局 px」（`clientHeight × scale`）再比，对缩放免疫。新增 `layoutHeightPx` / `isKeyboardOpen` 两个纯函数与 6 条回归用例。
+- **顶部状态带（轮次/Token/缓存命中/上下文）掉回输入区下方**。定位链原先依赖「tok 按钮 + 上下文按钮」的 aria-label 配对，两处宿主变化都会让它失配：① 官方是 `activity ? null : <ContextMeter/>`，智能体执行期间上下文环整块不渲染；② 新宿主顶栏多了「对话 / 轨迹 / 上下文」切换条，`/上下文/` 先命中页签，公共祖先一路爬到中心列后判定 `dock === root` 直接清标。改为**优先认官方结构锚点 `[data-composer-dock]`**（运行中与空闲都在），aria 配对降为老宿主退路。
+- 兜底「轮次统计行」的文本长度上限由 40 放宽到 80：官方补上「缓存命中 95%」后中文整行 41 字符，正好被旧上限拒掉。
+- 状态带高度在打标后改量子项（原先量自身，而上一次写入的固定高度会自指），执行中上下文环消失时能缩回去。
+- **键盘弹起后输入框与键盘之间多一条白带**（真机：正常手机 + 悬浮预设）。导航只做了 `opacity: 0`，官方 `shell.bottom` 这一行（grid 第二行，尺寸 `auto`）仍被导航自身 56px 撑着，输入卡就被顶到离键盘一整条导航远的位置。改为键盘态把该行 `height: 0`、卡片下沿那 8px「阴影净空」一并归零（阴影落在键盘上看不见，留着只是一条白缝），设置页弹窗底边同步落到键盘上沿。
+
+### 测试
+
+- 新增 `test/ime.test.js`（6 条）、`test/stats-bar.test.js`（7 条）。
+- 新增 `test/stats-bar-dom.test.js`（5 条，jsdom 骨架驱动 `syncStatsBar`）：空闲 / 执行中 / 顶栏有「上下文」页签 / 空会话 / 41 字符纯文本行；未安装 jsdom 时自动 skip（`NODE_PATH=<含 jsdom 的 node_modules> npm test` 可跑）。
+
 ## [0.4.0] - 2026-11-01
 
 ### 新增

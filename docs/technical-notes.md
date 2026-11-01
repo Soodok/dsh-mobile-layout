@@ -119,6 +119,23 @@ npm run pack:dry          # 预览发布文件清单
 - **单实例守卫**：宿主在插件页禁用插件**不调 dispose**、启用**不重新 apply**；旧实例晚 dispose 会清空订阅者、置空 `runtime.setPreset`。`apply` 开头 `activeDispose` 同步清场、末尾登记，`dispose` 里 `activeDispose === dispose` 才自清。
 - **插件自带配置页兼容（0.4.0）**：dsh-pet 桌宠配置 / dshmarket 插件市场实测。`isSettingsContentBlock` / `hasSettingsContent` 按几何 + 内容量判定（不再强依赖表单控件）；`tagSettingsCards` 限定外观小节；`findSettingsScroll` 兜底排除 nav / brand。
 
+### 3.9 顶部状态带、键盘判定与键盘态占位（0.4.1）
+
+真机（iPA2575 平板小窗 + 悬浮预设）连着报的两个症状，根因都在「按文案猜结构」和「按设备像素比高度」：
+
+**① 状态带（轮次 / Token / 缓存命中 / 上下文）掉回输入区下方。** 官方这三块在 `div[data-composer-dock]`（`conversation.composer.dock` 槽位）里，插件把它固定到标题栏下方当常驻状态带。0.4.0 的定位链是「tok 按钮 + 上下文按钮的 aria-label 配对 → 爬公共祖先」，两处宿主变化都会失配：
+
+- 官方是 `activity ? null : <ContextMeter/>`——**智能体执行期间上下文环整块不渲染**，配对必然缺一半；
+- 新宿主顶栏多了「对话 / 轨迹 / 上下文」切换条，`/上下文|context/i` 先命中**页签**；`buttons.find` 取的是 DOM 顺序第一个，于是 `context` 指向标题栏里的页签，爬祖先一路爬到中心列，命中 `dock === root` 分支 → `clearStatsBar()`。这条与截图症状完全一致（页签可见、状态带在底部）。
+- 兜底路径 `findTurnDock` 的文本上限 40 也太紧：官方补上「缓存命中 95%」后，三枚胶囊 + 上下文环的 `textContent` 拼接正好 **41** 字符（「3 轮 24 步 · 231 tok/s」+「693K tok · 缓存命中 95%」+「4%」），整行被拒。
+
+修法：**优先认结构锚点 `[data-composer-dock]`**（运行中与空闲都在，与文案无关），`dockHasStats()` 只判「这个 dock 里有没有统计内容」（`[data-composer-stat]` / 带「上下文」的按钮 / 轮次文本），aria 配对降为老宿主退路；文本上限放宽到 `STATS_TEXT_MAX = 80`。另外 `statsBandHeight()` 在已打标后改量**子项**——固定高度写回 `--dshm-stats-height` 后，量自身得到的是上一次写进去的值，会自指。
+
+**② 键盘判定被页面缩放误触发（底部导航整条消失）。** `visualViewport.height` 随页面缩放等比变化：826dp 窗口 + 150% 缩放量出 551，差 275 ≥ `IME_MIN_PX(120)` → 误判键盘弹出 → `data-dshm-ime` → v2 导航 `opacity: 0`。改为统一换算成**布局 px**（`layoutHeightPx = round(clientHeight × scale)`）再比较，对缩放免疫；判定拆成 `layoutHeightPx` / `isKeyboardOpen` 两个纯函数便于单测。
+
+**③ 键盘弹起后输入框与键盘之间一条白带。** 键盘态只把导航做了 `opacity: 0`，但官方 `shell.bottom` 是 grid 的**第二行（尺寸 auto）**，行高由导航自身的 `--dshm-v2-nav: 56px` 撑着——导航看不见了，高度还在，输入卡就被顶到离键盘整整一条导航远的地方（1260×2800 / ≈3x 截图实测约 200 物理 px ≈ 56dp + 8px 阴影净空）。淡出只解决「眼睛看见导航」，不解决「导航占位」。
+修法：`[data-dshm-ime]` 下把该行 `height: 0`（含 `min-height` / 上下内边距 / `overflow: hidden`），卡片下面那 8px「阴影净空」一并归零（阴影落在键盘上本来就看不见，留着只是一条白缝）；设置页弹窗底边同步从 `--dshm-v2-nav` 落到 0。锁法：`test/ime.test.js` 里一条 CSS 契约用例扫源码，防止以后被「只做淡出」的改动带回来。
+
 ## 4. i18n
 
 - `STRINGS` 表驱动，`t(key)` 取词；语言跟随官方 `locale` 服务（监听 `locale/change`），服务缺席退回 `<html lang>` / `navigator.language`（`detectLang`）。
@@ -185,6 +202,7 @@ WebView JS **没有**"不弹键盘就知道高度"的 API；来源按优先级�
    ```
    插件读取 `window.__DSH_IME_HEIGHT`（CSS px 直给）或 `window.DshAndroidKeyboard.heightPx()`（物理 px，按 devicePixelRatio 换算）；`dsh-ime-height` 事件触发插件立即重算。
 2. **visualViewport 实测**：adjustResize 下视口收缩量 = 键盘高（≥120px 显著收缩才采纳，防 pinch-zoom 误判）；测得后写 localStorage（`dshm-ime-height`），跨会话持久化——只需真弹一次键盘。
+   ⚠️ **0.4.1 起**：`visualViewport.height` / `documentElement.clientHeight` 都会随页面缩放（`visualViewport.scale`）等比变化，**必须先换算成布局 px** 再与满高比较（`round(clientHeight × scale)`），否则 150% 缩放就会凭空造出 275px 的「键盘」。实测：平板小窗 + 150% 缩放下 v2 底部导航整条 `opacity: 0`，就是这条误判。
 3. **启发式估值**：视口 × 42%，仅"从未开过键盘且无持久化值"的首次兜底，开过一次即被实测覆盖。
 
 ## 8. 已知限制与回退
