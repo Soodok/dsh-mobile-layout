@@ -2,6 +2,12 @@
 
 格式参照 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/)，版本号遵循 [SemVer](https://semver.org/lang/zh-CN/)。
 
+## [0.4.3] - 2026-11-01
+
+### 调试
+
+- 新增诊断探针 `probeIme`：在**键盘开合**与**抽屉 / 底部表收起**这几个低频时刻，往控制台打一行 JSON（`clientHeight` / `visualViewport` 的 `height`+`scale`+`offsetTop` / `data-dshm-ime` 标记 / 输入卡上下边 / `activeElement` / 当前预设）。app 侧 `onConsoleMessage` 会把 WARNING 写进 logcat，用来分辨「键盘没让位（app / OEM 侧 insets）」和「输入卡定位算错（插件侧）」——vivo X300 与 Redmi K70 表现不一致，靠这条日志定位。
+
 ## [0.4.2] - 2026-11-01
 
 ### 修复
