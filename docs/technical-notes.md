@@ -136,6 +136,23 @@ npm run pack:dry          # 预览发布文件清单
 **③ 键盘弹起后输入框与键盘之间一条白带。** 键盘态只把导航做了 `opacity: 0`，但官方 `shell.bottom` 是 grid 的**第二行（尺寸 auto）**，行高由导航自身的 `--dshm-v2-nav: 56px` 撑着——导航看不见了，高度还在，输入卡就被顶到离键盘整整一条导航远的地方（1260×2800 / ≈3x 截图实测约 200 物理 px ≈ 56dp + 8px 阴影净空）。淡出只解决「眼睛看见导航」，不解决「导航占位」。
 修法：`[data-dshm-ime]` 下把该行 `height: 0`（含 `min-height` / 上下内边距 / `overflow: hidden`），卡片下面那 8px「阴影净空」一并归零（阴影落在键盘上本来就看不见，留着只是一条白缝）；设置页弹窗底边同步从 `--dshm-v2-nav` 落到 0。锁法：`test/ime.test.js` 里一条 CSS 契约用例扫源码，防止以后被「只做淡出」的改动带回来。
 
+### 3.10 焦点归还与输入法（0.4.2）
+
+真机反馈：**焦点在输入框 → 手动收起软键盘 → 打开侧边栏 → 收起侧边栏**，键盘被自动唤起，且输入卡被压在键盘下面。
+
+Android 平台事实：**对 `input` / `textarea` / `contenteditable` 调 `focus()`，不需要任何用户手势，系统就会把软键盘拉起来。** 所以插件的焦点管理必须把这类元素排除在外。
+
+两条独立缺陷叠在一起：
+
+1. 抽屉的焦点进出按「打开时记住 `activeElement`，关闭时还回去」实现。打开抽屉前焦点就在 textarea 里（用户只是收了键盘，没移走焦点），于是收起抽屉时 `prev.focus()` = 一次脚本聚焦 = 键盘重新弹出。
+2. 这一路是脚本触发的聚焦，WebView 侧的键盘让位（`visualViewport` / `clientHeight` 收缩）不一定跟着到位，于是输入卡算出来的位置仍是「键盘收起时」的，直接被键盘盖住。
+
+修法：
+
+- `isTextEntry(node)` 判定文本录入控件，**抽屉与底部表收起时都不再归还焦点给它们**（按钮、链接等照旧归还，读屏用户不丢位置）。要接着打字，用户自己点一下输入框——这才符合「收浮层」这个纯导航动作的预期。
+- `guardComposerFocusAfterOverlay()`：浮层收起后开一个 **400ms 窗口**，窗内任何落进文本控件的 `focusin` 都下一帧 `blur` 掉（拦官方自己的 refocus：切会话后的补焦、窄屏侧栏收起后的兜底聚焦）。一旦出现 `pointerdown` 立刻撤窗——用户点输入框照常弹键盘。这把「谁 refocus 的」这个变量从等式里消掉了：不管是插件还是宿主，收起浮层都不能把键盘带出来。
+- 判定与护栏都是模块级导出（`__test.isTextEntry` / `__test.guardComposerFocusAfterOverlay`），`test/focus-return.test.js` 用 jsdom 覆盖 blur、`pointerdown` 撤窗、非文本控件不受影响。
+
 ## 4. i18n
 
 - `STRINGS` 表驱动，`t(key)` 取词；语言跟随官方 `locale` 服务（监听 `locale/change`），服务缺席退回 `<html lang>` / `navigator.language`（`detectLang`）。

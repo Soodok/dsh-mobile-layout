@@ -2,6 +2,18 @@
 
 格式参照 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/)，版本号遵循 [SemVer](https://semver.org/lang/zh-CN/)。
 
+## [0.4.2] - 2026-11-01
+
+### 修复
+
+- **收起侧边栏会自动唤起输入法，输入框还被键盘挡住**（真机：正常手机 + 悬浮预设）。抽屉关闭时把焦点「还给打开前的元素」，而打开抽屉前焦点就在输入框里：`textarea.focus()` 在 Android 上会无条件拉起软键盘，于是「手动收键盘 → 开抽屉 → 收抽屉」变成键盘自己弹回来；这一路是脚本聚焦，WebView 拿不到对应的键盘让位，输入卡就被压在键盘下面。
+  - 文本录入控件（`input` / `textarea` / `select` / `contenteditable`）**不再归还焦点**，新增纯函数 `isTextEntry`；底部表的焦点归还走同一条规矩。
+  - 新增 400ms 的「焦点回弹」护栏 `guardComposerFocusAfterOverlay`：浮层收起后短时间内任何落进文本控件的焦点都被 blur 掉（挡住官方自己的 refocus，比如切换会话后的补焦），一旦出现真实触摸立刻撤窗——用户点输入框照常弹键盘。
+
+### 测试
+
+- 新增 `test/focus-return.test.js`（4 条）：`isTextEntry` 的控件判定、护栏 blur 行为、`pointerdown` 撤窗、非文本控件不受影响。
+
 ## [0.4.1] - 2026-11-01
 
 ### 修复
