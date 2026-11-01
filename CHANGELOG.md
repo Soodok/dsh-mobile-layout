@@ -2,7 +2,15 @@
 
 格式参照 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/)，版本号遵循 [SemVer](https://semver.org/lang/zh-CN/)。
 
-## [未发布]
+## [0.4.4] - 2026-11-01
+
+### 修复
+
+- **窄窗口（悬浮小窗 / 分屏）首次打开设置页不被接管**。官方设置弹窗是桌面两列版式（导航固定 188px），视口 ~327px 时内容列只剩 ~91px，写死的宽度下限 120px 永远不成立。改为按弹窗宽度归一：宽屏仍 120px，窄屏放宽到 `min(120, max(48, 弹窗宽 × 0.25))`。内容判定同时扣掉工具行（新增 `contentPayload`：跳过含关闭按钮的头部子块再统计文本 / 节点），切预设 / 会话恢复留下的空壳弹窗不再被误判为「有内容」。
+- **设置页一次横滑直接跳到最后一个 / 第一个页签**。两处根因：① 页签行原生 `overflow-x: auto + scroll-snap` 带惯性，一次快速横滑被甩到最右 / 最左——改为 `overflow-x: hidden`，页签滚动由 `centerSettingsTab` 跟随激活项完成；② 插件可能被宿主实例化多次（热重载 / 重复 entry），每份实例都在 document 上收到同一个 touchend，一次横滑连换多页——touchend 用事件对象打标（`__dshmTabSwipeHandled`）去重，并新增跨模块单实例守卫（`window.__dshmLayoutDispose`）：apply 时先真正 dispose 上一个实例，手势监听不再叠加。页签行同时纳入换页手势（返回键除外）。
+- **命令结果卡片（bash / pwsh）窄屏上命令列被压到 ~20px、逐字换行没法读**。卡片 header 改三列网格：第 1 行 = 目录（左，过长省略）+ 退出码胶囊 + 复制，第 2 行 = 命令整宽一行不折行（超宽行内横滚），第 3 行起 = 多行命令的后续行各占一整行；状态点按新基准重新对齐。只依赖官方结构与 data 属性，不碰 CSS Modules 哈希类名。
+- **新增命令「自动换行」开关**：插件自建浮层按钮（不进 React 的卡片 DOM，避免被协调流程冲掉），用官方复制键的 rect 定位到首行右侧，滚动 / resize / DOM 变更时重算、卡片滚出视口即隐藏；图标复用官方 `IconWrapFillRegular` / `IconNowrapFillRegular`（React 元素树序列化成 SVG，官方换图标自动跟随）；偏好存 `localStorage`（`dshm-terminal-wrap`）。打开后命令按容器宽度折行。
+- **底部导航整体偏上、条底留一条空带**（DSH Mobile 宿主真机）：宿主 WebView 底边已经抬到手势条上方（让出 ~18 CSS px 导航条），页面里再叠一遍 `env(safe-area-inset-bottom)` 就是双份。`--dshm-safe-bottom` 置 0（普通移动浏览器该值一般为 0，行为不变）。
 
 ### 新增
 
