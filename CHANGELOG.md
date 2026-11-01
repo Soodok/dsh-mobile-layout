@@ -2,6 +2,13 @@
 
 格式参照 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/)，版本号遵循 [SemVer](https://semver.org/lang/zh-CN/)。
 
+## [未发布]
+
+### 新增
+
+- `package.json` 增加 `dsh.compatibility.dshReleases`：逐版本声明对 DSH 内核的兼容性，目前 `0.2.1-rc.2` 与 `0.2.1-rc.5` 标为 `compatible`（两者均实测可用）。取值沿用生态惯例 `compatible` / `incompatible` / `unknown`，未列出的版本视为 `unknown`。
+  - 说明：内核 `evaluatePluginCompatibility()`（`@deepseek-ai/dsh-app-boot`）只读 `engines.dsh` 与 `peerDependencies`，**不读这个字段**，所以它不影响安装判定，是给插件市场 / 商店索引看的声明。`dsh.compatibility.dsh` 与 `engines.dsh` 保持一致（`>=0.2.1-rc.2`）。
+
 ## [0.4.3] - 2026-11-01
 
 ### 调试

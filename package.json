@@ -30,6 +30,13 @@
         "@deepseek-ai/dsh-client-ui-layout"
       ],
       "platform": "web"
+    },
+    "compatibility": {
+      "dsh": ">=0.2.1-rc.2",
+      "dshReleases": {
+        "0.2.1-rc.2": "compatible",
+        "0.2.1-rc.5": "compatible"
+      }
     }
   },
   "engines": {
