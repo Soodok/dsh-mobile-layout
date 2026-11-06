@@ -153,6 +153,103 @@ Android 平台事实：**对 `input` / `textarea` / `contenteditable` 调 `focus
 - `guardComposerFocusAfterOverlay()`：浮层收起后开一个 **400ms 窗口**，窗内任何落进文本控件的 `focusin` 都下一帧 `blur` 掉（拦官方自己的 refocus：切会话后的补焦、窄屏侧栏收起后的兜底聚焦）。一旦出现 `pointerdown` 立刻撤窗——用户点输入框照常弹键盘。这把「谁 refocus 的」这个变量从等式里消掉了：不管是插件还是宿主，收起浮层都不能把键盘带出来。
 - 判定与护栏都是模块级导出（`__test.isTextEntry` / `__test.guardComposerFocusAfterOverlay`），`test/focus-return.test.js` 用 jsdom 覆盖 blur、`pointerdown` 撤窗、非文本控件不受影响。
 
+### 3.11 系统返回栈（手机形态，0.4.5）
+
+**为什么必须插件自己管**：宿主 `layout.selectPanel()` 只改 `panelInfo.activePanelId`，不写浏览器历史（`_dshm-shots/layout.js:407-409`）；Android 壳 `onBackPressed()` 原本是 `canGoBack() ? goBack() : finish()`。于是「插件页 / 自动化任务 / SSH 工作区」这类整页界面在 WebView 历史里没有任何痕迹 —— 按一次返回直接 finish 到桌面。反过来，若 WebView 历史里混入跨文档条目，`goBack()` 又会退到上一份文档，表现为「按返回重新加载了一下」。
+
+**三层模型**
+
+| 层 | 判定 | 条目 | 退出动作 |
+|---|---|---|---|
+| base | 会话页 | 新壳：`replaceState({dshm:'base'})`，不新增；旧壳：`pushState({dshm:'base'})` 哨兵 | 交给壳的双击退出 |
+| page | `panelInfo.activePanelId !== null` | `pushState({dshm:'page'})` | `layout.selectPanel(null)` |
+| overlay | `overlayVisible()` + `genericOverlayVisible()` | `pushState({dshm:'overlay'})` | 逐层关闭：子层 → v2 加号 → 设置 → 官方面板 → 头部菜单 → 表 / 抽屉 / 右栏 |
+
+压栈顺序 base → page → overlay；退栈顺序相反。因此栈顶永远是 overlay —— popstate 里不必读 `event.state` 也能确定「刚被消费的是哪一层」。
+
+**四条不变量**
+
+1. `consumable === (depth > 0)`，且只在手机形态为真。壳仅在 `mobile && consumable && canGoBack()` 时 `goBack()`；`consumable=false` 时即使 `canGoBack()` 为真也不回退 —— 这是「不重载」的根。
+2. 任何路径禁止 `location.reload()` / `location.href=` / `webView.reload()`；返回只改 DOM 与状态。
+3. 无 `dshm` 标记的 popstate 不猜测关闭：先交给 `__dshmBack` 注册者，无人认领只复位。
+4. 程序化回退（UI 主动关页 / 切预设）用 `programmaticBacks` 计数，命中的 popstate 只消费、不关闭。
+
+**关闭闸门**：`beginClosingOverlay()` 在返回后 320ms 内只挡 overlay 的压栈（page 不受影响），到期按真实可见性重算。挡的是「关闭动画期间可见性仍为 true → 重复压栈 → 下一次返回空转」；旧实现用 700ms 且连 page 一起挡，导致「面板 + 设置」连按两次的第二次空转。
+
+**跨插件覆盖**
+
+- **页面层不枚举 id**：其它插件经 `main` keyed slot（`ctx.slots.register({name:'main', key})`）注册的页面自动落进 page 层；`selectPanel` 内部用 `ctx.slots.entries('main')` 校验，`selectPanel(null)` 对任何已注册面板都通用。
+- **浮层 / 二级页 / portal 全屏页**走开放契约 `window.__dshmBack.register({id, priority, kind, isActive, close})`：`priority` 降序、同级后注册先问，`close()` 返回 `true` 即独占本次返回（对齐 Android `OnBackPressedDispatcher`）。
+- **纯 DOM 接入**：浮层根节点加 `data-dshm-back-layer` 即被识别并按「找关闭按钮 / 派发 Esc」兜底；`data-dshm-ignore-back` 可排除。
+- **壳侧与页面来源无关**：`DshAndroidBack` 只认 `mobile / consumable / depth`，不认识任何 `panelId`，所以跨插件泛化只动插件侧。
+- 底栏高亮对未知 `panelId` 返回 `unknown-page`，避免被误判成「会话页」。
+
+**探针待办**：插件侧 `ctx.slots.entries/subscribe`、`ctx.reflect.provide` 的可用性，以及 `shell.overlay`（list slot）条目是常驻还是按需挂载。当前实现只依赖 `activePanelId` 与 DOM 可见性，不依赖这些结论；探针结果只影响诊断能力。
+
+**旧壳兜底：栈底哨兵**
+
+新壳有 `DshAndroidBack`，插件报 `consumable` 即可；**旧壳没有这个桥**，`onBackPressed()` 只有 `canGoBack() ? goBack() : finish()`。此时插件若按新壳的写法只 `replaceState` 打标、不占条目，会话页 `canGoBack()` 就是 `false`，按一次返回直接 `finish()`。
+
+触发条件 `legacyBackFallback()` 三个同时成立：`runtime.host === 'android'` + `state.mode === MODE_MOBILE` + `hasBackBridge() === false`。**必须限定 Android 宿主** —— 桌面端和纯浏览器里 base 状态按返回就是关页面，塞哨兵反而污染浏览器返回键。
+
+| 时刻 | 历史 | `canGoBack()` | 插件动作 |
+|---|---|---|---|
+| 进入手机形态 | `[E0(无标记), S1(base)]` | true | 压哨兵；不打标 E0（栈底必须无标记，才能认出「退无可退」） |
+| 按返回 | `[E0, S1]` → `[E0]` | false | popstate 无 `dshm` → 弹提示，`baseEntry=false` |
+| 2 秒内再按 | `[E0]` | false | 壳直接 `finish()`（用户想退，放行） |
+| 超过 2 秒 | `[E0, S1']` | true | 定时器重压哨兵，恢复可回退 |
+
+关键点：**提示期间故意不压回**。如果退到底就立刻重压，`canGoBack()` 永远为真，用户永远退不出去 —— 这是哨兵方案最容易踩的死锁。哨兵也不计入 `depth` / `consumable`（它不代表用户能看到什么），离开手机形态或换到带桥的新壳时由 `planBackStack` 的 `staleBase` 分支退掉。
+
+提示条是插件自绘的 `[data-dshm-exit-hint]` 节点：`position:fixed`、`pointer-events:none`、尺寸用 `em`（跟随系统字号），不参与布局也不挡触摸。文案走 `STRINGS[*].backExitHint`，与新壳 `R.string.back_exit_hint` 语义一致（样式不同，时序一致）。
+
+**回滚**：`localStorage['dshm-back-stack'] = 'off'` → 只维护 overlay 一条，并上报 `mobile=false` 让壳走原逻辑（等价 v0.4.4）；哨兵同样不压（`backStackEnabled()` 是 `legacyBackFallback()` 的条件之一）。
+
+### 3.12 会话视图页签与「⋯」折叠（0.4.5）
+
+**现象**：手机上「对话 / 轨迹 / 编辑器」这排页签，宽度明明还够，第三个却被收进「⋯ 更多会话视图」。
+
+**判据在官方侧**（`@deepseek-ai/dsh-client-ui-conversation/lib/client.js`，`ConversationSessionHeader`）：
+
+```js
+const updateLimit = () => {
+  setVisibleViewLimit(Math.max(1, Math.floor((row.clientWidth - 48) / 120)));
+};
+const visibleTabs = hasEntryActions ? preferred.slice(0, visibleViewLimit) : preferred;
+const moreTabs = tabs.filter((t) => !visibleIds.has(t.id));
+```
+
+即**每个视图按 120px 预留**、再扣 48px 给 ⋯。而实测页签间距只有 58px（26px 文字 + 32px 内边距），口径差一倍多：手机 CSS 宽 392 时 `row.clientWidth ≈ 344` → `floor(296/120) = 2` → 只露两个。
+
+视图来源是 `conversation.view` 槽：内置 `chat`、`trajectory`（且 `trajectory` 需开启开发者工具），「编辑器」由 `@xiaopb/dsh-solution-explorer` 以 `id: "solution-explorer-editor"` 注册。所以只装本插件时模拟器上只有两个页签，要复现必须额外装那个插件。
+
+**做法**：公式只读 `row.clientWidth`，改不动，但 `clientWidth` 是 border-box 宽度 —— 给页签行补一段不可见的横向余量即可。`syncViewTabsRow()` 给 `[data-conversation-tabs]` 的父元素打 `data-dshm-viewtabs-row`，CSS 在手机形态下：
+
+```css
+[data-dshm-viewtabs-row] { width: calc(100% + var(--dshm-viewtabs-extra, 360px)) !important; }
+[data-dshm-center] { overflow-x: clip; }
+```
+
+内容仍左对齐，行尾多出来的是空白；溢出的那截由中心列裁掉。实测（CSS 宽 392）：
+
+| 状态 | `row.clientWidth` | 名额 | 可见页签 | `scrollWidth` |
+|---|---|---|---|---|
+| `--dshm-viewtabs-extra: 0` | 344 | 2 | 对话 / 轨迹 / ⋯ | 392 |
+| 默认 360px | 704 | 5 | 对话 / 轨迹 / 编辑器 / ⋯ | 392 |
+
+`--dshm-viewtabs-extra` 是公开旋钮：设 0 即回到官方行为。
+
+### 3.13 工作台（右栏）的两种状态机（0.4.5）
+
+Android 窄屏下右栏是**官方自己的浮层**，和桌面列不是同一套状态：
+
+| 标记 | 含义 | 由谁撤销 |
+|---|---|---|
+| `[data-rightbar-fullscreen]`（在 `[data-dshm-frame]`） | 是否占满宽度 | `layout.closeRightbar()` |
+| `[data-sidebar-right-open]`（在 `[data-sidebar-right-panel]`） | 浮层在不在 | 只有官方「收起右侧边栏」按钮 |
+
+`closeRightbar()` 只做前者。旧实现按返回时只调它 → 面板继续全屏、返回栈却已归零，用户被卡在工作台且再按返回只能退出 App。现在 `closeRightbarSafe()` 先按 `aria-label`（`收起右|收起侧|关闭…|collapse/close sidebar`）找官方按钮点击，找不到才退回 `closeRightbar()`；`nextBackTarget` 的右栏判据同时认两个标记，覆盖短暂不同步的中间态。
+
 ## 4. i18n
 
 - `STRINGS` 表驱动，`t(key)` 取词；语言跟随官方 `locale` 服务（监听 `locale/change`），服务缺席退回 `<html lang>` / `navigator.language`（`detectLang`）。

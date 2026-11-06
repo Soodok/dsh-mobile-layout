@@ -2,6 +2,35 @@
 
 格式参照 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/)，版本号遵循 [SemVer](https://semver.org/lang/zh-CN/)。
 
+## [0.4.5] - 2026-11-06
+
+### 修复
+
+- **手机形态按系统返回键直接退出到桌面，而不是回上一级**。三层根因：① 宿主 `layout.selectPanel()` 只改 `panelInfo.activePanelId`、不写浏览器历史，插件页 / 自动化任务 / SSH 工作区这类整页界面在 WebView 历史里完全没有痕迹；② Android 壳 `onBackPressed()` 是 `canGoBack() ? goBack() : finish()`，没有条目就直接结束 Activity；③ 插件这边只有「浮层可见 ⇒ 压一条 history」的单布尔模型，`panelActive` 根本没纳入。改为**三层返回栈**（base / page / overlay）：页面层只认宿主通用字段 `panelInfo.activePanelId`（不枚举具体 id，其它插件经 `main` keyed slot 注册的页面同样命中），关闭走通用的 `layout.selectPanel(null)`；浮层层沿用原有逐层顺序。一次返回只退一层，栈顶永远是浮层。
+- **面板页 + 设置页叠加时第二次返回仍然退出**。旧模型把页面态和浮层挤在同一个布尔里，第一次收浮层、第二次没有条目可退。三层栈给页面态单独一条，`S5`（面板 + 设置连按两次）现在逐层退干净。
+- **内部返回会「重新加载一下」**。根因是壳无条件相信 `canGoBack()`：WebView 历史里混着跨文档条目时，`goBack()` 退到上一份文档就是整页重载。插件改为按「自己压了几条同文档条目」经 `DshAndroidBack.setState({mobile, consumable, depth})` 上报，壳只在 `mobile && consumable && canGoBack()` 时才 `goBack()`；条目 state 带 `dshm` 标记，无标记条目一律不猜测着关 UI。
+- **会话页按返回直接退出、没有防误触**。壳侧改为「首次轻提示 + 2 秒内再按才退出」，提示走新增 `R.string.back_exit_hint`（五语言同步）。
+- **按返回键关不掉工作台（右侧边栏）**。Android 窄屏下右栏是官方自己的**浮层**形态：`[data-sidebar-right-panel]` 挂上 `data-sidebar-right-open` 后是 `position:fixed; inset:0`，而 `layout.closeRightbar()` 只把列折叠成 0 宽，浮层标记没撤销 → 面板继续全屏盖住会话页；同时 `[data-rightbar-fullscreen]` 已经消失，返回栈随之归零，用户再按返回只能退出 App。改为优先点官方「收起右侧边栏」（按 `aria-label` 词根在右栏子树里找，避开「退出全屏」「分栏」），点不到才退回 `closeRightbar()`；返回目标的右栏判据补上窄屏浮层标记，覆盖两个状态短暂不同步的中间态。
+- **会话视图页签过早收进「⋯ 更多会话视图」**。官方 `ConversationSessionHeader` 用 `visibleViewLimit = max(1, floor((row.clientWidth - 48) / 120))` 决定几个视图能直接露出标题，120px/个 的口径与实测页签间距（58px）差一倍多：手机 CSS 宽 392 时只算出 2 个，「编辑器」（由 `@xiaopb/dsh-solution-explorer` 经 `conversation.view` 槽提供）明明放得下也被折叠。公式只读 `row.clientWidth`，插件改不动它，改为给页签行打 `data-dshm-viewtabs-row` 并补一段不可见横向余量（`--dshm-viewtabs-extra`，默认 360px），名额随之从 2 升到 5；内容仍左对齐、行尾多出来的是空白，溢出的那截由中心列 `overflow-x: clip` 吃掉，实测 `scrollWidth === innerWidth` 无横向滚动。
+
+### 新增
+
+- **开放返回契约 `window.__dshmBack`**：任何插件都能 `register({ id, priority, kind, isActive, close })`，按返回时按优先级逆序询问，第一个 `close()` 返回 `true` 的独占本次返回 —— 对齐 Android `OnBackPressedDispatcher` 的「按注册逆序、谁使能谁消费」模型。其它插件新增的浮层、portal 型全屏界面、页内二级页因此都能自己接管返回，本插件不需要认识它们的 id。
+- **通用浮层发现**：`[role="dialog"][aria-modal="true"]` / `[role="alertdialog"]` / `[data-dshm-back-layer]` 也会压一条 overlay 条目（用尺寸、`visibility`、`data-dshm-ignore-back` 三重过滤）。没有注册者时尝试「找关闭按钮 / 派发 Esc」，收不掉也会回会话页，**不会直接退出应用**。
+- 底栏页面高亮新增 `unknown-page` 兜底：其它插件注册的 `main` 面板不再被误判成「会话页」（只影响高亮，不参与返回栈决策）。
+- 新增 `planBackStack` / `nextBackTarget` 两个纯函数并导出到 `__test`，`test/back-stack.test.js` 覆盖 34 例（压栈顺序、退栈顺序、幂等、关闭闸门、离开形态清栈、逐层优先级、哨兵兜底）。
+- **旧 APK 兜底（栈底哨兵）**：没有 `DshAndroidBack` 桥的旧版 App 只有 `canGoBack() ? goBack() : finish()` 一条判断，插件若不给栈底留条目，会话页按返回就会被直接 `finish()`。检测到桥缺失（且宿主是 Android 壳）时，base 层改为压一条**真实条目**并配合自绘「再按一次退出」提示 + 2 秒窗口：提示期间故意不压回，`canGoBack()` 保持 `false`，用户再按一次就落到旧壳原有的 `finish()` 上；超过 2 秒则重压哨兵，恢复「可回退」状态。哨兵不计入 `depth` / `consumable`，换到带桥的新壳或离开手机形态时会自动退回。
+
+### 兼容
+
+- **旧壳（无 `DshAndroidBack` 桥）**：三层栈照常维护，页面 / 浮层逐层退可用；另经栈底哨兵 + 自绘提示实现「再按一次退出」（提示样式不同于新壳的原生 Toast，时序一致）。无需升级 App 即可获得防误退。
+- **桌面形态（`MODE_DEFAULT`）零改动**：不压条目、不上报、不碰 history。非 Android 宿主（纯浏览器 / 桌面）也绝不启用哨兵，不污染浏览器返回键。
+- **一键回滚**：`localStorage['dshm-back-stack'] = 'off'` 退回 v0.4.4 行为（只维护浮层一条 + 上报 `mobile=false` 让壳走原逻辑），不需要降级版本。
+
+### 配套（Android 壳，独立 PR）
+
+- `MainActivity` 新增 `DshAndroidBack` 桥、`onBackPressed()` 三段逻辑、WebView 重建时重置返回状态、`back_exit_hint` 五语言；debug 包顺带开启 WebView 远程调试（`chrome://inspect`）。
+
 ## [0.4.4] - 2026-11-01
 
 ### 修复
