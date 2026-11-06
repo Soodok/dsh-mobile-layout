@@ -2,6 +2,31 @@
 
 格式参照 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/)，版本号遵循 [SemVer](https://semver.org/lang/zh-CN/)。
 
+## [0.4.7] - 2026-11-07
+
+### 适配
+
+- **兼容 DSH 引擎 `@deepseek-ai/dsh-client-ui-layout 0.2.2-rc.1`**（Android App 1.5.0 / BUILD `2026.11.06-4566c0be`）。`package.json` 的 `dsh.compatibility.dshReleases` 登记该版本，并新增 `capabilities` 声明（slots / services / `dialogContract`）。
+- **配置入口优先走官方 slot**：布局模式选择器注册到 `settings.general.item`（`id: 'dshm-layout'`、`order: 10.5`），落在官方「外观」与「字号大小」之间；旧版 DOM 注入保留为 `legacy` 降级路径。
+- **设置弹窗按官方稳定契约正向识别**：`[data-shortcut-modal="settings"]` 是真设置页，`sidebar` / `shortcut-edit` 一律排除；不再用 `role=dialog + nav + 文案` 启发式，避免把 0.2.2-rc.1 的独立抽屉 dialog 误标成设置页。缓存复用前经 `stillMatchesSettings()` 复查，误标由 `pruneSettingsTags()` 自愈。
+- **锚点优先 `data-slot`**：`sidebar` / `main` 先按官方 slot 属性定位，位置推断只作兜底。
+- **`data-dshm-form` 首帧无条件写入**：宽屏从启动即为 `wide`（此前属性根本不存在），修复所有依赖该属性的 CSS 判据。
+- **能力探测与三态降级**：只读诊断对象 `window.__dshmCompat` + `native` / `legacy` / `safe` 三态；未知引擎自动降级，探测失败只 `console.warn`、绝不影响启动。回滚开关：`localStorage['dshm-compat'] = 'legacy' | 'safe'`、`localStorage['dshm-settings-slot'] = 'off'`。
+
+### 修复
+
+- **原生预设设置页严重布局异常**（0.2.2-rc.1 上实测：浮动小窗 + 大片灰色遮罩 + 标题/页签右端裁切 + 内容底部截断）。根因是 0.4.6 给原生预设单独做的「悬浮窗重排」CSS（12/24px 边距）与 `hardenSettings()` 内联 `!important` 几何，官方换变体后把面板钉死。**三个预设统一为手机全屏设置页**（全屏 CSS 作用域从 `data-dshm-mode="mobile"` 改为 `data-dshm-form="phone"`），品牌行与返回键在原生预设下也保留；旧悬浮窗实现保留在源码里，把 `SETTINGS_UNIFIED_FULLSCREEN` 置 `false` 可一键回滚。
+- **设置页关不掉**（返回箭头 / 系统返回 / Esc / 左滑手势四条路径同时失效）。0.2.2-rc.1 把「打开配置文件 / ✕」工具行移出了内容区，旧 `tagSettings()` 只在 `content.children` 里找工具行，于是 `data-dshm-settings-close` 永不打标。`closeSettingsImmediate()` 增加按 `[data-shortcut-modal="settings"]` 正向查找官方关闭按钮的兜底。
+
+### 验证
+
+- `npm run check` 全绿：语法检查 → 216 项单测（0 失败）→ 包清单 / bundle 契约 → 硬编码守卫。新增 `test/compat-contract.test.js` 覆盖弹窗分类、缓存复查、slot 路径选择、能力归一化与源码契约。
+- 两台 AVD（手机 `Medium_Phone_API_35` / 平板 `Pixel_Tablet_API_35`，App 1.5.0）CDP + 截图验收：三预设冷启动与设置页内热切换、设置页几何（全屏 `0,0` 覆盖视口；悬浮预设底部按设计留 56px 导航）、五个页签逐页可达、返回箭头与系统返回键、侧边栏抽屉、附件入口向上弹出、深浅主题、中英语言往返、slot 路径与抽屉误标计数全部通过；平板宽屏保持官方两列弹窗，不受手机全屏规则影响。
+
+### 已知限制
+
+- 抽屉展开时按系统返回键不会收起抽屉（WebView 历史与官方抽屉状态分离），属 `back-stack-mobile-plan.md` 的手机形态返回栈专项，需 Android 壳侧配合，不在本次改动范围。
+
 ## [0.4.6] - 2026-11-06
 
 ### 新增

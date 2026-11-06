@@ -6,7 +6,7 @@
 [![Release](https://github.com/XiaoPb/dsh-mobile-layout/actions/workflows/release.yml/badge.svg)](https://github.com/XiaoPb/dsh-mobile-layout/actions/workflows/release.yml)
 [![npm](https://img.shields.io/npm/v/@xiaopb/dsh-mobile-layout?label=npm)](https://www.npmjs.com/package/@xiaopb/dsh-mobile-layout)
 
-**DSH mobile portrait layout plugin (v0.4.0)**
+**DSH mobile portrait layout plugin (v0.4.7)**
 
 Docs: [Architecture](docs/architecture.md) ｜ [Technical notes](docs/technical-notes.md) ｜ [Presets](docs/preset-v2.md) ｜ [Changelog](CHANGELOG.md) ｜ [中文版](README.md)
 
@@ -79,13 +79,24 @@ Floating is the **mobile-app form factor**: a five-item bottom nav acts as the p
     <td align="center"><img src="docs/assets/screens/preset-v2/home.png" width="200"><br><sub>Home</sub></td>
   </tr>
   <tr>
-    <td align="center"><img src="docs/assets/screens/preset-default/settings.png" width="200"><br><sub>Settings floating window</sub></td>
+    <td align="center"><img src="docs/assets/screens/preset-default/settings.png" width="200"><br><sub>Settings (full-screen since 0.4.7; image shows the legacy floating window)</sub></td>
     <td align="center"><img src="docs/assets/screens/preset-classic/settings.png" width="200"><br><sub>Settings · layout mode</sub></td>
     <td align="center"><img src="docs/assets/screens/preset-v2/settings-general.png" width="200"><br><sub>Settings · layout mode</sub></td>
   </tr>
 </table>
 
 Archived screenshots of the early release (v0.1.6, single-column v1 layout) live in a separate page: [docs/archive-v0.1.6.md](docs/archive-v0.1.6.md).
+
+---
+
+## Compatibility (0.4.7)
+
+- **Engine**: supports `@deepseek-ai/dsh-client-ui-layout 0.2.2-rc.1` (Android app 1.5.0); see `dsh.compatibility` in `package.json`.
+- **Settings entry**: the layout-mode picker registers on the official `settings.general.item` slot; older engines fall back to DOM injection (`legacy`), and missing capabilities fall back to no takeover (`safe`).
+- **Settings page**: all three presets use the same phone full-screen layout; tablets and desktops keep the official two-column dialog. Settings dialogs are identified by `data-shortcut-modal="settings"`, so the sidebar drawer is never mistaken for one.
+- **Diagnostics**: read `window.__dshmCompat` from the console / CDP (`mode`, `settingsPath`, `settingsSlotSeen`, `dialogContract`, `engineVersion`, `reason`).
+- **Rollback**: `localStorage['dshm-compat'] = 'legacy'` forces the old injection path, `'safe'` disables settings takeover, `localStorage['dshm-settings-slot'] = 'off'` disables only the slot path. The full-screen settings layout is gated by the source constant `SETTINGS_UNIFIED_FULLSCREEN`.
+- **Known limitation**: pressing the system Back key while the drawer is open does not close it (WebView history is decoupled from official drawer state). This belongs to the phone back-stack project and needs a matching Android shell change; it is out of scope for 0.4.7.
 
 ---
 
@@ -99,7 +110,7 @@ No runtime or dev dependencies; the client is a single-file artifact (no build),
 
 ```sh
 npm run check             # node --check → unit tests → package / bundle contract → hardcoded-value guard
-npm test                  # unit tests only (129)
+npm test                  # unit tests only (216)
 npm run hardcode:check    # guard only (fails on new violations)
 npm run hardcode:baseline # shrink the baseline after fixing violations
 npm run pack:dry          # preview the files that will be published

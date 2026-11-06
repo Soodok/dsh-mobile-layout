@@ -6,7 +6,7 @@
 [![Release](https://github.com/XiaoPb/dsh-mobile-layout/actions/workflows/release.yml/badge.svg)](https://github.com/XiaoPb/dsh-mobile-layout/actions/workflows/release.yml)
 [![npm](https://img.shields.io/npm/v/@xiaopb/dsh-mobile-layout?label=npm)](https://www.npmjs.com/package/@xiaopb/dsh-mobile-layout)
 
-**DSH 手机竖屏布局插件（v0.4.0）**
+**DSH 手机竖屏布局插件（v0.4.7）**
 
 文档：[架构文档](docs/architecture.md) ｜ [技术说明](docs/technical-notes.md) ｜ [预设方案 / 进度](docs/preset2-progress.md) ｜ [更新日志](CHANGELOG.md) ｜ [English](README.en.md)
 
@@ -140,13 +140,24 @@ const off = window.__dshmBack.register({
     <td align="center"><img src="docs/assets/screens/preset-v2/home.png" width="200"><br><sub>主界面</sub></td>
   </tr>
   <tr>
-    <td align="center"><img src="docs/assets/screens/preset-default/settings.png" width="200"><br><sub>设置悬浮窗（10vh 留白）</sub></td>
+    <td align="center"><img src="docs/assets/screens/preset-default/settings.png" width="200"><br><sub>设置页（0.4.7 起全屏；图为历史悬浮窗）</sub></td>
     <td align="center"><img src="docs/assets/screens/preset-classic/settings.png" width="200"><br><sub>设置全屏 · 布局模式</sub></td>
     <td align="center"><img src="docs/assets/screens/preset-v2/settings-general.png" width="200"><br><sub>设置全屏 · 布局模式</sub></td>
   </tr>
 </table>
 
 早期版本（v0.1.6，v1 单栏布局）的截图存档已移到独立文档：[docs/archive-v0.1.6.md](docs/archive-v0.1.6.md)。
+
+---
+
+## 0.4.7 兼容性说明
+
+- **适配引擎**：`@deepseek-ai/dsh-client-ui-layout 0.2.2-rc.1`（Android App 1.5.0）。声明见 `package.json` 的 `dsh.compatibility.dshReleases` 与 `capabilities`。
+- **配置入口**：布局模式选择器注册到官方 slot `settings.general.item`；旧引擎自动降级为 DOM 注入（legacy），能力缺失时完全不接管（safe）。
+- **设置页**：三个预设统一为手机全屏；平板 / 桌面保持官方两列弹窗。设置弹窗按 `data-shortcut-modal="settings"` 正向识别，抽屉不会被误认成设置页。
+- **诊断**：控制台 / CDP 读 `window.__dshmCompat`（`mode` / `settingsPath` / `settingsSlotSeen` / `dialogContract` / `engineVersion` / `reason`）。
+- **回滚**：`localStorage['dshm-compat'] = 'legacy'` 强制旧注入路径；`'safe'` 完全不接管配置 UI；`localStorage['dshm-settings-slot'] = 'off'` 只关 slot 路径。全屏设置页的回滚开关是源码常量 `SETTINGS_UNIFIED_FULLSCREEN`。
+- **已知限制**：抽屉展开时按系统返回键不会收起抽屉，属手机形态返回栈专项（需 Android 壳配合），不在 0.4.7 范围。
 
 ---
 
@@ -162,7 +173,7 @@ dsh plugin --profile web add @xiaopb/dsh-mobile-layout
 
 ```sh
 npm run check             # node --check → 单测 → 包清单 / bundle 契约 → 硬编码守卫
-npm test                  # 仅单测（129 项）
+npm test                  # 仅单测（216 项）
 npm run hardcode:check    # 仅硬编码守卫（新增违规即失败）
 npm run hardcode:baseline # 消除违规后收紧 baseline
 npm run pack:dry          # 查看将发布的文件

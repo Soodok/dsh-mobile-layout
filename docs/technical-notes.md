@@ -250,6 +250,24 @@ Android 窄屏下右栏是**官方自己的浮层**，和桌面列不是同一�
 
 `closeRightbar()` 只做前者。旧实现按返回时只调它 → 面板继续全屏、返回栈却已归零，用户被卡在工作台且再按返回只能退出 App。现在 `closeRightbarSafe()` 先按 `aria-label`（`收起右|收起侧|关闭…|collapse/close sidebar`）找官方按钮点击，找不到才退回 `closeRightbar()`；`nextBackTarget` 的右栏判据同时认两个标记，覆盖短暂不同步的中间态。
 
+### 3.14 引擎 0.2.2-rc.1 契约适配与设置页统一全屏（0.4.7）
+
+`@deepseek-ai/dsh-client-ui-layout 0.2.2-rc.1`（App 1.5.0）把抽屉改成了独立 overlay dialog，官方节点上开始稳定地挂 `data-shortcut-modal`：
+
+| 官方标记 | 含义 | 插件判据 |
+|---|---|---|
+| `[data-shortcut-modal="settings"]` | 真设置弹窗 | 正向识别，唯一入口 |
+| `[data-shortcut-modal="sidebar"]` | 手机抽屉 | 一律排除（旧启发式会把它误标成设置页） |
+| `[data-shortcut-modal="shortcut-edit"]` | 快捷键编辑 | 一律排除 |
+
+`classifyDialog()` / `stillMatchesSettings()` 把「按 role + nav + 文案猜」换成契约分类与缓存复查；`pruneSettingsTags()` 负责把误标过的节点擦干净。配置 UI 则优先注册官方 list slot `settings.general.item`（`id: 'dshm-layout'`，`order: 10.5`），`chooseSettingsPath()` 按 `safe` → `forceLegacy` → slot 已挂载 → 注册宽限期 → legacy 依次选路；`applyLocale()` 在 slot 路径下额外 `setState({})` 触发 React 组件重渲染（React 节点不会像自绘 DOM 那样被 `syncLayoutPickerTexts` 扫到）。
+
+能力探测只读：`window.__dshmCompat` 暴露 `mode`（`native` / `legacy` / `safe`）、`settingsPath`、`settingsSlotSeen`、`dialogContract`、`engineVersion`、`reason`。不解析 UA（平板 AVD 的 UA 是桌面 Chrome，与 JS 桥判 android 两套口径并存），未知引擎一律降级，任何失败只 `console.warn`。回滚：`localStorage['dshm-compat'] = 'legacy' | 'safe'`、`localStorage['dshm-settings-slot'] = 'off'`。
+
+**统一全屏**：0.4.6 给原生预设单独做的悬浮窗重排（CSS 钉 12/24px 边距 + `hardenSettings()` 内联 `!important` 几何）在这个引擎上把标题、页签右端和内容底部裁掉，周围还留大片灰色遮罩。0.4.7 把全屏规则的作用域从 `html[data-dshm-mode="mobile"]` 改为 `html[data-dshm-form="phone"]`——原生预设 `mode=default`，旧规则根本不生效——并停用整套原生悬浮窗 CSS（`...(SETTINGS_UNIFIED_FULLSCREEN ? [] : [...])`）与内联旧分支。悬浮（v2）预设仍按设计在底部留 56px 给五项导航。
+
+**关闭路径**：0.2.2-rc.1 把「打开配置文件 / ✕」工具行移到了内容区之外，`tagSettings()` 原先只在 `content.children` 里找工具行，导致 `data-dshm-settings-close` 永不打标，返回箭头 / 系统返回 / Esc / 左滑手势四条退出路径同时失效。`closeSettingsImmediate()` 现在按 `[data-shortcut-modal="settings"]` 正向找官方关闭按钮并点击，找不到才退回清标记。
+
 ## 4. i18n
 
 - `STRINGS` 表驱动，`t(key)` 取词；语言跟随官方 `locale` 服务（监听 `locale/change`），服务缺席退回 `<html lang>` / `navigator.language`（`detectLang`）。
