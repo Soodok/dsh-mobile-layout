@@ -28,7 +28,7 @@ npm run pack:dry          # 预览发布文件清单
 | 意图确认 `SWIPE_ARM_PX` | 24 CSS px | 24px 定向即进入跟手：更晚的话第三方页面已把 touchmove 吃掉（终端 / VS Code 组件 stopPropagation），手势跟不上 |
 | 抽屉开栏起手区 `drawerStartLimit` | 屏宽左 60%，下限 64 CSS px | 全面屏把系统返回绑在硬边缘，24px 边缘区根本滑不到；QQ 式中间偏左起手。0.2.10 由 40% 扩到 60% 并去掉 200 上限（用户实测中段起手更自然）；下限防极窄屏退化成纯边缘手势 |
 | 横滚让路 `scrollerConsumes` | 方向 + 边界判定 | 右滑看 `scrollLeft > 0`、左滑看是否到右端（1px 亚像素容差）；不是「起手在横滚容器内就让路」——终端 / 宽表整页横滚时最左端起手仍要能开抽屉（0.1.15 修） |
-| 松手吸附 `drawerSettle` | 甩动优先 \|v| ≥ 0.35 px/ms；否则位移比例 ≥ 0.38 展开 | 快速轻扫不必拖过半屏；两阈值取偏小值，手机上「拖出 1/3 屏 + 稍快」就该算明确意图。比例阈值两侧对称（展开态拖回 <0.38 才收） |
+| 松手吸附 `drawerSettle` | 甩动优先（速度模值 ≥ 0.35 px/ms）；否则位移比例 ≥ 0.38 展开 | 快速轻扫不必拖过半屏；两阈值取偏小值，手机上「拖出 1/3 屏 + 稍快」就该算明确意图。比例阈值两侧对称（展开态拖回 <0.38 才收） |
 | ⊕ 面板焦点抑制时长 | 输入控件禁用 600ms | 官方打开面板时的异步 refocus 落在窗口内；过长影响用户立刻打字 |
 | 键盘高来源 `resolveImeHeight` | 原生桥 > 实测/持久化 > 视口 42% 估值 | 原生 WindowInsets 最准且无需弹键盘；visualViewport 需真弹一次（K70 实测 resize 为一次性跳变，收缩量即键盘高）；估值仅首次兜底 |
 | 面板 ⇄ 键盘切换 | 揭开 / 覆盖（`startImeSwap`） | 键盘绘制在 WebView 之上，面板与输入行提前就位靠键盘滑出揭开；resize 一次性跳变时刻换算 padding 保持输入行屏幕位置（0.1.12，替代 0.1.11 等高瞬换） |
@@ -267,6 +267,34 @@ Android 窄屏下右栏是**官方自己的浮层**，和桌面列不是同一�
 **统一全屏**：0.4.6 给原生预设单独做的悬浮窗重排（CSS 钉 12/24px 边距 + `hardenSettings()` 内联 `!important` 几何）在这个引擎上把标题、页签右端和内容底部裁掉，周围还留大片灰色遮罩。0.4.7 把全屏规则的作用域从 `html[data-dshm-mode="mobile"]` 改为 `html[data-dshm-form="phone"]`——原生预设 `mode=default`，旧规则根本不生效——并停用整套原生悬浮窗 CSS（`...(SETTINGS_UNIFIED_FULLSCREEN ? [] : [...])`）与内联旧分支。悬浮（v2）预设仍按设计在底部留 56px 给五项导航。
 
 **关闭路径**：0.2.2-rc.1 把「打开配置文件 / ✕」工具行移到了内容区之外，`tagSettings()` 原先只在 `content.children` 里找工具行，导致 `data-dshm-settings-close` 永不打标，返回箭头 / 系统返回 / Esc / 左滑手势四条退出路径同时失效。`closeSettingsImmediate()` 现在按 `[data-shortcut-modal="settings"]` 正向找官方关闭按钮并点击，找不到才退回清标记。
+
+### 3.15 版本适配矩阵与声明口径（0.4.7 发版后补文档）
+
+对外矩阵放在 `README.md` / `README.en.md` 的「版本适配与 DSH 引擎兼容性」一节（插件版本 → DSH 版本 + 反向速查两张表）。这里记录**证据链**，避免以后凭印象改表。
+
+**「DSH 版本」的定义**：指宿主内核 / 官方 UI 布局包 `@deepseek-ai/dsh-client-ui-layout` 的版本，不是 Android App 的 `versionName`。二者不是一一对应，只有 `0.2.2-rc.1 ↔ App 1.5.0 / BUILD 2026.11.06-4566c0be` 有实测记录，`0.2.1-rc.x` 的 App 对应关系未记录，表里留空而不是猜一个。
+
+**两个字段不是一回事**：
+
+| 字段 | 引入版本 | 谁读它 | 语义 |
+|---|---|---|---|
+| `engines.dsh` | 所有已发布版本均为 `>=0.2.1-rc.2` | 内核 `evaluatePluginCompatibility()`（`@deepseek-ai/dsh-app-boot`），与 `peerDependencies` 一起 | 安装判定；只表达「最低线」，不表达「某版本已适配」 |
+| `dsh.compatibility.dshReleases` | 0.4.4（见 `eb009d9`） | 插件市场 / 商店索引 | 逐版本声明 `compatible` / `incompatible` / `unknown`；**不参与安装判定**，未列出即 `unknown` |
+| `dsh.compatibility.capabilities` | 0.4.7 | 索引 / 诊断 | 声明用到的 slots / services 与弹窗契约 |
+
+因此「能装上」≠「已适配」：所有版本的 `engines.dsh` 都是 `>=0.2.1-rc.2`，0.4.6 装到 0.2.2-rc.1 上照样通过安装判定，但功能坏。这也是 0.4.7 增加 `window.__dshmCompat` 三态降级的原因——未知引擎不能靠「装上了」就假定契约还在。
+
+**逐标签取证**（`git show <tag>:package.json`）：
+
+| 标签区间 | `version` | `engines.dsh` | `dshReleases` |
+|---|---|---|---|
+| `v0.1.6` – `v0.4.3` | 0.1.6 → 0.4.3 | `>=0.2.1-rc.2` | 字段不存在 |
+| `v0.4.4` – `v0.4.6` | 0.4.4 → 0.4.6 | `>=0.2.1-rc.2` | `0.2.1-rc.2`、`0.2.1-rc.5` = `compatible` |
+| `v0.4.7` | 0.4.7 | `>=0.2.1-rc.2` | 再加 `0.2.2-rc.1` = `compatible` |
+
+`0.2.1-rc.2` / `0.2.1-rc.5` 的「实测可用」结论来自 0.4.4 更新日志，0.4.7 沿用；0.4.7 对 `0.2.2-rc.1` 的验证是两台 AVD（`Medium_Phone_API_35` / `Pixel_Tablet_API_35`）+ Redmi K70 的三预设 × 深浅主题 × 中英文矩阵，见 CHANGELOG 0.4.7 与 §3.14。0.4.6 及更早版本在该引擎上的三个故障（选择器失效 / 原生设置页悬浮小窗裁切 / 设置页关不掉）均为实测，不是推断。
+
+**维护约定**：新增引擎版本适配时，同时更新 `package.json` 的 `dshReleases`、README 中英两张表、本节取证表与 CHANGELOG；若只是「装得上但没验证」，标 `unknown` 而不是 `compatible`。
 
 ## 4. i18n
 

@@ -150,7 +150,32 @@ const off = window.__dshmBack.register({
 
 ---
 
-## 0.4.7 兼容性说明
+## 版本适配与 DSH 引擎兼容性
+
+> 表中「DSH 版本」指宿主内核 / 官方 UI 布局包 `@deepseek-ai/dsh-client-ui-layout` 的版本，**不是** Android App 的 `versionName`。完整证据与声明口径见 [技术说明 §3.15](docs/technical-notes.md)。
+
+### 插件版本 → 适配的 DSH 版本
+
+| 插件版本 | `engines.dsh` 声明 | `dshReleases` 逐版本登记 | 已验证的 DSH 版本 | 对 `0.2.2-rc.1` | 说明 |
+|---|---|---|---|---|---|
+| **0.4.7**（当前） | `>=0.2.1-rc.2` | `0.2.1-rc.2`、`0.2.1-rc.5`、`0.2.2-rc.1` 均 `compatible` | `0.2.1-rc.2` / `0.2.1-rc.5` / `0.2.2-rc.1` | ✅ **唯一适配版本** | 按官方 `data-shortcut-modal` 正向契约 + `settings.general.item` slot 接入；三预设统一全屏设置页；未知引擎自动 `safe` 降级 |
+| 0.4.4 – 0.4.6 | `>=0.2.1-rc.2` | `0.2.1-rc.2`、`0.2.1-rc.5` 为 `compatible` | `0.2.1-rc.2` / `0.2.1-rc.5` | ❌ 不兼容（未登记 = `unknown`） | 在 0.2.2-rc.1 上实测：布局模式选择器失效、原生预设设置页变悬浮小窗且标题/页签/内容裁切、设置页关不掉；请升级到 0.4.7 |
+| 0.1.6 – 0.4.3 | `>=0.2.1-rc.2` | 无（0.4.4 起才引入该字段） | `0.2.1-rc.2` / `0.2.1-rc.5`（0.4.4 沿用的历史实测结论） | ⚠️ 未验证 | 只有 `engines.dsh` 范围声明，没有逐版本登记；不建议在新引擎上使用 |
+
+### DSH 版本 → 建议的插件版本（反向速查）
+
+| DSH / 官方 UI 布局包版本 | 宿主 App | 建议插件版本 | 结论 |
+|---|---|---|---|
+| `0.2.2-rc.1` | Android App 1.5.0 · BUILD `2026.11.06-4566c0be` | **≥ 0.4.7** | ✅ 已适配并在两台 AVD + Redmi K70 验收；0.4.6 及以下不要用 |
+| `0.2.1-rc.5` | —（未记录对应关系） | 0.4.7（也可用 0.4.4 – 0.4.6） | ✅ `compatible` |
+| `0.2.1-rc.2` | —（未记录对应关系） | 0.4.7（最低声明线） | ✅ `compatible` |
+| 其它 / 未列出 | — | 0.4.7 | ⚪ `unknown`：不接管配置 UI，走 `safe` 降级；可用 `localStorage['dshm-compat'] = 'safe'` 强制 |
+
+**声明口径**：`engines.dsh` 是安装判定字段（内核 `evaluatePluginCompatibility()` 只读它和 `peerDependencies`）；`dsh.compatibility.dshReleases` 是给插件市场 / 商店索引看的逐版本声明，**不参与安装判定**，未列出的版本一律视为 `unknown`。两个字段在所有历史版本中都保持 `>=0.2.1-rc.2`，因此「能装上」不等于「已适配」。
+
+表格依据各发行标签的 `package.json`（`git show v0.4.7:package.json` 等）与 0.4.7 的实测记录；0.2.2-rc.1 的三个故障详见 [更新日志 0.4.7](CHANGELOG.md)。
+
+### 0.4.7 适配要点
 
 - **适配引擎**：`@deepseek-ai/dsh-client-ui-layout 0.2.2-rc.1`（Android App 1.5.0）。声明见 `package.json` 的 `dsh.compatibility.dshReleases` 与 `capabilities`。
 - **配置入口**：布局模式选择器注册到官方 slot `settings.general.item`；旧引擎自动降级为 DOM 注入（legacy），能力缺失时完全不接管（safe）。

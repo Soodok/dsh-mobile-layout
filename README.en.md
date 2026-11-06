@@ -89,7 +89,32 @@ Archived screenshots of the early release (v0.1.6, single-column v1 layout) live
 
 ---
 
-## Compatibility (0.4.7)
+## Version Compatibility
+
+> "DSH version" below refers to the host core / official UI layout package `@deepseek-ai/dsh-client-ui-layout`, **not** the Android app's `versionName`. Evidence and declaration semantics: [technical notes §3.15](docs/technical-notes.md).
+
+### Plugin version → supported DSH versions
+
+| Plugin version | `engines.dsh` | `dshReleases` entries | Verified DSH versions | `0.2.2-rc.1` | Notes |
+|---|---|---|---|---|---|
+| **0.4.7** (current) | `>=0.2.1-rc.2` | `0.2.1-rc.2`, `0.2.1-rc.5`, `0.2.2-rc.1` → `compatible` | `0.2.1-rc.2` / `0.2.1-rc.5` / `0.2.2-rc.1` | ✅ **only compatible release** | Official `data-shortcut-modal` contract + `settings.general.item` slot; unified full-screen settings for all three presets; unknown engines degrade to `safe` |
+| 0.4.4 – 0.4.6 | `>=0.2.1-rc.2` | `0.2.1-rc.2`, `0.2.1-rc.5` → `compatible` | `0.2.1-rc.2` / `0.2.1-rc.5` | ❌ incompatible (unlisted = `unknown`) | On 0.2.2-rc.1: layout-mode picker breaks, the native preset settings page becomes a clipped floating window, and the settings page cannot be closed. Upgrade to 0.4.7 |
+| 0.1.6 – 0.4.3 | `>=0.2.1-rc.2` | none (field added in 0.4.4) | `0.2.1-rc.2` / `0.2.1-rc.5` (historical results carried into 0.4.4) | ⚠️ unverified | Only a range declaration, no per-release entry; not recommended for newer engines |
+
+### DSH version → recommended plugin version
+
+| DSH / official UI layout | Host app | Recommended plugin | Verdict |
+|---|---|---|---|
+| `0.2.2-rc.1` | Android app 1.5.0 · BUILD `2026.11.06-4566c0be` | **≥ 0.4.7** | ✅ Verified on two AVDs and a Redmi K70; do not use 0.4.6 or older |
+| `0.2.1-rc.5` | — (no recorded mapping) | 0.4.7 (0.4.4 – 0.4.6 also work) | ✅ `compatible` |
+| `0.2.1-rc.2` | — (no recorded mapping) | 0.4.7 (minimum declared line) | ✅ `compatible` |
+| Other / unlisted | — | 0.4.7 | ⚪ `unknown`: no settings takeover, `safe` degradation; force with `localStorage['dshm-compat'] = 'safe'` |
+
+**Declaration semantics**: `engines.dsh` drives install-time checks (the core's `evaluatePluginCompatibility()` reads only it and `peerDependencies`). `dsh.compatibility.dshReleases` is a per-release declaration for marketplace indexing, **not** used at install time; unlisted versions count as `unknown`. Both fields have been `>=0.2.1-rc.2` in every release, so "installs successfully" does not mean "adapted".
+
+The tables are derived from each release tag's `package.json` (e.g. `git show v0.4.7:package.json`) plus the 0.4.7 test record; the three 0.2.2-rc.1 regressions are listed in the [0.4.7 changelog](CHANGELOG.md).
+
+### 0.4.7 adaptation notes
 
 - **Engine**: supports `@deepseek-ai/dsh-client-ui-layout 0.2.2-rc.1` (Android app 1.5.0); see `dsh.compatibility` in `package.json`.
 - **Settings entry**: the layout-mode picker registers on the official `settings.general.item` slot; older engines fall back to DOM injection (`legacy`), and missing capabilities fall back to no takeover (`safe`).
@@ -99,6 +124,8 @@ Archived screenshots of the early release (v0.1.6, single-column v1 layout) live
 - **Known limitation**: pressing the system Back key while the drawer is open does not close it (WebView history is decoupled from official drawer state). This belongs to the phone back-stack project and needs a matching Android shell change; it is out of scope for 0.4.7.
 
 ---
+
+## Installation
 
 ```sh
 dsh plugin --profile web add @xiaopb/dsh-mobile-layout

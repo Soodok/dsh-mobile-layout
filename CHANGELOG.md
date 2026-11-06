@@ -23,6 +23,10 @@
 - `npm run check` 全绿：语法检查 → 216 项单测（0 失败）→ 包清单 / bundle 契约 → 硬编码守卫。新增 `test/compat-contract.test.js` 覆盖弹窗分类、缓存复查、slot 路径选择、能力归一化与源码契约。
 - 两台 AVD（手机 `Medium_Phone_API_35` / 平板 `Pixel_Tablet_API_35`，App 1.5.0）CDP + 截图验收：三预设冷启动与设置页内热切换、设置页几何（全屏 `0,0` 覆盖视口；悬浮预设底部按设计留 56px 导航）、五个页签逐页可达、返回箭头与系统返回键、侧边栏抽屉、附件入口向上弹出、深浅主题、中英语言往返、slot 路径与抽屉误标计数全部通过；平板宽屏保持官方两列弹窗，不受手机全屏规则影响。
 
+### 文档
+
+- 发版后补充**版本适配矩阵**：`README.md` / `README.en.md` 各新增「插件版本 → 适配的 DSH 版本」与「DSH 版本 → 建议插件版本」两张表；`docs/technical-notes.md` §3.15 记录逐标签取证（`engines.dsh` / `dshReleases` / `capabilities`）与「能装上 ≠ 已适配」的口径差异。仅文档变更，不涉及 0.4.7 产物代码；npm 包内 README 为发布时快照。
+
 ### 已知限制
 
 - 抽屉展开时按系统返回键不会收起抽屉（WebView 历史与官方抽屉状态分离），属 `back-stack-mobile-plan.md` 的手机形态返回栈专项，需 Android 壳侧配合，不在本次改动范围。
