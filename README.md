@@ -6,7 +6,7 @@
 [![Release](https://github.com/XiaoPb/dsh-mobile-layout/actions/workflows/release.yml/badge.svg)](https://github.com/XiaoPb/dsh-mobile-layout/actions/workflows/release.yml)
 [![npm](https://img.shields.io/npm/v/@xiaopb/dsh-mobile-layout?label=npm)](https://www.npmjs.com/package/@xiaopb/dsh-mobile-layout)
 
-**DSH 手机 / 平板触控布局插件（v0.4.8）**
+**DSH 手机 / 平板触控布局插件（v0.4.9）**
 
 文档：[架构文档](docs/architecture.md) ｜ [技术说明](docs/technical-notes.md) ｜ [预设方案 / 进度](docs/preset2-progress.md) ｜ [更新日志](CHANGELOG.md) ｜ [English](README.en.md)
 
@@ -159,23 +159,24 @@ const off = window.__dshmBack.register({
 
 | 插件版本 | `engines.dsh` 声明 | `dshReleases` 逐版本登记 | 已验证的 DSH 版本 | 对 `0.2.2-rc.1` | 说明 |
 |---|---|---|---|---|---|
-| **0.4.8**（当前） | `>=0.2.1-rc.2` | `0.2.1-rc.2`、`0.2.1-rc.5`、`0.2.2-rc.1` 均 `compatible`（沿用 0.4.7） | `0.2.1-rc.2` / `0.2.1-rc.5` / `0.2.2-rc.1` | ✅ 兼容 | 0.4.7 的全部适配 + 0.2.2-rc.1 二轮修复 + 平板宽屏侧栏手势；新装 / 升级请直接用 0.4.8 |
+| **0.4.9**（当前） | `>=0.2.1-rc.2` | `0.2.1-rc.2`、`0.2.1-rc.5`、`0.2.2-rc.1` 均 `compatible`（沿用 0.4.7） | `0.2.1-rc.2` / `0.2.1-rc.5` / `0.2.2-rc.1` | ✅ 兼容 | 0.4.8 全部能力 + 加号面板接管链四个缺陷修复（用户意图 / 点击黑洞 / 状态自愈 / 预设清理）；新装 / 升级请直接用 0.4.9 |
+| 0.4.8 | `>=0.2.1-rc.2` | `0.2.1-rc.2`、`0.2.1-rc.5`、`0.2.2-rc.1` 均 `compatible`（沿用 0.4.7） | `0.2.1-rc.2` / `0.2.1-rc.5` / `0.2.2-rc.1` | ✅ 兼容 | 0.4.7 的全部适配 + 0.2.2-rc.1 二轮修复 + 平板宽屏侧栏手势 |
 | 0.4.7 | `>=0.2.1-rc.2` | `0.2.1-rc.2`、`0.2.1-rc.5`、`0.2.2-rc.1` 均 `compatible` | `0.2.1-rc.2` / `0.2.1-rc.5` / `0.2.2-rc.1` | ✅ **首个适配版本** | 按官方 `data-shortcut-modal` 正向契约 + `settings.general.item` slot 接入；三预设统一全屏设置页；未知引擎自动 `safe` 降级 |
-| 0.4.4 – 0.4.6 | `>=0.2.1-rc.2` | `0.2.1-rc.2`、`0.2.1-rc.5` 为 `compatible` | `0.2.1-rc.2` / `0.2.1-rc.5` | ❌ 不兼容（未登记 = `unknown`） | 在 0.2.2-rc.1 上实测：布局模式选择器失效、原生预设设置页变悬浮小窗且标题/页签/内容裁切、设置页关不掉；请升级到 0.4.8 |
+| 0.4.4 – 0.4.6 | `>=0.2.1-rc.2` | `0.2.1-rc.2`、`0.2.1-rc.5` 为 `compatible` | `0.2.1-rc.2` / `0.2.1-rc.5` | ❌ 不兼容（未登记 = `unknown`） | 在 0.2.2-rc.1 上实测：布局模式选择器失效、原生预设设置页变悬浮小窗且标题/页签/内容裁切、设置页关不掉；请升级到 0.4.9 |
 | 0.1.6 – 0.4.3 | `>=0.2.1-rc.2` | 无（0.4.4 起才引入该字段） | `0.2.1-rc.2` / `0.2.1-rc.5`（0.4.4 沿用的历史实测结论） | ⚠️ 未验证 | 只有 `engines.dsh` 范围声明，没有逐版本登记；不建议在新引擎上使用 |
 
 ### DSH 版本 → 建议的插件版本（反向速查）
 
 | DSH / 官方 UI 布局包版本 | 宿主 App | 建议插件版本 | 结论 |
 |---|---|---|---|
-| `0.2.2-rc.1` | Android App 1.5.0 · BUILD `2026.11.06-4566c0be` | **≥ 0.4.8** | ✅ 已适配并在两台 AVD + Redmi K70 验收；0.4.6 及以下不要用 |
-| `0.2.1-rc.5` | —（未记录对应关系） | 0.4.8（也可用 0.4.4 – 0.4.7） | ✅ `compatible` |
-| `0.2.1-rc.2` | —（未记录对应关系） | 0.4.8（最低声明线） | ✅ `compatible` |
-| 其它 / 未列出 | — | 0.4.8 | ⚪ `unknown`：不接管配置 UI，走 `safe` 降级；可用 `localStorage['dshm-compat'] = 'safe'` 强制 |
+| `0.2.2-rc.1` | Android App 1.5.0 · BUILD `2026.11.06-4566c0be` | **≥ 0.4.9** | ✅ 已适配并在两台 AVD + Redmi K70 真机验收（0.4.9）；0.4.6 及以下不要用 |
+| `0.2.1-rc.5` | —（未记录对应关系） | 0.4.9（也可用 0.4.4 – 0.4.8） | ✅ `compatible` |
+| `0.2.1-rc.2` | —（未记录对应关系） | 0.4.9（最低声明线） | ✅ `compatible` |
+| 其它 / 未列出 | — | 0.4.9 | ⚪ `unknown`：不接管配置 UI，走 `safe` 降级；可用 `localStorage['dshm-compat'] = 'safe'` 强制 |
 
 **声明口径**：`engines.dsh` 是安装判定字段（内核 `evaluatePluginCompatibility()` 只读它和 `peerDependencies`）；`dsh.compatibility.dshReleases` 是给插件市场 / 商店索引看的逐版本声明，**不参与安装判定**，未列出的版本一律视为 `unknown`。两个字段在所有历史版本中都保持 `>=0.2.1-rc.2`，因此「能装上」不等于「已适配」。
 
-表格依据各发行标签的 `package.json`（`git show v0.4.8:package.json` 等）与 0.4.7 / 0.4.8 的实测记录；0.2.2-rc.1 的三个故障详见 [更新日志 0.4.7](CHANGELOG.md)。
+表格依据各发行标签的 `package.json`（`git show v0.4.8:package.json` 等）与 0.4.7 – 0.4.9 的实测记录；0.2.2-rc.1 的三个故障详见 [更新日志 0.4.7](CHANGELOG.md)。
 
 ### 0.4.7 适配要点
 
