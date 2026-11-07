@@ -35,6 +35,8 @@ function loadClient() {
 const {
   resolvePreset,
   presetLabelKey,
+  matchesAccountMenuLabel,
+  matchesMoreActionsLabel,
   isPhoneForm,
   effectiveMode,
   navSlots,
@@ -80,6 +82,21 @@ test('presetLabelKey：三档各自对应一个文案 key', () => {
   assert.equal(presetLabelKey('v2'), 'presetV2')
   // 脏值走 classic 的 key，和 resolvePreset 的归一化保持一致
   assert.equal(presetLabelKey('nope'), 'presetClassic')
+})
+
+test('设置入口标签识别支持中英文语义且不误认无关按钮', () => {
+  for (const label of ['账号菜单', '用户菜单', 'Account menu', 'Profile menu']) {
+    assert.equal(matchesAccountMenuLabel(label), true, label)
+  }
+  for (const label of ['更多操作', '更多选项', 'More actions', 'More options', 'Overflow menu']) {
+    assert.equal(matchesMoreActionsLabel(label), true, label)
+  }
+  for (const label of ['', 'Settings', 'Search', 'User questions', 'Actions']) {
+    assert.equal(matchesAccountMenuLabel(label), false, label)
+    assert.equal(matchesMoreActionsLabel(label), false, label)
+  }
+  assert.equal(matchesAccountMenuLabel(null), false)
+  assert.equal(matchesMoreActionsLabel(undefined), false)
 })
 
 test('isPhoneForm：桌面端无论尺寸都不是手机形态', () => {
