@@ -2,6 +2,38 @@
 
 格式参照 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/)，版本号遵循 [SemVer](https://semver.org/lang/zh-CN/)。
 
+## [0.4.9] - 2026-11-07
+
+加号面板（v2）时序缺陷修复（取证报告：`.workbuddy/plan/button-flow-audit-plan.md` §十）。四个问题、两处 P0，全部实机复现后修掉。
+
+### 修复
+
+- **（P0）点外关闭后立刻再点「+」，掉回官方原生菜单 → 图片 / 相机入口消失**。接管 effect 的两个抑制窗（关闭后 500ms、派发后 2000ms）是**全局时间戳**，与「谁关的」无关：用户主动连点被当成「官方重放同一浮层」静默丢弃，官方面板原样贴底弹出，而原生菜单的附件只有「文件」一项——这就是「图片键有时打不开 / 发不了图」的确切机制。新增 `addMenuUserIntentAt`：只记**真人** pointerdown（`isTrusted`，插件自己派的事件不算），意图时刻晚于关闭 / 派发时刻即视为新意图、照常接管。实测「关 → 80ms → 再点」从降级恢复为接管。
+- **（P0）面板打开时底栏点击被静默吞掉**。`.dshm-v2-addpanel` 是固定 55% 高的整块矩形（z 1401），底部留白正好压在已经看不见的底栏上；容器 `pointer-events:auto` 时那块区域既不是遮罩（点了不关）也不是按钮（点了不切页），`elementFromPoint` 实测命中 `DIV.dshm-v2-addpanel-list`，完全无响应。改为容器穿透、只有 `-head` / `-tiles` / `-list` 吃事件，留白点击落到下层遮罩，等同于「点面板外 = 关闭」；`-list` 的 `flex: 1 1 auto` 同步改为 `0 1 auto`，内容不足时不再把空白撑到全高（内容超出仍自行滚动）。
+- **（P1）切预设 / 切模式不清理自绘面板**。`setPreset` 走的是 `classic ⇄ v2`，`setMode` 首行 `if (next === state.mode) return` 直接返回，清理链根本不跑——面板会以「没有样式的裸列表」留在屏上并盖住底栏。`setPreset` 开头与 `setMode(MODE_DEFAULT)` 的清理清单各补一次 `closeV2AddMenu()`。
+- **（P1）派发重试链没有取消令牌**。一次派发最长 45×60ms ≈ 2.7s 的「重开官方面板 → 找节点 → 点下去」轮询，期间切预设会让旧链继续按 key 找节点、还把官方面板重新点开一次。引入 `addMenuEpoch`：切预设 / 切模式递增，`dispatchAddOption` / `dispatchSubOption` 每跳自检，世代不符立即收摊。
+- **（P2）结构没就绪时静默放弃**。接管时 `countSectionTitles(listbox)` 为 0 就 `return`，React 尚未画完或官方 DOM 一改，失败率就从「偶现」变「必现」，且没有任何痕迹。改为 8×50ms 短重试，仍读不到才 `console.warn` 并保留原生菜单（至少还有「文件」可用）。
+- **（P0，复验中新发现）接管以 DOM 为准 + 心跳自愈**。接管 effect 原本依赖 React 状态 `popoverOpen`，而该状态只在主观察器收到 `childList` 变更时同步——官方复用同一个浮层节点、只改样式重开时收不到通知，状态会长期停在 `false`，effect 于是**再也不触发**，面板从此退回官方窄条菜单（这正是「用一阵子就失效、重进 App 才好」的机制，比 500ms 时间窗更致命）。改为 `tryTakeOverAddMenu()` 直接以 `[data-dshm-popover]` + 组标题为准，并加 200ms 心跳巡检（顺带双向修正 `popoverOpen`），状态脱节后 200ms 内自愈。
+- 接管判定新增可读诊断：`window.__dshmCompat.addMenu` 记录最近一次的 `phase`（`took-over` / `suppressed` / `structure-miss` / `no-popover`）与三个时间戳差值，排障不必再改代码插日志。
+
+### 变更
+
+- 版本 0.4.8 → 0.4.9。行为不变的部分一律不动：数据仍来自官方节点（`readAddMenu`），条目点击仍派发官方 mousedown，命令语义 / 权限提示 / 上传链路完全沿用官方。
+- 设置入口的 P2（槽位不可用时的降级）经核查无需改动：`chooseSettingsPath()` 已有 2500ms 宽限期 + legacy DOM 注入兜底，不存在「静默消失」。
+
+### 验证
+
+- `npm run check` 全绿：语法 → **227 项单测（0 失败，新增 5 项接管链契约）** → 包清单 / `VERSION` 一致性（0.4.9）→ 硬编码守卫（222 known / 0 new）。
+- 手机 AVD（`Medium_Phone_API_35`，457×962 CSS 像素 / dpr 2.625）CDP 真实触摸回归 **17/17 PASS**：
+  - A 组（抑制窗）：点外关闭后 **0 / 50 / 80 / 150 / 300 / 500ms** 再点「+」，六档全部仍由插件面板接管（`data-dshm-v2-addmenu` 在、官方 popover `opacity:0`），S2 的 80ms 复现路径不再降级；
+  - B 组（点击黑洞）：面板底部留白与底栏（y=934）位置 `elementFromPoint` 均命中 `dshm-v2-addpanel-mask`，点击即关闭面板；面板上部空白同样命中遮罩；
+  - C 组（状态脱节）：脚本 `click()` 关闭（不产生用户意图）后立刻点「+」，心跳在 200ms 内修回状态并接管；
+  - D 组（功能）：附件三块（图片 / 相机 / 文件）齐全、分组二级页进出、Esc 关闭、列表溢出时可滚动（注入 20 行假数据：`scrollHeight 1178 > clientHeight 393`，`scrollTop` 生效）；
+  - E 组（压测）：随机间隔 30–250ms 连点 12 轮，12/12 全部接管。
+- 派发链路抽验：文件块 → `documentsui/PickActivity`（面板关闭、隐身标记撤净）；图片块 → `media/PhotoPickerActivity`。
+- 预设侧回归：v2 → classic → v2 往返（`localStorage` + reload）后面板零残留、⊕ 在位、仍能接管；classic 六键底栏与「更多」官方面板开合正常；v2 五个导航项 `aria-current` 迁移与 S 组扫描结果不变。
+
+
 ## [0.4.8] - 2026-11-07
 
 0.2.2-rc.1 第二轮适配修复（审计报告：`.workbuddy/plan/audit-022rc1-fix-plan.md`）+ 平板宽屏侧栏手势。
