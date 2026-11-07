@@ -291,10 +291,38 @@ Android 窄屏下右栏是**官方自己的浮层**，和桌面列不是同一�
 | `v0.1.6` – `v0.4.3` | 0.1.6 → 0.4.3 | `>=0.2.1-rc.2` | 字段不存在 |
 | `v0.4.4` – `v0.4.6` | 0.4.4 → 0.4.6 | `>=0.2.1-rc.2` | `0.2.1-rc.2`、`0.2.1-rc.5` = `compatible` |
 | `v0.4.7` | 0.4.7 | `>=0.2.1-rc.2` | 再加 `0.2.2-rc.1` = `compatible` |
+| `v0.4.8` | 0.4.8 | `>=0.2.1-rc.2` | 沿用 0.4.7（无新增引擎声明；新增平板宽屏手势与 0.2.2-rc.1 二轮修复，见 §3.16） |
 
 `0.2.1-rc.2` / `0.2.1-rc.5` 的「实测可用」结论来自 0.4.4 更新日志，0.4.7 沿用；0.4.7 对 `0.2.2-rc.1` 的验证是两台 AVD（`Medium_Phone_API_35` / `Pixel_Tablet_API_35`）+ Redmi K70 的三预设 × 深浅主题 × 中英文矩阵，见 CHANGELOG 0.4.7 与 §3.14。0.4.6 及更早版本在该引擎上的三个故障（选择器失效 / 原生设置页悬浮小窗裁切 / 设置页关不掉）均为实测，不是推断。
 
 **维护约定**：新增引擎版本适配时，同时更新 `package.json` 的 `dshReleases`、README 中英两张表、本节取证表与 CHANGELOG；若只是「装得上但没验证」，标 `unknown` 而不是 `compatible`。
+
+### 3.16 平板宽屏侧栏滑动手势（0.4.8）
+
+**形态前提**：`effectiveMode()` 的分层判据里「非手机竖屏几何 → 恒 `MODE_DEFAULT`」保证平板 / 宽窗不受预设影响，三预设实测都走官方原生页（`data-dshm-mode` 不写、无插件底栏 / v2 导航）。所以宽屏需要的不是另一套布局，而是在官方布局之上**只注入一层手势**。
+
+**为什么不能复用手机抽屉手势**：宽屏侧栏是常驻列，收起后变窄条 rail，没有 overlay / 遮罩 / `will-change` 跟手位移；收起会推动整个主内容列，做跟手必然整页抖动。因此宽屏走**阈值触发 + 官方 toggle/过渡**，不跟手、不改内联几何。
+
+**判据（纯函数 `decideWideSidebarSwipe()`，单测覆盖）**：
+
+| 条件 | 结果 |
+|---|---|
+| 起手 `startX ≤ width/2` 且 `dx > 0`、当前收起 | `open` |
+| 起手 `startX ≤ width/2` 且 `dx < 0`、当前展开 | `close` |
+| 右半边起手 / 反方向 / 竖滑（`\|dy\| > \|dx\|×0.72`）/ 横滚容器消费 / 位移不足 `SWIPE_MIN` | `none` |
+
+起手区按用户要求统一为**整页左半边**（两个方向对称），不限制在 ~64px 的窄条上；右半边一律交还内容自身。控制器里 `dx/dy` 与手机分支共用，宽屏分支额外传 `width: doc.documentElement.clientWidth` 与 `blocked`。
+
+**弹窗层级拦截**：`wideModalBlocked()` 按 0.2.2-rc.1 官方契约查 `[data-shortcut-modal]` 与 `[role="dialog"][aria-modal="true"]`。`gestureStart` 里命中即整轮 `BLOCKED_LAYER` 放弃，`gestureMove` 结算前再实时复核一次（防手势途中弹窗出现）。**不能并进 `overlayBlocked()`**——手机分支里「设置页在屏时仍要能左滑退出」依赖 dialog 不阻断手势，两者语义相反。
+
+**门禁放宽**：`gestureEligible()` 从 `mode === MODE_MOBILE || state.phone` 放宽到「非 desktop 宿主即可」；`gestureStart` 用 `wideSwipe = mode !== MODE_MOBILE && !phone` 分流，宽屏不参与抽屉跟手 / 设置页左滑退出 / 工作台横滑退出（这些都是手机形态语义），桌面鼠标拖拽仍不启用。
+
+**两个踩过的坑（值得记住）**：
+
+1. **枚举字符串不能真值判断**。控制器首版写 `if (wideDecision)`，`'none'` 是非空字符串恒为真 → 任何被拒绝的滑动都打「→ 收起」日志并执行 `requestDrawer(false)`，表现为用户反馈的「只能滑关、不能滑开」。修复为 `if (wideDecision === 'open' || wideDecision === 'close')`。这个 bug 在控制器而非纯函数里，单测覆盖不到，是 AVD 真实触摸用例的矛盾日志抓出来的。
+2. **多设备 CDP 调试工具禁止硬编码端口**。排查中 `.tmp/audit/cdplib.mjs` 把端口写死 `9222`（转发到手机 AVD 5558），而平板走 `9350`，导致「同一页面 innerWidth 在 1280 / 457 间振荡」的假象，误判成 App 自由窗口来回切换、追了很久。已改为 `CDP_PORT` 环境变量覆盖；`cdp.mjs` / `cdpseq.mjs` 一直按参数取端口，平板上的滑动测试自始至终有效。另：CDP forward 绑 pid，模拟器 / App 每次重启都要按新 `pidof` 重建。
+
+**验证**：平板 AVD（`Pixel_Tablet_API_35`，1280×752）十项真实触摸用例全通过（左半边两方向开合、右半边反例、边界 640、伪模态弹窗拦截 + 移除恢复、复测）；手机 AVD 同版回归正常。顺带发现平板 AVD 掉帧瓶颈在 CPU/内存配额而非 GPU（`gfxinfo` 81.8% jank、p95 150ms 而 GPU p50 仅 10ms）：把 `hw.cpu.ncore 4→8`、`hw.ramSize 2048→4096`、`vm.heapSize 192→336` 冷启动后 jank 降到 26.4%、p95 46ms。
 
 ## 4. i18n
 
