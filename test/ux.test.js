@@ -637,6 +637,12 @@ test('布局模式选择器：切语言后文案会重刷（源码契约）', ()
   assert.ok(source.includes("option.setAttribute('aria-label'"), '应同步无障碍标签')
 })
 
+test('右栏全屏手势让位使用 tablist 语义契约而非类名片段', () => {
+  const source = fs.readFileSync(path.join(__dirname, '..', 'lib', 'client.js'), 'utf8')
+  assert.ok(/target\.closest\('\[data-sidebar-right-panel\] \[role="tablist"\]/.test(source))
+  assert.ok(!source.includes('[class*="tabStrip"]'), '不得用生成类名猜右栏页签条')
+})
+
 test('原生设置悬浮窗：纵向留白按 10vh 比例并双向钳制（源码契约）', () => {
   const source = fs.readFileSync(path.join(__dirname, '..', 'lib', 'client.js'), 'utf8')
   // 上下各留约 10% 视口高；矮视口保底 vpad-min（小手机空隙不塌），高视口
