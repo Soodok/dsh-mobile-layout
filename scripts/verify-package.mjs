@@ -59,6 +59,7 @@ for (const entry of files) {
 
 // ---- 3. dsh 元数据 ----
 const dsh = pkg.dsh || {}
+check(dsh.manifestVersion === 1, 'dsh.manifestVersion = 1')
 check(dsh.bundle && dsh.bundle.patch === './cordis.patch.yml', 'dsh.bundle.patch = ./cordis.patch.yml')
 check(dsh.client && dsh.client.platform === 'web', 'dsh.client.platform = web')
 const inject = (dsh.client && dsh.client.inject) || []
