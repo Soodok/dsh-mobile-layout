@@ -579,6 +579,13 @@ test('resolveImeHeight：原生注入 > 实测/持久化 > 启发式', () => {
   assert.equal(resolveImeHeight(0, -5, 917), 385)
 })
 
+test('composer 输入编辑器样式只匹配编辑控件，不猜短类名', () => {
+  const source = fs.readFileSync(path.join(__dirname, '..', 'lib', 'client.js'), 'utf8')
+  assert.ok(source.includes('[data-composer-card] textarea,'))
+  assert.ok(source.includes('[data-composer-card] [contenteditable="true"] {'))
+  assert.ok(!source.includes('[class*="_input"]'), '不得依赖可能泄漏的短类名片段')
+})
+
 test('classic 空态虚线卡：滚动容器铺满 + 虚线卡左右对称留白（源码契约）', () => {
   const source = fs.readFileSync(path.join(__dirname, '..', 'lib', 'client.js'), 'utf8')
   // clip 容器在手机布局全预设打标（classic 也修掉滚动条沟槽的 7px 右偏）
