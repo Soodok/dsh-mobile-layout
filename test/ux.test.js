@@ -600,6 +600,15 @@ test('classic 空态虚线卡：滚动容器铺满 + 虚线卡左右对称留白
   assert.ok(source.includes("'  --dshm-classic-gutter: clamp(12px, 3.4vw, 20px);',"), 'gutter 应随屏宽 clamp 自适应')
 })
 
+test('composerSeat 样式只锚定官方 data 属性，不依赖构建类名', () => {
+  const source = fs.readFileSync(path.join(__dirname, '..', 'lib', 'client.js'), 'utf8')
+  assert.ok(
+    source.includes('html[data-dshm-form="phone"] [data-composer-seat] {'),
+    'phone composer 规则应使用已核验的 data-composer-seat 契约',
+  )
+  assert.ok(!source.includes('[class*="composerSeat"]'), '不得依赖 composerSeat localName 片段')
+})
+
 test('STRINGS：布局模式文案中英文成对，英文不残留中文', () => {
   const keys = ['layoutMode', 'presetDefault', 'presetDefaultHint', 'presetClassic', 'presetClassicHint', 'presetV2', 'presetV2Hint']
   const han = /[\u4e00-\u9fa5]/
