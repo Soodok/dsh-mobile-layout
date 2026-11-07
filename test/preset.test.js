@@ -37,6 +37,7 @@ const {
   presetLabelKey,
   matchesAccountMenuLabel,
   matchesMoreActionsLabel,
+  syncV2PageMarker,
   isPhoneForm,
   effectiveMode,
   navSlots,
@@ -97,6 +98,22 @@ test('设置入口标签识别支持中英文语义且不误认无关按钮', ()
   }
   assert.equal(matchesAccountMenuLabel(null), false)
   assert.equal(matchesMoreActionsLabel(undefined), false)
+})
+
+test('v2 页面标记同步器能在退出/切预设时清除根属性', () => {
+  const attrs = new Set()
+  const html = {
+    setAttribute(name) { attrs.add(name) },
+    removeAttribute(name) { attrs.delete(name) },
+    hasAttribute(name) { return attrs.has(name) },
+  }
+  syncV2PageMarker(html, true)
+  assert.equal(html.hasAttribute('data-dshm-v2-page'), true)
+  syncV2PageMarker(html, false)
+  assert.equal(html.hasAttribute('data-dshm-v2-page'), false)
+  syncV2PageMarker(html, true)
+  syncV2PageMarker(html, null)
+  assert.equal(html.hasAttribute('data-dshm-v2-page'), false)
 })
 
 test('isPhoneForm：桌面端无论尺寸都不是手机形态', () => {
