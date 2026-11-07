@@ -22,6 +22,10 @@ const vm = require('node:vm')
 
 const CLIENT_PATH = path.join(__dirname, '..', 'lib', 'client.js')
 const source = fs.readFileSync(CLIENT_PATH, 'utf8')
+// 版本锁：不写死具体版本号（每次 bump 都要改测试），只校验两处声明一致。
+const PKG_VERSION = JSON.parse(
+  fs.readFileSync(path.join(__dirname, '..', 'package.json'), 'utf8'),
+).version
 
 function loadClient() {
   let captured
@@ -164,7 +168,8 @@ test('预设白名单在适配改动后不变', () => {
   assert.equal(resolvePreset(' classic '), PRESET_CLASSIC)
   assert.equal(resolvePreset('V2'), PRESET_V2)
   assert.equal(resolvePreset({}), PRESET_CLASSIC)
-  assert.equal(VERSION, '0.4.7')
+  // VERSION 必须跟着 package.json 一起 bump（verify-package.mjs 也校验）。
+  assert.equal(VERSION, PKG_VERSION)
 })
 
 // ---- 6. 源码级契约（防止实现被改回去） ----
@@ -198,7 +203,7 @@ test('源码契约：诊断与兼容性声明齐备', () => {
   assert.match(source, /dshm-settings-slot/)
   assert.match(source, /dshm-compat/)
   const pkg = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'package.json'), 'utf8'))
-  assert.equal(pkg.version, '0.4.7')
+  assert.equal(pkg.version, VERSION)
   assert.equal(pkg.dsh.compatibility.dshReleases['0.2.2-rc.1'], 'compatible')
   assert.ok(pkg.dsh.compatibility.capabilities.slots.includes('settings.general.item'))
 })

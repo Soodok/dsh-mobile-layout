@@ -39,6 +39,7 @@ const {
   isHorizScrollerMetrics,
   scrollerConsumes,
   decideDrawerGesture,
+  decideWideSidebarSwipe,
   drawerSettle,
   settingsSettle,
   SETTLE_RATIO,
@@ -119,6 +120,69 @@ test('decideDrawerGesture：非法输入一律 none，不产生 NaN 分支', () 
 test('decideDrawerGesture：min 参数可收紧 / 放宽触发阈值', () => {
   assert.equal(decideDrawerGesture({ dx: 30, dy: 0, startX: 120, width: W, drawerOpen: false, blocked: false, hScrollerConsumes: false }, 24), 'open')
   assert.equal(decideDrawerGesture({ dx: 30, dy: 0, startX: 120, width: W, drawerOpen: false, blocked: false, hScrollerConsumes: false }, 60), 'none')
+})
+
+/** 宽屏（平板）侧栏滑动判定快捷入口：缺省字段补全（视口 1280，左半边 = 640）。 */
+function decideWide(input) {
+  return decideWideSidebarSwipe({
+    startX: 100,
+    width: 1280,
+    expanded: true,
+    blocked: false,
+    hScrollerConsumes: false,
+    ...input,
+  })
+}
+
+test('decideWideSidebarSwipe：展开态左半边任意位置左滑 → close（不限于侧栏列）', () => {
+  // 侧栏列上、主内容区左半段（会话列表右侧、输入区左缘）、左半边最右端，全都能收
+  assert.equal(decideWide({ dx: -60, dy: 0, startX: 0 }), 'close')
+  assert.equal(decideWide({ dx: -60, dy: 0, startX: 264 }), 'close')
+  assert.equal(decideWide({ dx: -60, dy: 0, startX: 500 }), 'close')
+  assert.equal(decideWide({ dx: -60, dy: 0, startX: 640 }), 'close')
+  // 右半边起手不算（滑动交给内容自身）
+  assert.equal(decideWide({ dx: -60, dy: 0, startX: 641 }), 'none')
+  assert.equal(decideWide({ dx: -60, dy: 0, startX: 900 }), 'none')
+  // 视口宽未知则放弃
+  assert.equal(decideWide({ dx: -60, dy: 0, startX: 0, width: 0 }), 'none')
+  assert.equal(decideWide({ dx: -60, dy: 0, startX: 0, width: NaN }), 'none')
+})
+
+test('decideWideSidebarSwipe：收起态左半边任意位置右滑 → open（不限于窄条）', () => {
+  // 窄条上、主内容区左半段，全都能开
+  assert.equal(decideWide({ dx: 60, dy: 0, startX: 30, expanded: false }), 'open')
+  assert.equal(decideWide({ dx: 60, dy: 0, startX: 200, expanded: false }), 'open')
+  assert.equal(decideWide({ dx: 60, dy: 0, startX: 640, expanded: false }), 'open')
+  // 右半边起手不展开（滑动交给内容自身）
+  assert.equal(decideWide({ dx: 60, dy: 0, startX: 641, expanded: false }), 'none')
+  assert.equal(decideWide({ dx: 60, dy: 0, startX: 900, expanded: false }), 'none')
+})
+
+test('decideWideSidebarSwipe：反方向滑动不是侧栏语义', () => {
+  // 展开态右滑：无动作
+  assert.equal(decideWide({ dx: 60, dy: 0, startX: 100 }), 'none')
+  // 收起态左滑：无动作
+  assert.equal(decideWide({ dx: -60, dy: 0, startX: 30, expanded: false }), 'none')
+})
+
+test('decideWideSidebarSwipe：竖滑 / 阈值不足 / 让路条件与抽屉判定一致', () => {
+  assert.equal(decideWide({ dx: 100, dy: 80 }), 'none')
+  assert.equal(decideWide({ dx: -100, dy: 80 }), 'none')
+  assert.equal(decideWide({ dx: -47, dy: 0 }), 'none')
+  assert.equal(decideWide({ dx: -SWIPE_MIN, dy: 0 }), 'close')
+  assert.equal(decideWide({ dx: -100, dy: 0, hScrollerConsumes: true }), 'none')
+  assert.equal(decideWide({ dx: -100, dy: 0, blocked: true }), 'none')
+})
+
+test('decideWideSidebarSwipe：非法输入一律 none', () => {
+  assert.equal(decideWideSidebarSwipe(null), 'none')
+  assert.equal(decideWide({ dx: NaN, dy: 0 }), 'none')
+  assert.equal(decideWide({ dx: -100, dy: 0, startX: NaN }), 'none')
+})
+
+test('decideWideSidebarSwipe：min 参数可收紧 / 放宽触发阈值', () => {
+  assert.equal(decideWideSidebarSwipe({ dx: -30, dy: 0, startX: 0, width: 1280, expanded: true, blocked: false, hScrollerConsumes: false }, 24), 'close')
+  assert.equal(decideWideSidebarSwipe({ dx: -30, dy: 0, startX: 0, width: 1280, expanded: true, blocked: false, hScrollerConsumes: false }, 60), 'none')
 })
 
 /** 造一个只带滚动指标的「元素」。 */
