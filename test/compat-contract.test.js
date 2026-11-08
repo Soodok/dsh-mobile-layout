@@ -208,13 +208,16 @@ test('源码契约：诊断与兼容性声明齐备', () => {
   assert.ok(pkg.dsh.compatibility.capabilities.slots.includes('settings.general.item'))
 })
 
-test('源码契约：三个预设统一全屏，原生悬浮窗重排被停用', () => {
-  assert.match(source, /const SETTINGS_UNIFIED_FULLSCREEN = true;/)
-  assert.match(source, /\.\.\.\(SETTINGS_UNIFIED_FULLSCREEN \? \[\] : \[/)
-  assert.match(source, /if \(!SETTINGS_UNIFIED_FULLSCREEN && currentPreset\(\) === PRESET_DEFAULT\)/)
-  // 全屏规则只认形态，不再绑 mode=mobile（原生预设 mode=default 也要生效）
-  assert.match(source, /'html\[data-dshm-form="phone"\] \[data-dshm-settings-panel\] \{'/)
-  assert.doesNotMatch(source, /html\[data-dshm-mode="mobile"\] \[data-dshm-settings-panel\]/)
+test('源码契约：default minimal 只读设置弹窗，enhanced/classic/v2 保留设置接管路径', () => {
+  assert.match(source, /function shouldManageSettingsPanel\(preset, nativeStyle\)/)
+  assert.match(source, /if \(!shouldManageSettingsPanel\(state\.preset, runtime\.nativeStyle\)\)/)
+  assert.match(source, /function findSettingsDialog\(readOnly = false\)/)
+  assert.match(source, /const found = findSettingsDialog\(true\);/)
+  assert.match(source, /if \(!readOnly\) \{\n\s*pruneSettingsTags\(native\);/)
+  assert.match(source, /if \(!readOnly\) pruneSettingsTags\(null\);/)
+  assert.match(source, /tagSettings\(found\);\n\s*hardenSettings\(found\.dialog\);/)
+  assert.match(source, /const NATIVE_STYLE_KEY = 'dshm-native-style';/)
+  assert.match(source, /data-dshm-native/)
 })
 
 test('源码契约：设置页关闭按钮按官方弹窗契约正向查找', () => {

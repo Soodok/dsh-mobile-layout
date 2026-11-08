@@ -617,7 +617,7 @@ test('composerSeat 样式只锚定官方 data 属性，不依赖构建类名', (
 })
 
 test('STRINGS：布局模式文案中英文成对，英文不残留中文', () => {
-  const keys = ['layoutMode', 'presetDefault', 'presetDefaultHint', 'presetClassic', 'presetClassicHint', 'presetV2', 'presetV2Hint']
+  const keys = ['layoutMode', 'presetDefault', 'presetDefaultHint', 'presetClassic', 'presetClassicHint', 'presetV2', 'presetV2Hint', 'nativeSettings', 'nativeSettingsHint', 'nativeMinimal', 'nativeEnhanced']
   const han = /[\u4e00-\u9fa5]/
   for (const key of keys) {
     assert.ok(STRINGS.zh[key], 'zh 缺少键：' + key)

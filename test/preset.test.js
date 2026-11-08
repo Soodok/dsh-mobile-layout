@@ -38,6 +38,8 @@ const {
   matchesAccountMenuLabel,
   matchesMoreActionsLabel,
   syncV2PageMarker,
+  resolveNativeStyle,
+  shouldManageSettingsPanel,
   isPhoneForm,
   effectiveMode,
   navSlots,
@@ -114,6 +116,18 @@ test('v2 页面标记同步器能在退出/切预设时清除根属性', () => {
   syncV2PageMarker(html, true)
   syncV2PageMarker(html, null)
   assert.equal(html.hasAttribute('data-dshm-v2-page'), false)
+})
+
+test('default 原生预设 minimal 不接管官方设置，enhanced 与两种移动预设仍接管', () => {
+  assert.equal(resolveNativeStyle('minimal'), 'minimal')
+  assert.equal(resolveNativeStyle('enhanced'), 'enhanced')
+  for (const invalid of ['', null, 'auto', 'legacy', undefined]) {
+    assert.equal(resolveNativeStyle(invalid), 'minimal')
+  }
+  assert.equal(shouldManageSettingsPanel('default', 'minimal'), false)
+  assert.equal(shouldManageSettingsPanel('default', 'enhanced'), true)
+  assert.equal(shouldManageSettingsPanel('classic', 'minimal'), true)
+  assert.equal(shouldManageSettingsPanel('v2', 'minimal'), true)
 })
 
 test('isPhoneForm：桌面端无论尺寸都不是手机形态', () => {
