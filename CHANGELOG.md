@@ -2,6 +2,32 @@
 
 格式参照 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/)，版本号遵循 [SemVer](https://semver.org/lang/zh-CN/)。
 
+## [0.4.10] - 2026-11-08
+
+三预设稳定性与低耦合加固，继续兼容已验证的 DSH `0.2.1-rc.2`、`0.2.1-rc.5`、`0.2.2-rc.1`。
+
+### 新增
+
+- **可覆盖的 token 契约**：新增 size / color token 目录、参考 CSS 与文档；`--dshm-color-*` 将自有颜色提升为第三方可覆盖变量，颜色值保持原样。
+- **兼容与漂移门禁**：登记官方 `data-*` 与 ARIA role 契约、11 项运行时特征及官方服务方法快照；新增 token、颜色、官方契约、兼容清单、服务漂移和 `!important` 检查。
+- **异步服务绑定**：client half 同时导出 `{ inject, apply }` 形态；有 `ctx.inject` 时使用官方注入，无该 API 时通过 `ctx.get` 有界轮询，dispose 后停止。
+- **稳定空会话标记**：结合官方 session `blank`、空态 hero 与官方瞬时卡片变体维护 `html[data-dshm-empty]`；classic 预设用该稳定信号显示空态虚线卡。
+- **commandUi 候选元数据**：v2 加号面板通过官方候选目录获取本地化标签 / 描述 / 分组，仅增强已有 DOM action，不从服务候选单独创建可执行入口。
+
+### 变更
+
+- **颜色裸值清零**：CSS 使用点统一改为 `var(--dshm-color-*, fallback)`；裸颜色守卫统计为 0。
+- **哈希类选择器清零**：composerStack / workspace trigger 改用自有 `data-dshm-*` 锚点；`[class*=]` 选择器为 0。
+- **减少冗余 `!important`**：经 AVD 几何与计算样式对照，在自有节点上移除 75 条；设置弹窗盒模型与键盘态规则保留，并由增长守卫防止回涨。
+- **特征探针粘性化**：DOM 契约延迟出现时，探针会在挂载后复检并保留已观察结果，避免把启动时序误报为宿主不兼容。
+
+### 验证
+
+- `npm run check` 全绿：**262 项测试**，包契约、几何硬编码、token 三方一致、颜色、官方契约、兼容清单及 `!important` 增长门禁均通过。
+- `Medium_Phone_API_35` AVD 三预设与设置页矩阵通过；v2 五项导航、底栏、加号面板及 classic 空态规则完成运行态核验。
+
+---
+
 ## [0.4.9] - 2026-11-07
 
 加号面板（v2）时序缺陷修复（取证报告：`.workbuddy/plan/button-flow-audit-plan.md` §十）。四个问题、两处 P0，全部实机复现后修掉。

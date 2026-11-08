@@ -6,9 +6,9 @@
 [![Release](https://github.com/XiaoPb/dsh-mobile-layout/actions/workflows/release.yml/badge.svg)](https://github.com/XiaoPb/dsh-mobile-layout/actions/workflows/release.yml)
 [![npm](https://img.shields.io/npm/v/@xiaopb/dsh-mobile-layout?label=npm)](https://www.npmjs.com/package/@xiaopb/dsh-mobile-layout)
 
-**DSH phone / tablet touch layout plugin (v0.4.8)**
+**DSH phone / tablet touch layout plugin (v0.4.10)**
 
-Docs: [Architecture](docs/architecture.md) ｜ [Technical notes](docs/technical-notes.md) ｜ [Presets](docs/preset-v2.md) ｜ [Changelog](CHANGELOG.md) ｜ [中文版](README.md)
+Docs: [Architecture](docs/architecture.md) ｜ [Technical notes](docs/technical-notes.md) ｜ [Theme token contract](docs/theme-tokens.md) ｜ [Presets](docs/preset-v2.md) ｜ [Changelog](CHANGELOG.md) ｜ [中文版](README.md)
 
 A Cordis plugin that turns the DSH web client into a one-handed, touch-first layout on **phone portrait** screens — **without modifying the official kernel or replacing the official layout plugin**. Outside phone portrait, landscape and desktop keep the official layout pixel-for-pixel; **tablet / wide screens (since 0.4.8) only gain one extra sidebar swipe gesture**, with the official layout untouched.
 
@@ -21,26 +21,27 @@ A Cordis plugin that turns the DSH web client into a one-handed, touch-first lay
 - **Add panel**: **reveal / cover transition** against the soft keyboard (content-adaptive height; the keyboard slides over to cover the panel and slides away to reveal it, with the input row position preserved via viewport-jump compensation — no animation crossing); open/close slide animations (skipped automatically for reduce-motion users); a 4×2 icon grid with horizontal paging beyond 8 items; icons are **color-coded by function** (12 soft tints across blue / orange / violet / green — same type keeps the same color, no clashes on screen, new items auto-assigned by alias hash).
 - **Sessions / plugins sheets**: grouped by workspace with sticky headers and relative timestamps, capped at 64% of screen height; **drag the grabber down to dismiss**, styled after the engine's v1.4.57 official sheet (28px corners, raised surface, large title, pill primary action).
 - **Composer merged into the bottom panel**: flat, full-width, single 1px divider; tightened empty state; permission & model short-name chips stay on the input row (**"Full access" is always red**, in both Chinese and English).
-- **Fullscreen settings**: brand row + swipeable tabs + back button; swipe left/right on the content area to switch tabs; the panel follows the finger and slides out only from the leftmost tab's right-swipe (all other directions yield to tab paging).
+- **Fullscreen settings when managed**: enhanced Native, Merged and Floating use a brand row, swipeable tabs and back button; Native `minimal` keeps the official dialog untouched. Swipe left/right on the content area to switch tabs; only a right-swipe from the leftmost tab exits the panel.
 - **Restyled pickers**: model / permission sub-menus become bottom-sheet lists with the theme-blue selected state; no soft keyboard pops up when a picker opens in the empty state (search-box autofocus guard — tapping the search box still focuses normally).
 - **Exclusive overlays + history stack**: drawer / bottom sheet / add panel never stack; closed layer-by-layer. The add panel is also mutually exclusive with the soft keyboard in both directions (opening it first drops composer focus; tapping the input while the panel is open closes the panel first, and the keyboard rises only after the panel is gone).
 - **Three layout presets**: **Native** (stock DSH) / **Merged** (composer joined with the bottom bar) / **Floating** (mobile-app form), one tap in Settings, see below.
 - **Tablet wide-screen sidebar gesture** (since 0.4.8): on tablets / wide windows the sidebar is a persistent column that collapses into a narrow rail — **swipe left to collapse, swipe right to expand, starting anywhere in the left half of the screen** (threshold-triggered official toggle and transition, no finger-following); while an official modal dialog is on screen the gesture yields entirely, and swipes starting in the right half belong to the content. Shared engine with the phone drawer gesture; desktop hosts never enable it.
 - **Live i18n**: every self-drawn label (layout-mode cards, bottom nav, panels) refreshes **instantly** when the official language changes — no restart needed; falls back to `<html lang>` / system language.
+- **Token & compatibility contracts**: size/color tokens have a machine-readable catalog, reference CSS and override guide; official data-* / ARIA dependencies and feature probes are registered and checked for drift, with missing features degrading independently.
 - **Accessibility & motion**: `aria-modal`, focus in/out, honors system "reduce motion".
 
 ### Three layout presets (Native / Merged / Floating)
 
 The three layouts are **Native / Merged / Floating**: Native is DSH untouched; Merged joins the composer and the bottom bar into one block (v1); Floating lifts the composer card and adds a five-item nav (v2). There is exactly one place to switch: **Settings → General → Layout mode, right under Appearance**, offering three cards with mini wireframe thumbnails. Switching is instant, round-trips cleanly, and **plugin-provided config pages** (e.g. pet config, plugin market) are handled as well.
 
-- **Native**: hands the whole screen back to the official layout; on phones the settings page matches the other two presets as **full-screen** (since 0.4.7 — brand row + swipeable tabs + back button), while tablets and desktops keep the official two-column dialog. The **only exception** is an attach entry in the composer tool row: one paperclip button that opens a nearby "Choose image / Choose file" menu, skipping the "tap ⊕ then find upload in the command list" detour. It shows up everywhere inside the App (phone or tablet, portrait or landscape, full screen or freeform) and stays hidden on desktop.
-- **Merged**: composer and bottom bar joined into one block; the empty-state dashed input card gets symmetric side gutters (previously flush left with a 7px skew from the official scrollbar gutter).
+- **Native**: hands the layout back to DSH; the default `minimal` setting keeps the official settings dialog untouched. `enhanced` is an optional phone-only fullscreen takeover (brand row, swipeable tabs and back button); tablets / desktops always keep the official two-column dialog. The only attachment exception is one paperclip button that opens a nearby "Choose image / Choose file" menu. It appears inside the App across phone/tablet, portrait/landscape and fullscreen/windowed forms, but never on desktop hosts.
+- **Merged**: composer and bottom bar joined into one block; empty-session card styling uses a stable plugin-owned state marker instead of a transient host class variant.
 
 Floating is the **mobile-app form factor**: a five-item bottom nav acts as the page switcher, the composer floats, and the add panel becomes a two-level menu.
 
 - **Five-item nav**: Sessions / Automations / Plugins / Workbench / Settings, using DSH's own icon set; the current page is tinted with the official blue (`--dsw-alias-state-business-primary`). Sessions acts as "go home" — from other pages it returns to the session page; tapped again on the session page it opens the session sheet. Plugins / Automations / Settings are **pages**, not sheets, so the nav stays put (tapping the active one returns to the session).
 - **Workbench**: toggles the official right panel (`sidebarRight.toggleExpanded`); at phone widths the official code makes it fullscreen and the panel leaves room for the nav; **swipe sideways to dismiss**, and from a plugin/automation page it closes that page first.
-- **Add panel (self-drawn)**: level 1 = three attachment tiles (**image / camera / file**) plus one row per official group; tapping a group opens level 2, a list of that group's items with **title + official description**. Data and actions still come from the official nodes — it reads their options and dispatches their `mousedown`; no command semantics are duplicated.
+- **Add panel (self-drawn)**: level 1 has three attachment tiles (**image / camera / file**) plus one row per official section; tapping a section opens level 2. The command UI service supplies localized labels, descriptions and sections, but a row is shown only when its official DOM action also exists. Clicks still go through the official node, preserving upload, permission and picker behavior.
 - **Cover-style drawers**: add / model / permission / workspace pickers slide up over the page instead of pushing content up; the session sheet is a fixed 55% of the viewport, leaving blank space when there are few rows.
 - **Transparent bottom bar**: no fill and no divider, so the composer's soft shadow can spill into the nav row instead of being cut off.
 - **Engine status band**: the host's own "engine ready" band is a native view (not in the DOM, not styleable, does not resize the viewport). `--dshm-engine-bar` (default 56px) reserves its height for panel headers; set it to `0px` if you always collapse the band first.
@@ -56,7 +57,7 @@ Floating is the **mobile-app form factor**: a five-item bottom nav acts as the p
 | **Stable theming** | Hash-based tint assignment — new feature icons are colored automatically, no code change. |
 | **Adaptive geometry** | Gutters / radii / heights are all CSS variables (`clamp()` + safe-area insets) — no hardcoded px, scales across devices. |
 | **Hardcoded-value guard** | CI scans the injected styles for fixed px layout values; **any new violation fails the build**, legacy ones live in a baseline that shrinks over time. |
-| **Verified on device** | MuMu emulator (720×1280), phone + tablet AVDs (CDP real-touch regression) and a Redmi K70 real device; **222** CI unit tests all green. |
+| **Verified on device** | Three presets, settings modes, the add panel, feature probes and service binding checked on Medium Phone API 35; **262** CI unit tests pass. |
 
 ---
 
@@ -98,7 +99,8 @@ Archived screenshots of the early release (v0.1.6, single-column v1 layout) live
 
 | Plugin version | `engines.dsh` | `dshReleases` entries | Verified DSH versions | `0.2.2-rc.1` | Notes |
 |---|---|---|---|---|---|
-| **0.4.8** (current) | `>=0.2.1-rc.2` | `0.2.1-rc.2`, `0.2.1-rc.5`, `0.2.2-rc.1` → `compatible` (carried over from 0.4.7) | `0.2.1-rc.2` / `0.2.1-rc.5` / `0.2.2-rc.1` | ✅ compatible | Everything from 0.4.7 + second-round fixes + tablet wide-screen sidebar gesture; use 0.4.8 for new installs / upgrades |
+| **0.4.10** (current) | `>=0.2.1-rc.2` | `0.2.1-rc.2`, `0.2.1-rc.5`, `0.2.2-rc.1` → `compatible` | `0.2.1-rc.2` / `0.2.1-rc.5` / `0.2.2-rc.1` | ✅ compatible | Three-preset hardening, command candidate metadata, stable empty-state marker, token / contract / drift gates; use 0.4.10 for installs and upgrades |
+| 0.4.9 | `>=0.2.1-rc.2` | Same releases (`compatible`) | Same verified versions | ✅ compatible | Add-panel takeover timing, click and preset-cleanup fixes |
 | 0.4.7 | `>=0.2.1-rc.2` | `0.2.1-rc.2`, `0.2.1-rc.5`, `0.2.2-rc.1` → `compatible` | `0.2.1-rc.2` / `0.2.1-rc.5` / `0.2.2-rc.1` | ✅ **first adapted release** | Official `data-shortcut-modal` contract + `settings.general.item` slot; unified full-screen settings for all three presets; unknown engines degrade to `safe` |
 | 0.4.4 – 0.4.6 | `>=0.2.1-rc.2` | `0.2.1-rc.2`, `0.2.1-rc.5` → `compatible` | `0.2.1-rc.2` / `0.2.1-rc.5` | ❌ incompatible (unlisted = `unknown`) | On 0.2.2-rc.1: layout-mode picker breaks, the native preset settings page becomes a clipped floating window, and the settings page cannot be closed. Upgrade to 0.4.8 |
 | 0.1.6 – 0.4.3 | `>=0.2.1-rc.2` | none (field added in 0.4.4) | `0.2.1-rc.2` / `0.2.1-rc.5` (historical results carried into 0.4.4) | ⚠️ unverified | Only a range declaration, no per-release entry; not recommended for newer engines |
@@ -107,10 +109,10 @@ Archived screenshots of the early release (v0.1.6, single-column v1 layout) live
 
 | DSH / official UI layout | Host app | Recommended plugin | Verdict |
 |---|---|---|---|
-| `0.2.2-rc.1` | Android app 1.5.0 · BUILD `2026.11.06-4566c0be` | **≥ 0.4.8** | ✅ Verified on two AVDs and a Redmi K70; do not use 0.4.6 or older |
-| `0.2.1-rc.5` | — (no recorded mapping) | 0.4.8 (0.4.4 – 0.4.7 also work) | ✅ `compatible` |
-| `0.2.1-rc.2` | — (no recorded mapping) | 0.4.8 (minimum declared line) | ✅ `compatible` |
-| Other / unlisted | — | 0.4.8 | ⚪ `unknown`: no settings takeover, `safe` degradation; force with `localStorage['dshm-compat'] = 'safe'` |
+| `0.2.2-rc.1` | Android app 1.5.0 · BUILD `2026.11.06-4566c0be` | **≥ 0.4.10** | ✅ Verified on AVD; do not use 0.4.6 or older |
+| `0.2.1-rc.5` | — (no recorded mapping) | 0.4.10 (0.4.4 – 0.4.9 also work) | ✅ `compatible` |
+| `0.2.1-rc.2` | — (no recorded mapping) | 0.4.10 (minimum declared line) | ✅ `compatible` |
+| Other / unlisted | — | 0.4.10 | ⚪ `unknown`: no settings takeover, `safe` degradation; force with `localStorage['dshm-compat'] = 'safe'` |
 
 **Declaration semantics**: `engines.dsh` drives install-time checks (the core's `evaluatePluginCompatibility()` reads only it and `peerDependencies`). `dsh.compatibility.dshReleases` is a per-release declaration for marketplace indexing, **not** used at install time; unlisted versions count as `unknown`. Both fields have been `>=0.2.1-rc.2` in every release, so "installs successfully" does not mean "adapted".
 
@@ -123,6 +125,15 @@ The tables are derived from each release tag's `package.json` (e.g. `git show v0
 - **Settings page**: all three presets use the same phone full-screen layout; tablets and desktops keep the official two-column dialog. Settings dialogs are identified by `data-shortcut-modal="settings"`, so the sidebar drawer is never mistaken for one.
 - **Diagnostics**: read `window.__dshmCompat` from the console / CDP (`mode`, `settingsPath`, `settingsSlotSeen`, `dialogContract`, `engineVersion`, `reason`).
 - **Rollback**: `localStorage['dshm-compat'] = 'legacy'` forces the old injection path, `'safe'` disables settings takeover, `localStorage['dshm-settings-slot'] = 'off'` disables only the slot path. The full-screen settings layout is gated by the source constant `SETTINGS_UNIFIED_FULLSCREEN`.
+
+### 0.4.10 changes
+
+- **Optional Native settings takeover**: the default preset now defaults to `minimal`, leaving the official settings dialog untouched; `enhanced` opts into the phone fullscreen panel. Classic and Floating keep their plugin settings panel.
+- **Feature-level compatibility probes**: delayed DOM/services are rechecked after mount and observed capabilities stay sticky; a missing feature only degrades its own path rather than gating the whole engine by version regex.
+- **Token contract**: size and color tokens are documented in [`docs/theme-tokens.md`](docs/theme-tokens.md), with a machine-readable catalog, reference stylesheet and three-way drift check.
+- **Command UI metadata**: the Floating add panel uses official command candidates for localized labels, descriptions and sections, while clicks remain on verified official DOM actions.
+- **Stable empty state**: the classic dashed card is driven by the retained session's `blank` state plus plugin-owned anchors, not a transient host class variant.
+- **Compatibility gates**: official `data-*` and ARIA roles, feature coverage, contract drift, color literals and `!important` growth are checked by `npm run check`.
 
 ### 0.4.8 changes
 
@@ -144,11 +155,15 @@ dsh plugin --profile web add @xiaopb/dsh-mobile-layout
 No runtime or dev dependencies; the client is a single-file artifact (no build), `lib/client.js` is what ships.
 
 ```sh
-npm run check             # node --check → unit tests → package / bundle contract → hardcoded-value guard
-npm test                  # unit tests only (222)
-npm run hardcode:check    # guard only (fails on new violations)
-npm run hardcode:baseline # shrink the baseline after fixing violations
-npm run pack:dry          # preview the files that will be published
+npm run check             # syntax → 262 tests → package → geometry/token/color/contract/compat/important gates
+npm test                  # unit tests only (262)
+npm run hardcode:check    # geometry hardcode guard
+npm run tokens:check      # token catalog / client / docs / reference CSS consistency
+npm run colors:check      # fail on new raw colors
+npm run contracts:check   # official data-* and ARIA role registry
+npm run compat:check      # FEATURE_KEYS compatibility coverage
+npm run important:check   # fail on !important growth
+npm run pack:dry          # preview package files
 ```
 
 Pushing a `v*` tag triggers Release (npm Trusted Publishing with `NPM_TOKEN` fallback, then polls until the version is public). Device acceptance needs a device and is done manually per section 6 of `docs/technical-notes.md`.

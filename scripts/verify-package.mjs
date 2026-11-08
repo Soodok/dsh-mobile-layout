@@ -51,7 +51,7 @@ const files = pkg.files || []
 check(Array.isArray(files) && files.length > 0, 'package.json 声明了 files 白名单')
 check(files.includes('lib'), 'files 含 lib')
 check(files.includes('cordis.patch.yml'), 'files 含 cordis.patch.yml')
-const leaked = files.filter((f) => /^(test|tools|docs|scripts|\.github)/.test(f))
+const leaked = files.filter((f) => /^(test|tools|docs|scripts|\.github)/.test(f) && f !== 'docs/theme-tokens.md')
 check(leaked.length === 0, `files 未夹带开发目录（${leaked.join(', ') || '无'}）`)
 for (const entry of files) {
   check(exists(entry), `files 条目存在（${entry}）`)
