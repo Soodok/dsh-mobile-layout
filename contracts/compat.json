@@ -33,9 +33,10 @@
     {
       "key": "commandUi",
       "status": "native",
-      "verifiedValue": "ctx.commandUi 21 个方法，含 candidates/2、dispatch/1",
-      "whenMissing": "加号面板保持现有 DOM 接管链（已实测可用）",
-      "evidence": "A（serviceShapes 快照）；迁移到服务调用仍需候选对象形状验证"
+      "verifiedValue": "ctx.commandUi 21 个方法；sessions() → 管理器，list 是 store，getSnapshot() = { byId, ids, phase, projectionsBySession }",
+      "whenMissing": "加号面板保持现有 DOM 接管链（图片/相机/文件/指令，AVD 已实测）",
+      "evidence": "A（serviceShapes + 只读探针 commandUiProbe）；迁移到服务调用仍缺 request/dispatch 形状",
+      "blockedOn": "candidates(session, req) 的 req 形状与 dispatch(pick) 的 pick 形状未确认（已定位取会话路径：sessions.list.getSnapshot().ids[0] → byId[id]）"
     },
     {
       "key": "sidebarRightTabs",
