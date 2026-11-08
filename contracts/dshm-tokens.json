@@ -132,7 +132,7 @@
       "name": "--dshm-v2-dock-handle",
       "layer": "size",
       "public": false,
-      "default": "36px",
+      "default": "18px",
       "summary": "胶囊底栏把手行的高度，同时是把手的触控区下限（内部几何，不承诺第三方可用）"
     },
     {
