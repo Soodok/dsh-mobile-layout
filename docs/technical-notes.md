@@ -458,3 +458,14 @@ WebView JS **没有**"不弹键盘就知道高度"的 API；来源按优先级�
 - 静态作用域审计：胶囊相关的全部选择器（`.dshm-seg` / `.dshm-actions` / `.dshm-dock-foot` / `.dshm-dock-meta` / `.dshm-dock-grabber` 等）都带 `html[data-dshm-mode="mobile"]` 前缀，平板下不会命中任何一条 → 样式层零影响。
 - JS 侧：胶囊底栏、分段控件、自绘动作行都只在 `dock === capsule` 且 mobile 模式时创建；平板不进入该分支，DOM 不注入。
 - 结论：平板布局与改造前一致（无样式命中、无节点注入）。真实平板 AVD 像素 diff 仍建议在设备可用时补一次。
+
+**⑧ 截图矩阵（浅色，2026-11-09）**
+
+| 场景 | 文件 | 结论 |
+|---|---|---|
+| 会话页（浅） | `.tmp-shot/avd/mx-01-conv-light.png` | 卡片头三段、分段控件 48px、统计带在卡内、输入区一行、底栏五项 + 脚注 |
+| 加号面板（浅） | `.tmp-shot/avd/mx-02-addpanel-light.png` | 附件（图片/相机/文件）+ 指令（压缩·模型·下载日志）正常；面板为整屏 sheet |
+| 收起态（浅） | `.tmp-shot/avd/mx-03-collapsed-light.png` | 底栏只剩「权限 · 把手 · 模型」一行，页面让位同步收缩 |
+| 设置页（浅） | `.tmp-shot/avd/p64-01-settings.png` | 五项补位（会话/插件/设置/自动化任务/工作台），内容不被遮挡 |
+
+**深色未能验证**：`adb shell cmd uimode night yes` 后 App 仍为浅色（`data-ds-theme-source=system`、`color-scheme: light`），说明该壳不跟随系统夜间模式；深色需要在 App 设置里切「外观」，脚本没定位到该入口。深色样式本身（`prefers-color-scheme: dark` 下正文 +1px、代码块卡片）已随 CSS 生效，只差一张实拍。
