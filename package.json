@@ -16,7 +16,7 @@
   ],
   "scripts": {
     "test": "node --test --test-force-exit test/*.test.js",
-    "check": "node --check lib/client.js && npm test && node scripts/verify-package.mjs && node scripts/check-hardcoded.mjs && node scripts/check-tokens.mjs && node scripts/check-colors.mjs && node scripts/check-contracts.mjs && node scripts/check-compat.mjs",
+    "check": "node --check lib/client.js && npm test && node scripts/verify-package.mjs && node scripts/check-hardcoded.mjs && node scripts/check-tokens.mjs && node scripts/check-colors.mjs && node scripts/check-contracts.mjs && node scripts/check-compat.mjs && node scripts/check-important.mjs",
     "tokens:check": "node scripts/check-tokens.mjs",
     "metrics": "node scripts/metrics.mjs",
     "hardcode:check": "node scripts/check-hardcoded.mjs",
@@ -27,7 +27,9 @@
     "colors:baseline": "node scripts/check-colors.mjs --update",
     "contracts:check": "node scripts/check-contracts.mjs",
     "compat:check": "node scripts/check-compat.mjs",
-    "contract:drift": "node scripts/contract-snapshot.mjs"
+    "contract:drift": "node scripts/contract-snapshot.mjs",
+    "important:check": "node scripts/check-important.mjs",
+    "important:baseline": "node scripts/check-important.mjs --update"
   },
   "dsh": {
     "manifestVersion": 1,

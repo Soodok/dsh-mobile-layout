@@ -1,0 +1,751 @@
+{
+  "_comment": "!important baseline（见 scripts/check-important.mjs）。减量口径：先在真机比对结构度量，再删、再跑 npm run important:baseline 收紧。",
+  "total": 587,
+  "rules": [
+    {
+      "hash": "f2ee765234dc",
+      "selector": "html[data-dshm-mode=\"mobile\"] [data-dshm-frame]:not([data-rightbar-fullscreen])",
+      "count": 1
+    },
+    {
+      "hash": "ad2a72e6803c",
+      "selector": "html[data-dshm-mode=\"mobile\"] [data-dshm-center]",
+      "count": 3
+    },
+    {
+      "hash": "432a01478424",
+      "selector": "html[data-dshm-mode=\"mobile\"] [data-dshm-viewtabs-row]",
+      "count": 2
+    },
+    {
+      "hash": "5c977dc180c4",
+      "selector": "html[data-dshm-mode=\"mobile\"] [data-dshm-rightbar]",
+      "count": 2
+    },
+    {
+      "hash": "e4a41e168f4c",
+      "selector": "html[data-dshm-mode=\"mobile\"][data-dshm-following] [data-dshm-sidebar]",
+      "count": 1
+    },
+    {
+      "hash": "8433cd47f7d3",
+      "selector": "html[data-dshm-mode=\"mobile\"][data-dshm-settling] [data-dshm-sidebar]",
+      "count": 1
+    },
+    {
+      "hash": "112dcb661e8b",
+      "selector": "html[data-dshm-mode=\"mobile\"] [data-dshm-sidebar] > *",
+      "count": 1
+    },
+    {
+      "hash": "b47204c8761c",
+      "selector": "html[data-dshm-mode=\"mobile\"] [data-android-narrow-yield-col]",
+      "count": 1
+    },
+    {
+      "hash": "ebd0fbd09b06",
+      "selector": "html[data-dshm-mode=\"mobile\"] [data-android-narrow-sidebar-col]",
+      "count": 1
+    },
+    {
+      "hash": "a508cb4f0eb4",
+      "selector": "html[data-dshm-mode=\"mobile\"] [data-dshm-model-chip]",
+      "count": 5
+    },
+    {
+      "hash": "7fd077266b97",
+      "selector": "html[data-dshm-mode=\"mobile\"] [data-dshm-perm-chip] > span[aria-hidden=\"true\"]:last-of-type",
+      "count": 1
+    },
+    {
+      "hash": "277d7fd511e0",
+      "selector": "html[data-dshm-mode=\"mobile\"] [data-dshm-model-chip] > *",
+      "count": 1
+    },
+    {
+      "hash": "3c2e273363e2",
+      "selector": "html[data-dshm-mode=\"mobile\"] [data-dshm-perm-chip][data-dshm-perm-danger]::after",
+      "count": 1
+    },
+    {
+      "hash": "92733460c3bb",
+      "selector": "html[data-dshm-mode=\"mobile\"] [data-dshm-perm-chip][data-dshm-perm-danger] svg",
+      "count": 1
+    },
+    {
+      "hash": "1aa9a2765353",
+      "selector": "html[data-dshm-mode=\"mobile\"] [data-composer-seat]",
+      "count": 5
+    },
+    {
+      "hash": "b3a383b3bd03",
+      "selector": "html[data-dshm-mode=\"mobile\"] [data-dshm-composer-pad]",
+      "count": 1
+    },
+    {
+      "hash": "f4f08ca94c9a",
+      "selector": "html[data-dshm-mode=\"mobile\"] [data-dshm-hero]",
+      "count": 1
+    },
+    {
+      "hash": "d443bde641ff",
+      "selector": "html[data-dshm-mode=\"mobile\"] [data-dshm-add-chip]",
+      "count": 1
+    },
+    {
+      "hash": "dd531be02a6e",
+      "selector": "html[data-dshm-mode=\"mobile\"] [data-composer-card]",
+      "count": 3
+    },
+    {
+      "hash": "78e7bf9c68ea",
+      "selector": "html[data-dshm-mode=\"mobile\"] [data-composer-card] [contenteditable=\"true\"]",
+      "count": 2
+    },
+    {
+      "hash": "fd324d2a8a1f",
+      "selector": "html[data-dshm-mode=\"mobile\"] [data-dshm-composer-flat]",
+      "count": 8
+    },
+    {
+      "hash": "a0ebe30fef76",
+      "selector": "html[data-dshm-mode=\"mobile\"] [data-composer-seat] *::-webkit-scrollbar",
+      "count": 3
+    },
+    {
+      "hash": "acb96f06d3fe",
+      "selector": "html[data-dshm-mode=\"mobile\"] [data-dshm-composer-clip]",
+      "count": 3
+    },
+    {
+      "hash": "2e10b86f4170",
+      "selector": "html[data-dshm-mode=\"mobile\"] [data-dshm-composer-clip]::-webkit-scrollbar",
+      "count": 3
+    },
+    {
+      "hash": "2f9320b022b3",
+      "selector": "html[data-dshm-mode=\"mobile\"][data-dshm-preset=\"classic\"] [data-dshm-card-trigger]",
+      "count": 5
+    },
+    {
+      "hash": "02fa563d19bb",
+      "selector": "html[data-dshm-mode=\"mobile\"][data-dshm-preset=\"classic\"] [data-dshm-card-trigger]::after",
+      "count": 1
+    },
+    {
+      "hash": "658a7e085713",
+      "selector": "html[data-dshm-mode=\"mobile\"][data-dshm-composer-split] [data-composer-seat]",
+      "count": 1
+    },
+    {
+      "hash": "eb8037f93590",
+      "selector": "html[data-dshm-mode=\"mobile\"] [data-dshm-composer-edge]",
+      "count": 1
+    },
+    {
+      "hash": "1aa69ed092f1",
+      "selector": "html[data-dshm-form=\"phone\"] [data-composer-seat]",
+      "count": 1
+    },
+    {
+      "hash": "cfd605dd8477",
+      "selector": "html[data-dshm-mode=\"mobile\"][data-dshm-stats-on] [data-dshm-center] header[data-window-drag]",
+      "count": 1
+    },
+    {
+      "hash": "8cfc8599828c",
+      "selector": "html[data-dshm-mode=\"mobile\"] [data-dshm-stats]",
+      "count": 13
+    },
+    {
+      "hash": "495b6d4e6c38",
+      "selector": "html[data-dshm-mode=\"mobile\"] [data-dshm-stats] button",
+      "count": 2
+    },
+    {
+      "hash": "af1e14c7d684",
+      "selector": "html[data-dshm-mode=\"mobile\"] [data-dshm-stats] button span",
+      "count": 1
+    },
+    {
+      "hash": "741a6ffe28bb",
+      "selector": "html[data-dshm-mode=\"mobile\"] [data-dshm-frame][data-rightbar-fullscreen] [data-dshm-stats]",
+      "count": 1
+    },
+    {
+      "hash": "e42ec4c4102c",
+      "selector": "html[data-dshm-mode=\"mobile\"][data-dshm-header-menu-open] [data-dshm-center] header[data-window-drag]",
+      "count": 2
+    },
+    {
+      "hash": "6b021124e1f2",
+      "selector": "html[data-dshm-mode=\"mobile\"] [data-dshm-stats-dialog]",
+      "count": 14
+    },
+    {
+      "hash": "dfa23369fc97",
+      "selector": "html[data-dshm-mode=\"mobile\"] [data-dshm-stats-host]",
+      "count": 1
+    },
+    {
+      "hash": "9104ccdb0d13",
+      "selector": "html[data-dshm-mode=\"mobile\"] [data-dshm-popover]",
+      "count": 17
+    },
+    {
+      "hash": "a1d44420ad78",
+      "selector": "html[data-dshm-mode=\"mobile\"][data-dshm-swap] [data-dshm-popover] > *",
+      "count": 2
+    },
+    {
+      "hash": "a99ad4676270",
+      "selector": "html[data-dshm-mode=\"mobile\"] [data-dshm-popover] [role=\"listbox\"]",
+      "count": 4
+    },
+    {
+      "hash": "190a6d5a18d2",
+      "selector": "html[data-dshm-mode=\"mobile\"] [data-dshm-popover] [role=\"listbox\"] > [role=\"presentation\"]:not([data-dshm-add-group-title])",
+      "count": 1
+    },
+    {
+      "hash": "de9bc1ff2117",
+      "selector": "html[data-dshm-mode=\"mobile\"] [data-dshm-popover] [role=\"listbox\"] > [role=\"option\"]",
+      "count": 9
+    },
+    {
+      "hash": "5c1e11a111fe",
+      "selector": "html[data-dshm-mode=\"mobile\"] [data-dshm-popover] [role=\"listbox\"] > [role=\"option\"] > span:nth-child(n+3)",
+      "count": 1
+    },
+    {
+      "hash": "34fdc2ca0890",
+      "selector": "html[data-dshm-mode=\"mobile\"] [data-dshm-popover] [role=\"listbox\"] > [role=\"option\"] > span:first-child",
+      "count": 1
+    },
+    {
+      "hash": "f371ca0f02ed",
+      "selector": "html[data-dshm-mode=\"mobile\"] [data-dshm-popover] [role=\"listbox\"] > [role=\"option\"] > span:first-child svg",
+      "count": 2
+    },
+    {
+      "hash": "c762f4dfde0d",
+      "selector": "html[data-dshm-mode=\"mobile\"] [data-dshm-popover] [role=\"listbox\"] > [role=\"option\"] > span:nth-child(2)",
+      "count": 1
+    },
+    {
+      "hash": "6695187c01d5",
+      "selector": "html[data-dshm-mode=\"mobile\"] [data-dshm-chrome-btn]",
+      "count": 2
+    },
+    {
+      "hash": "00e3ae56ccd3",
+      "selector": "html[data-dshm-mode=\"mobile\"] [data-dshm-popover] [role=\"listbox\"][data-dshm-add-paged]",
+      "count": 14
+    },
+    {
+      "hash": "b33f925e9b67",
+      "selector": "html[data-dshm-mode=\"mobile\"] [data-dshm-popover] [role=\"listbox\"][data-dshm-add-paged] > [role=\"option\"]",
+      "count": 2
+    },
+    {
+      "hash": "68fb409fcba3",
+      "selector": "html[data-dshm-mode=\"mobile\"] [data-dshm-popover][data-dshm-picker] [role=\"listbox\"]",
+      "count": 5
+    },
+    {
+      "hash": "11e893ecdf8f",
+      "selector": "html[data-dshm-mode=\"mobile\"] [data-dshm-popover][data-dshm-picker] input",
+      "count": 13
+    },
+    {
+      "hash": "80ee4e8734e6",
+      "selector": "html[data-dshm-mode=\"mobile\"] [data-dshm-popover][data-dshm-picker] [role=\"group\"]",
+      "count": 5
+    },
+    {
+      "hash": "1a6725b71e3c",
+      "selector": "html[data-dshm-mode=\"mobile\"] [data-dshm-popover][data-dshm-picker] [role=\"group\"] > div:not([role=\"option\"])",
+      "count": 6
+    },
+    {
+      "hash": "8a755c4b886b",
+      "selector": "html[data-dshm-mode=\"mobile\"] [data-dshm-popover][data-dshm-picker] [role=\"option\"]",
+      "count": 17
+    },
+    {
+      "hash": "b7fa7ee971cc",
+      "selector": "html[data-dshm-mode=\"mobile\"] [data-dshm-popover][data-dshm-picker] [role=\"option\"]:active",
+      "count": 1
+    },
+    {
+      "hash": "5c33f7bfe5f5",
+      "selector": "html[data-dshm-mode=\"mobile\"] [data-dshm-popover][data-dshm-picker] [role=\"option\"][aria-selected=\"true\"]",
+      "count": 1
+    },
+    {
+      "hash": "7e74b9c1f0da",
+      "selector": "html[data-dshm-mode=\"mobile\"] [data-dshm-popover][data-dshm-picker] [role=\"option\"][aria-selected=\"true\"] > span:first-child",
+      "count": 1
+    },
+    {
+      "hash": "655592aaab48",
+      "selector": "html[data-dshm-mode=\"mobile\"] [data-dshm-popover][data-dshm-picker] [role=\"option\"][data-dshm-perm-danger][aria-selected=\"true\"]",
+      "count": 1
+    },
+    {
+      "hash": "96d30772259a",
+      "selector": "html[data-dshm-mode=\"mobile\"] [data-dshm-popover][data-dshm-picker] [role=\"option\"][data-dshm-perm-danger] > span:first-child",
+      "count": 1
+    },
+    {
+      "hash": "638b656d1893",
+      "selector": "html[data-dshm-mode=\"mobile\"] [data-dshm-popover][data-dshm-picker] [role=\"option\"][data-dshm-perm-danger] > span[data-dshm-picker-check]",
+      "count": 1
+    },
+    {
+      "hash": "0375acbff91c",
+      "selector": "html[data-dshm-mode=\"mobile\"] [role=\"option\"][data-dshm-perm-danger]",
+      "count": 1
+    },
+    {
+      "hash": "8df55da42609",
+      "selector": "html[data-dshm-mode=\"mobile\"] [role=\"menuitemradio\"][data-dshm-perm-danger] > span",
+      "count": 1
+    },
+    {
+      "hash": "cbbfb9b5d3f1",
+      "selector": "html[data-dshm-mode=\"mobile\"] [data-dshm-popover][data-dshm-picker] [role=\"option\"] > span:first-child",
+      "count": 17
+    },
+    {
+      "hash": "d9345c8894bf",
+      "selector": "html[data-dshm-mode=\"mobile\"] [data-dshm-popover][data-dshm-picker] [role=\"option\"] > span[data-dshm-picker-detail]",
+      "count": 14
+    },
+    {
+      "hash": "e7dc44e7ff2a",
+      "selector": "html[data-dshm-mode=\"mobile\"] [data-dshm-popover][data-dshm-picker] [role=\"option\"] > span[data-dshm-picker-check]",
+      "count": 13
+    },
+    {
+      "hash": "0746d85849b9",
+      "selector": "html[data-dshm-mode=\"mobile\"] [data-dshm-popover][data-dshm-picker] [role=\"option\"] > span[data-dshm-picker-check] svg",
+      "count": 2
+    },
+    {
+      "hash": "f77f2b615e73",
+      "selector": "html[data-dshm-form=\"phone\"] [data-dshm-settings-panel]",
+      "count": 15
+    },
+    {
+      "hash": "1fb98581e7ca",
+      "selector": "html[data-dshm-form=\"phone\"] [data-dshm-settings-brand]",
+      "count": 8
+    },
+    {
+      "hash": "6d6fe2707f6c",
+      "selector": "html[data-dshm-form=\"phone\"] [data-dshm-settings-brand] .dshm-settings-brand-logo",
+      "count": 6
+    },
+    {
+      "hash": "3060b359ce42",
+      "selector": "html[data-dshm-form=\"phone\"] [data-dshm-settings-brand] .dshm-settings-brand-logo svg",
+      "count": 3
+    },
+    {
+      "hash": "64fc91c2f609",
+      "selector": "html[data-dshm-form=\"phone\"] [data-dshm-settings-brand] .dshm-settings-brand-name",
+      "count": 2
+    },
+    {
+      "hash": "a3a0843d4c96",
+      "selector": "html[data-dshm-form=\"phone\"] [data-dshm-settings-back]",
+      "count": 12
+    },
+    {
+      "hash": "a38d2b82e152",
+      "selector": "html[data-dshm-form=\"phone\"] [data-dshm-settings-back] svg",
+      "count": 3
+    },
+    {
+      "hash": "1bcf9c580384",
+      "selector": "html[data-dshm-form=\"phone\"] [data-dshm-settings-nav]",
+      "count": 9
+    },
+    {
+      "hash": "c3720e6bd5f7",
+      "selector": "html[data-dshm-form=\"phone\"] [data-dshm-settings-title]",
+      "count": 1
+    },
+    {
+      "hash": "e5bd904f338c",
+      "selector": "html[data-dshm-form=\"phone\"] [data-dshm-settings-tabs]",
+      "count": 13
+    },
+    {
+      "hash": "985ebd26ce49",
+      "selector": "html[data-dshm-form=\"phone\"] [data-dshm-settings-tabs] > *",
+      "count": 1
+    },
+    {
+      "hash": "0089c1303e7f",
+      "selector": "html[data-dshm-form=\"phone\"] [data-dshm-settings-tabs] a",
+      "count": 7
+    },
+    {
+      "hash": "482217a133c2",
+      "selector": "html[data-dshm-form=\"phone\"] [data-dshm-settings-tabs] [data-dshm-settings-back]",
+      "count": 4
+    },
+    {
+      "hash": "c92dc359d22b",
+      "selector": "html[data-dshm-form=\"phone\"] [data-dshm-settings-tabs] [data-dshm-settings-back]::after",
+      "count": 1
+    },
+    {
+      "hash": "a892bc2c3747",
+      "selector": "html[data-dshm-form=\"phone\"] [data-dshm-settings-content]",
+      "count": 6
+    },
+    {
+      "hash": "01ab2b663d78",
+      "selector": "html[data-dshm-form=\"phone\"] [data-dshm-settings-content]:not([data-dshm-settings-scroll])",
+      "count": 2
+    },
+    {
+      "hash": "917ebb6a3c97",
+      "selector": "html[data-dshm-form=\"phone\"] [data-dshm-settings-head]",
+      "count": 14
+    },
+    {
+      "hash": "7cef8792b727",
+      "selector": "html[data-dshm-form=\"phone\"] [data-dshm-settings-tool]",
+      "count": 3
+    },
+    {
+      "hash": "4b841f596351",
+      "selector": "html[data-dshm-form=\"phone\"] [data-dshm-settings-close]",
+      "count": 7
+    },
+    {
+      "hash": "7543618d94b9",
+      "selector": "html[data-dshm-form=\"phone\"] [data-dshm-settings-scroll]",
+      "count": 6
+    },
+    {
+      "hash": "de2bd2b49861",
+      "selector": "html[data-dshm-form=\"phone\"] [data-dshm-settings-scroll] > *",
+      "count": 1
+    },
+    {
+      "hash": "d98a78e20049",
+      "selector": "html[data-dshm-form=\"phone\"] [data-dshm-settings-scroll] [role=\"switch\"]",
+      "count": 3
+    },
+    {
+      "hash": "c78c24a98399",
+      "selector": "html[data-dshm-form=\"phone\"] [data-dshm-settings-scroll] button[aria-haspopup]",
+      "count": 1
+    },
+    {
+      "hash": "e15cfde21d76",
+      "selector": "html[data-dshm-form=\"phone\"] [data-dshm-settings-cards]",
+      "count": 5
+    },
+    {
+      "hash": "2dba9ce7a9cb",
+      "selector": "html[data-dshm-form=\"phone\"] [data-dshm-settings-cards] > *",
+      "count": 4
+    },
+    {
+      "hash": "8c54357bdeb0",
+      "selector": "html[data-dshm-form=\"phone\"][data-dshm-preset=\"default\"] [data-dshm-settings-panel]",
+      "count": 7
+    },
+    {
+      "hash": "a85720c56627",
+      "selector": "html[data-dshm-form=\"phone\"][data-dshm-preset=\"default\"] [data-dshm-settings-nav][data-dshm-settings-nav]",
+      "count": 9
+    },
+    {
+      "hash": "17e8fffe1f44",
+      "selector": "html[data-dshm-form=\"phone\"][data-dshm-preset=\"default\"] [data-dshm-settings-title][data-dshm-settings-title]",
+      "count": 11
+    },
+    {
+      "hash": "306e79b9dff8",
+      "selector": "html[data-dshm-form=\"phone\"][data-dshm-preset=\"default\"] [data-dshm-settings-nav]",
+      "count": 8
+    },
+    {
+      "hash": "4518b59b4f1d",
+      "selector": "html[data-dshm-form=\"phone\"][data-dshm-preset=\"default\"] [data-dshm-settings-tabs]",
+      "count": 13
+    },
+    {
+      "hash": "c34de7cfeb65",
+      "selector": "html[data-dshm-form=\"phone\"][data-dshm-preset=\"default\"] [data-dshm-settings-tabs] > *",
+      "count": 1
+    },
+    {
+      "hash": "4f366fa72917",
+      "selector": "html[data-dshm-form=\"phone\"][data-dshm-preset=\"default\"] [data-dshm-settings-tabs] a",
+      "count": 7
+    },
+    {
+      "hash": "2a69a47f0bdc",
+      "selector": "html[data-dshm-form=\"phone\"][data-dshm-preset=\"default\"] [data-dshm-settings-head]",
+      "count": 12
+    },
+    {
+      "hash": "16fe26e60530",
+      "selector": "html[data-dshm-form=\"phone\"][data-dshm-preset=\"default\"] [data-dshm-settings-content]",
+      "count": 1
+    },
+    {
+      "hash": "3108569ffa86",
+      "selector": "html[data-dshm-form=\"phone\"][data-dshm-preset=\"default\"] [data-dshm-settings-cards]",
+      "count": 4
+    },
+    {
+      "hash": "cd4ce573d263",
+      "selector": "html[data-dshm-form=\"phone\"][data-dshm-preset=\"default\"] [data-dshm-settings-cards] > *",
+      "count": 4
+    },
+    {
+      "hash": "32714bcd2688",
+      "selector": "html[data-dshm-form=\"phone\"][data-dshm-preset=\"default\"] [data-dshm-settings-cards] label",
+      "count": 1
+    },
+    {
+      "hash": "5dba250baad3",
+      "selector": "html[data-dshm-mode=\"mobile\"][data-dshm-preset=\"v2\"] [data-composer-seat]",
+      "count": 7
+    },
+    {
+      "hash": "a8e92ba627d1",
+      "selector": "html[data-dshm-mode=\"mobile\"][data-dshm-preset=\"v2\"] [data-dshm-composer-tight]",
+      "count": 2
+    },
+    {
+      "hash": "47ea23c9b3eb",
+      "selector": "html[data-dshm-mode=\"mobile\"][data-dshm-preset=\"v2\"] [data-composer-seat] [data-dshm-composer-stack]",
+      "count": 1
+    },
+    {
+      "hash": "2a68ea6c3d30",
+      "selector": "html[data-dshm-mode=\"mobile\"][data-dshm-preset=\"v2\"] [data-dshm-composer-edge]",
+      "count": 1
+    },
+    {
+      "hash": "a79672ddc60a",
+      "selector": "html[data-dshm-mode=\"mobile\"][data-dshm-preset=\"v2\"] [data-composer-card]",
+      "count": 2
+    },
+    {
+      "hash": "d4b3d3349ffe",
+      "selector": "html[data-dshm-mode=\"mobile\"][data-dshm-preset=\"v2\"] [data-composer-card]::after",
+      "count": 1
+    },
+    {
+      "hash": "1acead1ee2a6",
+      "selector": "html[data-dshm-mode=\"mobile\"][data-dshm-preset=\"v2\"] [data-dshm-composer-clip]",
+      "count": 2
+    },
+    {
+      "hash": "6e6a419bba0b",
+      "selector": "html[data-dshm-mode=\"mobile\"][data-dshm-preset=\"v2\"] [data-dshm-composer-clip]::-webkit-scrollbar",
+      "count": 3
+    },
+    {
+      "hash": "b2cca3f71fe0",
+      "selector": "html[data-dshm-mode=\"mobile\"][data-dshm-preset=\"v2\"][data-dshm-ime] [data-dshm-bottom]",
+      "count": 5
+    },
+    {
+      "hash": "d33de4741697",
+      "selector": "html[data-dshm-mode=\"mobile\"][data-dshm-preset=\"v2\"][data-dshm-ime] [data-dshm-composer-clip]",
+      "count": 1
+    },
+    {
+      "hash": "37fa47c579cf",
+      "selector": "html[data-dshm-mode=\"mobile\"][data-dshm-preset=\"v2\"] [data-dshm-add-chip]",
+      "count": 1
+    },
+    {
+      "hash": "72833bedc5db",
+      "selector": "html[data-dshm-mode=\"mobile\"][data-dshm-preset=\"v2\"] [data-dshm-sidebar]",
+      "count": 1
+    },
+    {
+      "hash": "86ee8c785a9d",
+      "selector": "html[data-dshm-mode=\"mobile\"][data-dshm-preset=\"v2\"][data-dshm-v2-page] [data-slot=\"main\"]",
+      "count": 2
+    },
+    {
+      "hash": "e97c4cf50517",
+      "selector": "html[data-dshm-mode=\"mobile\"][data-dshm-preset=\"v2\"][data-dshm-settings-open] [data-dshm-settings-panel]",
+      "count": 1
+    },
+    {
+      "hash": "d1df277aa413",
+      "selector": "html[data-dshm-mode=\"mobile\"][data-dshm-preset=\"v2\"][data-dshm-settings-open][data-dshm-ime] [data-dshm-settings-panel]",
+      "count": 1
+    },
+    {
+      "hash": "97d27841615c",
+      "selector": "html[data-dshm-mode=\"mobile\"][data-dshm-preset=\"v2\"] [data-sidebar-right-panel] [role=\"tab\"]",
+      "count": 6
+    },
+    {
+      "hash": "a866e08300e4",
+      "selector": "html[data-dshm-mode=\"mobile\"][data-dshm-preset=\"v2\"] [data-sidebar-right-panel] [role=\"tab\"] > span",
+      "count": 5
+    },
+    {
+      "hash": "19606c77ac0e",
+      "selector": "html[data-dshm-mode=\"mobile\"][data-dshm-preset=\"v2\"] [data-sidebar-right-panel] [role=\"tab\"] button",
+      "count": 6
+    },
+    {
+      "hash": "0a09261634fd",
+      "selector": "html[data-dshm-mode=\"mobile\"][data-dshm-preset=\"v2\"] [data-dshm-tabstrip]",
+      "count": 6
+    },
+    {
+      "hash": "8d9fffa92232",
+      "selector": "html[data-dshm-mode=\"mobile\"][data-dshm-preset=\"v2\"] [data-dshm-tabstrip] [role=\"tab\"]",
+      "count": 2
+    },
+    {
+      "hash": "026fea56d64c",
+      "selector": "html[data-dshm-mode=\"mobile\"][data-dshm-preset=\"v2\"] [data-dshm-tabfiller]",
+      "count": 4
+    },
+    {
+      "hash": "bfc766bfb953",
+      "selector": "html[data-dshm-mode=\"mobile\"][data-dshm-preset=\"v2\"] [data-dshm-chrome-btn]",
+      "count": 2
+    },
+    {
+      "hash": "b86365d74558",
+      "selector": "html[data-dshm-mode=\"mobile\"][data-dshm-preset=\"v2\"] [data-sidebar-right-panel] [role=\"tablist\"]",
+      "count": 1
+    },
+    {
+      "hash": "8ecd29f5be73",
+      "selector": "html[data-dshm-mode=\"mobile\"][data-dshm-opening-settings] [role=\"menu\"]",
+      "count": 3
+    },
+    {
+      "hash": "6caf68093680",
+      "selector": "html[data-dshm-mode=\"mobile\"][data-dshm-preset=\"v2\"] [data-dshm-popover] [role=\"listbox\"]",
+      "count": 3
+    },
+    {
+      "hash": "84b084c2ca4a",
+      "selector": "html[data-dshm-mode=\"mobile\"][data-dshm-preset=\"v2\"] [data-dshm-popover] [role=\"listbox\"] > [role=\"option\"]",
+      "count": 1
+    },
+    {
+      "hash": "4c1f7c9dc8a1",
+      "selector": "html[data-dshm-mode=\"mobile\"][data-dshm-preset=\"v2\"] [data-dshm-add-group-title]",
+      "count": 9
+    },
+    {
+      "hash": "c340ce940306",
+      "selector": "html[data-dshm-mode=\"mobile\"][data-dshm-preset=\"v2\"] [data-dshm-add-kind=\"attachment\"]",
+      "count": 1
+    },
+    {
+      "hash": "ec57142efad1",
+      "selector": "html[data-dshm-mode=\"mobile\"][data-dshm-preset=\"v2\"] [data-dshm-popover]",
+      "count": 3
+    },
+    {
+      "hash": "9efcda8c8e65",
+      "selector": "html[data-dshm-mode=\"mobile\"][data-dshm-preset=\"v2\"][data-dshm-v2-addmenu] [data-dshm-popover]",
+      "count": 2
+    },
+    {
+      "hash": "9fb435aada0a",
+      "selector": "html[data-dshm-mode=\"mobile\"][data-dshm-preset=\"v2\"] [data-dshm-frame][data-rightbar-fullscreen] [data-dshm-center]",
+      "count": 1
+    },
+    {
+      "hash": "74c39dc2e804",
+      "selector": "html[data-dshm-mode=\"mobile\"][data-dshm-preset=\"v2\"] [data-dshm-frame][data-rightbar-fullscreen] [data-sidebar-right-panel]",
+      "count": 3
+    },
+    {
+      "hash": "ebbf5b82b45a",
+      "selector": "html[data-dshm-mode=\"mobile\"][data-dshm-preset=\"v2\"][data-dshm-composer-split] [data-dshm-frame][data-rightbar-fullscreen] [data-sidebar-right-panel]",
+      "count": 1
+    },
+    {
+      "hash": "a5e1ce6bfc11",
+      "selector": "html[data-dshm-mode=\"mobile\"] .dshm-add-pager-dot",
+      "count": 2
+    },
+    {
+      "hash": "5a8a61066c6e",
+      "selector": "html[data-dshm-form=\"phone\"] [data-dshm-settings-scroll][data-dshm-settings-swap]",
+      "count": 1
+    },
+    {
+      "hash": "53c93da424d5",
+      "selector": "html[data-dshm-form=\"phone\"] [data-terminal] > div:first-child",
+      "count": 5
+    },
+    {
+      "hash": "6097b53d5885",
+      "selector": "html[data-dshm-form=\"phone\"] [data-terminal] > div:first-child > div:first-child",
+      "count": 1
+    },
+    {
+      "hash": "d70ef026a6cd",
+      "selector": "html[data-dshm-form=\"phone\"] [data-terminal] > div:first-child > div:first-child > div:first-of-type",
+      "count": 1
+    },
+    {
+      "hash": "1321136bc508",
+      "selector": "html[data-dshm-form=\"phone\"] [data-terminal] > div:first-child > div:first-child > div:first-of-type > span:not([data-command-text]):not([data-state])",
+      "count": 6
+    },
+    {
+      "hash": "fae393a16fd9",
+      "selector": "html[data-dshm-form=\"phone\"] [data-terminal] > div:first-child > div:first-child > div:first-of-type > [data-command-text]",
+      "count": 3
+    },
+    {
+      "hash": "58b619610c41",
+      "selector": "html[data-dshm-form=\"phone\"] [data-terminal] [data-command-text]",
+      "count": 2
+    },
+    {
+      "hash": "c771915d2ebf",
+      "selector": "html[data-dshm-form=\"phone\"] [data-terminal] > div:first-child > div:first-child > div:first-of-type ~ div",
+      "count": 2
+    },
+    {
+      "hash": "bfb2cbbc15f9",
+      "selector": "html[data-dshm-form=\"phone\"] [data-terminal] > div:first-child > div:first-child > div:first-of-type > [data-state]",
+      "count": 1
+    },
+    {
+      "hash": "a3049d2a4904",
+      "selector": "html[data-dshm-form=\"phone\"] [data-terminal] > div:first-child > span",
+      "count": 2
+    },
+    {
+      "hash": "c4fe29dbe84a",
+      "selector": "html[data-dshm-form=\"phone\"] [data-terminal] > div:first-child > button",
+      "count": 2
+    },
+    {
+      "hash": "77029f290fe2",
+      "selector": "html[data-dshm-form=\"phone\"][data-dshm-preset=\"default\"] [data-dshm-terminal-wrap] [data-terminal] [data-command-text]",
+      "count": 2
+    }
+  ]
+}
