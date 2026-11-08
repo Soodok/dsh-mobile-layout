@@ -1,0 +1,286 @@
+{
+  "$comment": "dsh-mobile-layout token 契约目录。机器可读，scripts/check-tokens.mjs 校验它与 lib/client.js、styles/tokens.css、docs/theme-tokens.md 三者一致。layer=size 是版式尺寸（插件给出默认值，第三方可覆盖）；layer=rt 是运行时测量值（插件自己写，第三方不得写）。public=true 表示第三方插件可以覆盖。",
+  "version": 1,
+  "tokens": [
+    {
+      "name": "--dshm-header-height",
+      "layer": "size",
+      "public": true,
+      "default": "56px",
+      "summary": "移动布局下顶部宿主占位高度（含悬浮条）"
+    },
+    {
+      "name": "--dshm-bar-height",
+      "layer": "size",
+      "public": true,
+      "default": "56px",
+      "summary": "底部常驻操作条高度"
+    },
+    {
+      "name": "--dshm-drawer-width",
+      "layer": "size",
+      "public": true,
+      "default": "min(86vw, 280px)",
+      "summary": "手机抽屉宽度上限"
+    },
+    {
+      "name": "--dshm-safe-top",
+      "layer": "size",
+      "public": true,
+      "default": "env(safe-area-inset-top, 0px)",
+      "summary": "顶部安全区"
+    },
+    {
+      "name": "--dshm-safe-left",
+      "layer": "size",
+      "public": true,
+      "default": "env(safe-area-inset-left, 0px)",
+      "summary": "左侧安全区（横屏 / 挖孔屏生效）"
+    },
+    {
+      "name": "--dshm-safe-right",
+      "layer": "size",
+      "public": true,
+      "default": "env(safe-area-inset-right, 0px)",
+      "summary": "右侧安全区"
+    },
+    {
+      "name": "--dshm-safe-bottom",
+      "layer": "size",
+      "public": true,
+      "default": "0px",
+      "summary": "底部安全区；由宿主让位，默认不再叠加"
+    },
+    {
+      "name": "--dshm-settings-gutter",
+      "layer": "size",
+      "public": true,
+      "default": "clamp(12px, 3.4vw, 20px)",
+      "summary": "设置页左右留白"
+    },
+    {
+      "name": "--dshm-settings-vpad-min",
+      "layer": "size",
+      "public": true,
+      "default": "24px",
+      "summary": "设置页纵向留白下限"
+    },
+    {
+      "name": "--dshm-settings-vpad-max",
+      "layer": "size",
+      "public": true,
+      "default": "120px",
+      "summary": "设置页纵向留白上限"
+    },
+    {
+      "name": "--dshm-settings-vpad",
+      "layer": "size",
+      "public": true,
+      "default": "clamp(var(--dshm-settings-vpad-min, 24px), 10vh, var(--dshm-settings-vpad-max, 120px))",
+      "summary": "设置页纵向留白（视口高的 10% 夹逼）"
+    },
+    {
+      "name": "--dshm-settings-maxw",
+      "layer": "size",
+      "public": true,
+      "default": "480px",
+      "summary": "设置面板最大宽度"
+    },
+    {
+      "name": "--dshm-settings-safe-x",
+      "layer": "size",
+      "public": true,
+      "default": "max(env(safe-area-inset-left, 0px), env(safe-area-inset-right, 0px))",
+      "summary": "设置面板左右安全区（取两侧较大值保证对称）"
+    },
+    {
+      "name": "--dshm-classic-gutter",
+      "layer": "size",
+      "public": true,
+      "default": "clamp(12px, 3.4vw, 20px)",
+      "summary": "融合预设空态虚线卡左右留白"
+    },
+    {
+      "name": "--dshm-classic-radius",
+      "layer": "size",
+      "public": true,
+      "default": "16px",
+      "summary": "融合预设空态虚线卡圆角"
+    },
+    {
+      "name": "--dshm-v2-gutter",
+      "layer": "size",
+      "public": true,
+      "default": "8px",
+      "summary": "悬浮预设输入卡四周留白"
+    },
+    {
+      "name": "--dshm-v2-nav",
+      "layer": "size",
+      "public": true,
+      "default": "56px",
+      "summary": "悬浮预设五项导航高度"
+    },
+    {
+      "name": "--dshm-v2-radius",
+      "layer": "size",
+      "public": true,
+      "default": "20px",
+      "summary": "悬浮预设输入卡圆角"
+    },
+    {
+      "name": "--dshm-v2-shadow-gap",
+      "layer": "size",
+      "public": true,
+      "default": "8px",
+      "summary": "悬浮预设阴影净空"
+    },
+    {
+      "name": "--dshm-engine-bar",
+      "layer": "size",
+      "public": true,
+      "default": "56px",
+      "summary": "宿主引擎悬浮条占位高度"
+    },
+    {
+      "name": "--dshm-quick-size",
+      "layer": "size",
+      "public": true,
+      "default": "clamp(26px, 7vw, 28px)",
+      "summary": "原生预设回形针按钮尺寸"
+    },
+    {
+      "name": "--dshm-quick-icon",
+      "layer": "size",
+      "public": true,
+      "default": "clamp(15px, 4vw, 17px)",
+      "summary": "原生预设回形针图标尺寸"
+    },
+    {
+      "name": "--dshm-quick-gap",
+      "layer": "size",
+      "public": true,
+      "default": "clamp(6px, 1.6vw, 10px)",
+      "summary": "原生预设附件入口与输入行的间距"
+    },
+    {
+      "name": "--dshm-quick-menu-w",
+      "layer": "size",
+      "public": true,
+      "default": "clamp(132px, 42vw, 168px)",
+      "summary": "原生预设附件浮层宽度"
+    },
+    {
+      "name": "--dshm-native-option-min-height",
+      "layer": "size",
+      "public": true,
+      "default": null,
+      "summary": "原生设置模式选项最小高度（仅覆盖，插件不写默认值）"
+    },
+    {
+      "name": "--dshm-viewport-height",
+      "layer": "rt",
+      "public": false,
+      "default": null,
+      "summary": "布局视口高度，apply 写入 html 内联"
+    },
+    {
+      "name": "--dshm-ime-height",
+      "layer": "rt",
+      "public": false,
+      "default": null,
+      "summary": "键盘高度，apply 写入 html 内联"
+    },
+    {
+      "name": "--dshm-panel-space",
+      "layer": "rt",
+      "public": false,
+      "default": null,
+      "summary": "面板页底部让位高度"
+    },
+    {
+      "name": "--dshm-drawer-x",
+      "layer": "rt",
+      "public": false,
+      "default": null,
+      "summary": "抽屉跟随位移，手势引擎逐帧写入"
+    },
+    {
+      "name": "--dshm-settle-dur",
+      "layer": "rt",
+      "public": false,
+      "default": null,
+      "summary": "抽屉吸附补间时长"
+    },
+    {
+      "name": "--dshm-hero-shift",
+      "layer": "rt",
+      "public": false,
+      "default": null,
+      "summary": "空会话 hero 纵向位移"
+    },
+    {
+      "name": "--dshm-stats-height",
+      "layer": "rt",
+      "public": false,
+      "default": null,
+      "summary": "顶部统计状态带高度"
+    },
+    {
+      "name": "--dshm-stats-top",
+      "layer": "rt",
+      "public": false,
+      "default": null,
+      "summary": "顶部统计状态带纵坐标"
+    },
+    {
+      "name": "--dshm-header-menu-top",
+      "layer": "rt",
+      "public": false,
+      "default": null,
+      "summary": "顶栏菜单纵向锚点"
+    },
+    {
+      "name": "--dshm-header-menu-right",
+      "layer": "rt",
+      "public": false,
+      "default": null,
+      "summary": "顶栏菜单右缘校正量"
+    },
+    {
+      "name": "--dshm-menu-up-bottom",
+      "layer": "rt",
+      "public": false,
+      "default": null,
+      "summary": "向上展开菜单的底部锚点"
+    },
+    {
+      "name": "--dshm-tint",
+      "layer": "rt",
+      "public": false,
+      "default": null,
+      "summary": "加号面板色族前景色"
+    },
+    {
+      "name": "--dshm-tint-soft",
+      "layer": "rt",
+      "public": false,
+      "default": null,
+      "summary": "加号面板色族柔光底色"
+    },
+    {
+      "name": "--dshm-add-rows",
+      "layer": "rt",
+      "public": false,
+      "default": null,
+      "summary": "加号面板当前行数"
+    },
+    {
+      "name": "--dshm-viewtabs-extra",
+      "layer": "rt",
+      "public": false,
+      "default": null,
+      "summary": "会话视图页签行的额外横向余量"
+    }
+  ]
+}

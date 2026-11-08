@@ -1,0 +1,48 @@
+/*
+ * dsh-mobile-layout token 契约（参考 / 回退样式表）
+ *
+ * 用途
+ *   1. 作为「插件注入样式缺席」时的纯 CSS 回退：第三方或静态预览可以先引本文件；
+ *   2. 作为公开契约的可读清单：与 contracts/dshm-tokens.json 逐值一致，
+ *      由 scripts/check-tokens.mjs 校验，避免文档漂移。
+ *
+ * 覆盖方式（第三方插件）
+ *   在**更靠后加载**的样式表里用同名变量覆盖即可；标了 public:true 的 token
+ *   属于稳定契约，私有 token（layer=rt）由插件运行时写入，不要覆盖。
+ *
+ *   html[data-dshm-form="phone"] {
+ *     --dshm-bar-height: 64px;
+ *     --dshm-drawer-width: 320px;
+ *   }
+ *
+ * 注意：本文件只声明尺寸层默认值；颜色一律消费官方 --dsw-* / --dsh-* token，
+ * 插件不自造颜色 token。
+ */
+
+html[data-dshm-form="phone"],
+html[data-dshm-mode="mobile"] {
+  --dshm-header-height: 56px;
+  --dshm-bar-height: 56px;
+  --dshm-drawer-width: min(86vw, 280px);
+  --dshm-safe-top: env(safe-area-inset-top, 0px);
+  --dshm-safe-left: env(safe-area-inset-left, 0px);
+  --dshm-safe-right: env(safe-area-inset-right, 0px);
+  --dshm-safe-bottom: 0px;
+  --dshm-settings-gutter: clamp(12px, 3.4vw, 20px);
+  --dshm-settings-vpad-min: 24px;
+  --dshm-settings-vpad-max: 120px;
+  --dshm-settings-vpad: clamp(var(--dshm-settings-vpad-min, 24px), 10vh, var(--dshm-settings-vpad-max, 120px));
+  --dshm-settings-maxw: 480px;
+  --dshm-settings-safe-x: max(env(safe-area-inset-left, 0px), env(safe-area-inset-right, 0px));
+  --dshm-classic-gutter: clamp(12px, 3.4vw, 20px);
+  --dshm-classic-radius: 16px;
+  --dshm-v2-gutter: 8px;
+  --dshm-v2-nav: 56px;
+  --dshm-v2-radius: 20px;
+  --dshm-v2-shadow-gap: 8px;
+  --dshm-engine-bar: 56px;
+  --dshm-quick-size: clamp(26px, 7vw, 28px);
+  --dshm-quick-icon: clamp(15px, 4vw, 17px);
+  --dshm-quick-gap: clamp(6px, 1.6vw, 10px);
+  --dshm-quick-menu-w: clamp(132px, 42vw, 168px);
+}
