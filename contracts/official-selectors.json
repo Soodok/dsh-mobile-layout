@@ -1,0 +1,132 @@
+{
+  "$comment": "本插件依赖的**官方** DOM 契约登记表。新增任何官方 data-* 依赖都必须先登记（含证据），否则 scripts/check-contracts.mjs 让构建失败。evidence 写清「在哪一版宿主 / 用什么方式核验过」。",
+  "version": 1,
+  "hostVerified": "0.2.2-rc.1",
+  "selectors": [
+    {
+      "name": "data-slot",
+      "usedFor": "AppFrame 三列锚定（sidebar / main / rightbar）",
+      "evidence": "宿主 UI 包源码：data-slot=\"sidebar|main|rightbar\"；AVD 实测 AppFrame 三列均带该属性"
+    },
+    {
+      "name": "data-shortcut-modal",
+      "usedFor": "设置 / 抽屉 / 快捷键弹窗正向分类",
+      "evidence": "宿主 0.2.2-rc.1 三种模态均带该属性，值为 settings / sidebar / shortcut-edit；AVD 实测 settings 弹窗带 data-shortcut-modal=\"settings\""
+    },
+    {
+      "name": "data-sidebar-collapsed",
+      "usedFor": "抽屉开合状态唯一事实来源",
+      "evidence": "宿主 AppFrame 属性；真机与 AVD 实测开合时切换"
+    },
+    {
+      "name": "data-rightbar-fullscreen",
+      "usedFor": "右栏全屏（工作台）形态判定",
+      "evidence": "宿主 AppFrame 属性；AVD 实测进入/退出工作台时切换"
+    },
+    {
+      "name": "data-sidebar-right-panel",
+      "usedFor": "右栏面板节点与横滑退出",
+      "evidence": "宿主右栏包属性；AVD 实测存在"
+    },
+    {
+      "name": "data-sidebar-right-open",
+      "usedFor": "右栏面板展开态",
+      "evidence": "宿主右栏包属性；AVD 实测展开时存在"
+    },
+    {
+      "name": "data-dockkit-strip",
+      "usedFor": "右栏页签条的手势让位",
+      "evidence": "宿主右栏包属性（与 role=tablist 并列兜底）"
+    },
+    {
+      "name": "data-composer-card",
+      "usedFor": "输入卡几何与样式锚点",
+      "evidence": "宿主 conversation 包属性；AVD 实测 v2 输入卡带该属性"
+    },
+    {
+      "name": "data-composer-seat",
+      "usedFor": "输入区容器（固定定位包含块 / 留白）",
+      "evidence": "宿主 conversation 包属性；AVD 实测存在"
+    },
+    {
+      "name": "data-composer-input",
+      "usedFor": "官方输入编辑器（lexical）定位",
+      "evidence": "宿主 conversation 包属性；AVD 实测 role=textbox + data-lexical-editor 同节点"
+    },
+    {
+      "name": "data-composer-dock",
+      "usedFor": "统计胶囊所在 dock（状态带搬移）",
+      "evidence": "宿主 conversation 包属性；运行中与空闲均存在"
+    },
+    {
+      "name": "data-composer-stat",
+      "usedFor": "dock 内统计胶囊存在性判定",
+      "evidence": "宿主 conversation 包属性（activity / usage 两枚）"
+    },
+    {
+      "name": "data-conversation-tabs",
+      "usedFor": "会话视图页签行补横向余量",
+      "evidence": "宿主 conversation 包属性（role=tablist 的父行）"
+    },
+    {
+      "name": "data-window-drag",
+      "usedFor": "标题栏定位（header[data-window-drag]）",
+      "evidence": "宿主布局包属性；AVD 实测存在"
+    },
+    {
+      "name": "data-shell-bottom",
+      "usedFor": "底部槽位锚定",
+      "evidence": "宿主布局包 shell.bottom 槽位节点"
+    },
+    {
+      "name": "data-rightbar-col",
+      "usedFor": "右栏列锚定兜底",
+      "evidence": "宿主布局包属性"
+    },
+    {
+      "name": "data-sidebar-drawer",
+      "usedFor": "官方窄屏抽屉形态（退位判定）",
+      "evidence": "宿主布局包属性，宿主内出现 19 次；本插件当前仅探测未依赖"
+    },
+    {
+      "name": "data-sidebar-mask",
+      "usedFor": "官方抽屉遮罩（退位判定）",
+      "evidence": "宿主布局包属性；本插件当前仅探测未依赖"
+    },
+    {
+      "name": "data-sidebar-opener",
+      "usedFor": "官方抽屉入口（退位判定）",
+      "evidence": "宿主布局包属性；本插件当前仅探测未依赖"
+    },
+    {
+      "name": "data-sidebar-toggle",
+      "usedFor": "官方侧栏开关（退位判定）",
+      "evidence": "宿主 sidebar 包属性；本插件当前仅探测未依赖"
+    },
+    {
+      "name": "data-android-narrow-sidebar-col",
+      "usedFor": "Android 窄屏官方列标记（让位）",
+      "evidence": "宿主布局包窄屏分支属性"
+    },
+    {
+      "name": "data-android-narrow-yield-col",
+      "usedFor": "Android 窄屏官方让位列（让位）",
+      "evidence": "宿主布局包窄屏分支属性"
+    },
+    {
+      "name": "data-command-text",
+      "usedFor": "命令卡片的命令文本节点（换行按钮定位）",
+      "evidence": "宿主 commands 包属性"
+    },
+    {
+      "name": "data-terminal",
+      "usedFor": "终端视图根节点（命令卡片浮层按钮）",
+      "evidence": "宿主 commands / conversation 包属性"
+    },
+    {
+      "name": "data-state",
+      "usedFor": "状态机取值域探针（sending 等阶段）",
+      "evidence": "宿主 conversation 包属性（取值域需按版本复核）"
+    }
+  ]
+}
