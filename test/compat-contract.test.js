@@ -210,7 +210,10 @@ test('源码契约：诊断与兼容性声明齐备', () => {
 
 test('源码契约：default minimal 只读设置弹窗，enhanced/classic/v2 保留设置接管路径', () => {
   assert.match(source, /function shouldManageSettingsPanel\(preset, nativeStyle\)/)
-  assert.match(source, /if \(!shouldManageSettingsPanel\(state\.preset, runtime\.nativeStyle\)\)/)
+  assert.match(source, /if \(!shouldManageSettingsPanel\(state\.preset, runtime\.nativeStyle\) && path === 'legacy'\)/)
+  assert.match(source, /runtime\.compat\.settingsPath = 'legacy-native';/)
+  assert.match(source, /function buildLayoutPicker\(doc, options = \{\}\)/)
+  assert.match(source, /if \(options\.includeNativeStyle\)/)
   assert.match(source, /function findSettingsDialog\(readOnly = false\)/)
   assert.match(source, /const found = findSettingsDialog\(true\);/)
   assert.match(source, /if \(!readOnly\) \{\n\s*pruneSettingsTags\(native\);/)

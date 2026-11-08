@@ -40,6 +40,7 @@ const {
   syncV2PageMarker,
   resolveNativeStyle,
   shouldManageSettingsPanel,
+  legacyNativePickerVisible,
   isPhoneForm,
   effectiveMode,
   navSlots,
@@ -128,6 +129,13 @@ test('default 原生预设 minimal 不接管官方设置，enhanced 与两种移
   assert.equal(shouldManageSettingsPanel('default', 'enhanced'), true)
   assert.equal(shouldManageSettingsPanel('classic', 'minimal'), true)
   assert.equal(shouldManageSettingsPanel('v2', 'minimal'), true)
+})
+
+test('旧引擎 legacy picker 在 default 下保留 native mode 入口', () => {
+  assert.equal(legacyNativePickerVisible('default', 'legacy'), true)
+  assert.equal(legacyNativePickerVisible('classic', 'legacy'), false)
+  assert.equal(legacyNativePickerVisible('v2', 'legacy'), false)
+  assert.equal(legacyNativePickerVisible('default', 'slot'), false)
 })
 
 test('isPhoneForm：桌面端无论尺寸都不是手机形态', () => {
