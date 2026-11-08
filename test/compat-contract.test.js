@@ -50,6 +50,11 @@ const {
   stillMatchesSettings,
   chooseSettingsPath,
   resolveCapabilities,
+  normalizeFeatures,
+  countFeatures,
+  featureMode,
+  collectFeatures,
+  FEATURE_KEYS,
   resolvePreset,
   VERSION,
   PRESET_DEFAULT,
@@ -136,32 +141,90 @@ test('chooseSettingsPath：从未注册 / 脏输入一律 legacy', () => {
 
 // ---- 4. 能力快照归一化 ----
 
-test('resolveCapabilities：0.2.2-rc.1 判为 native，未知版本判为 legacy', () => {
-  const native = resolveCapabilities({ engineVersion: '0.2.2-rc.1', dialogContract: 'attribute', settingsSlotAvailable: true })
+test('特征快照：键集固定、脏值一律视为不可用', () => {
+  const empty = normalizeFeatures(null)
+  for (const key of FEATURE_KEYS) assert.equal(empty[key], false, key)
+  const mixed = normalizeFeatures({ themeOverride: true, commandUi: 'yes', extra: true })
+  assert.equal(mixed.themeOverride, true)
+  assert.equal(mixed.commandUi, false, '非布尔 true 一律不认')
+  assert.equal(Object.prototype.hasOwnProperty.call(mixed, 'extra'), false, '未知键不进入快照')
+  assert.equal(countFeatures(mixed), 1)
+  assert.equal(countFeatures(null), 0)
+})
+
+test('特征聚合：有 dialog/slot 契约才判 native，不再看版本号', () => {
+  assert.equal(featureMode({}), 'legacy')
+  assert.equal(featureMode({ dialogContract: true }), 'native')
+  assert.equal(featureMode({ settingsSlot: true }), 'native')
+  assert.equal(featureMode({ themeOverride: true, commandUi: true }), 'legacy', '单独的服务不足以判 native')
+})
+
+test('resolveCapabilities：版本号只作诊断，特征才是闸门', () => {
+  const native = resolveCapabilities({
+    engineVersion: '0.2.2-rc.1',
+    features: { dialogContract: true, settingsSlot: true },
+  })
   assert.equal(native.engineVersion, '0.2.2-rc.1')
   assert.equal(native.dialogContract, 'attribute')
   assert.equal(native.settingsSlotAvailable, true)
   assert.equal(native.mode, 'native')
 
-  const old = resolveCapabilities({ engineVersion: '0.2.1-rc.5', dialogContract: 'legacy' })
-  assert.equal(old.engineVersion, '0.2.1-rc.5')
+  // 关键行为变更：只报版本号、不报契约时不再判 native（删掉版本正则）
+  assert.equal(resolveCapabilities({ engineVersion: '0.2.2-rc.1' }).mode, 'legacy')
+  assert.equal(resolveCapabilities({ engineVersion: '  0.2.2-rc.1  ' }).mode, 'legacy')
+
+  const old = resolveCapabilities({ engineVersion: '0.2.1-rc.5' })
   assert.equal(old.dialogContract, 'legacy')
   assert.equal(old.settingsSlotAvailable, false)
   assert.equal(old.mode, 'legacy')
 })
 
-test('resolveCapabilities：未知版本 / slot 可用 / 强制 safe 的边界', () => {
+test('resolveCapabilities：强制档与脏输入的边界', () => {
   assert.equal(resolveCapabilities({}).engineVersion, 'unknown')
   assert.equal(resolveCapabilities({}).mode, 'legacy')
-  assert.equal(resolveCapabilities({ engineVersion: '  0.2.2-rc.1  ' }).mode, 'native')
   assert.equal(resolveCapabilities({ settingsSlotAvailable: true }).mode, 'native')
-  assert.equal(resolveCapabilities({ engineVersion: '0.2.2-rc.1', safeMode: true }).mode, 'safe')
+  assert.equal(resolveCapabilities({ dialogContract: 'attribute' }).mode, 'native')
+  assert.equal(resolveCapabilities({ features: { settingsSlot: true }, safeMode: true }).mode, 'safe')
   assert.equal(resolveCapabilities({ forceSafe: true, settingsSlotAvailable: true }).mode, 'safe')
   assert.equal(resolveCapabilities(null).engineVersion, 'unknown')
   assert.equal(resolveCapabilities({ dialogContract: 'nonsense' }).dialogContract, 'legacy')
 })
 
-// ---- 5. 相邻契约：预设仍收口到三个白名单值 ----
+test('collectFeatures：从服务与 DOM 只读探测，缺失一律 false', () => {
+  const ctx = {
+    get(name) {
+      if (name === 'theme') return { overrideTokens() {} }
+      if (name === 'commandUi') return { candidates() {}, dispatch() {} }
+      if (name === 'sidebarRightTabs') return {}
+      return null
+    },
+  }
+  const doc = {
+    querySelector(selector) {
+      return selector === '[data-shortcut-modal]' || selector === '[data-composer-card]' ? {} : null
+    },
+  }
+  const features = collectFeatures(ctx, doc)
+  assert.equal(features.themeOverride, true)
+  assert.equal(features.commandUi, true)
+  assert.equal(features.sidebarRightTabs, false, 'register 缺失即不可用')
+  assert.equal(features.dialogContract, true)
+  assert.equal(features.composerCard, true)
+  assert.equal(features.composerSeat, false)
+  assert.equal(features.settingsSlot, false, 'slot 由注册结果回填，不在启动期猜')
+  assert.equal(countFeatures(features), 4)
+
+  const none = collectFeatures(null, { querySelector() { return null } })
+  assert.equal(countFeatures(none), 0)
+  assert.equal(collectFeatures({ get() { throw new Error('boom') } }, doc).themeOverride, false)
+})
+
+test('源码契约：版本正则已删除，特征探针进入诊断快照', () => {
+  assert.doesNotMatch(source, /\/\^0\\\.2\\\.2\//, '不得再用引擎版本正则当闸门')
+  assert.match(source, /runtime\.compat\.features = collectFeatures\(ctx, doc\);/)
+  assert.match(source, /runtime\.compat\.featureCount = countFeatures\(caps\.features\);/)
+  assert.match(source, /if \(runtime\.compat\.features\) runtime\.compat\.features\.settingsSlot = true;/)
+})
 
 test('预设白名单在适配改动后不变', () => {
   assert.equal(resolvePreset('DEFAULT'), PRESET_DEFAULT)
