@@ -86,6 +86,9 @@ for (const gone of ['dshm-menu-btn', 'dshm-float-menu', 'conversation.header.lea
 }
 check(!/^\s*import\s+/m.test(client), 'bundle 不用 ESM import（走 loader 注入的 require）')
 check(/const\s+react\s*=\s*require\(['"]react['"]\)/.test(client), 'react 经 factory 注入的 require 解析')
+// 插件系统生命周期：动态包 / 新加载器期望 { inject, apply } 对象形态。
+check(/exports\.inject\s*=\s*\[\]/.test(client), 'client half 导出 inject 数组')
+check(/exports\.apply\s*=\s*apply/.test(client), 'client half 导出 apply')
 
 // bundle 里的 VERSION 会出现在 dshm:mode 事件里，必须与包版本一致；
 // 两处靠人肉同步容易漏。
