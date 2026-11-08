@@ -310,3 +310,64 @@
 | 官方 token / 图标名猜错（静默走回退） | 中 | 中 | 先 `findstr` 实测再写；结论记进 `docs/preset2-progress.md` |
 | 对话区改造拖慢长列表滚动 | 中 | 中 | 纯 CSS、不加 observer；滚动目测 + 脚本验证 |
 | 模拟器被其它任务占用 | 高 | 低 | 桌面 device emulation 先过样式；真机项排队 |
+
+---
+
+## 11. 修订 3（2026-11-09）：当前情况与全部待办方案
+
+> 本节是**执行现状**，§1–§10 仍是设计口径。已合入 main 的三个提交：`32563dc`（底栏合并 + 按页换项 + 输入区收纳）、`69d3aa0`（回形针）、`48e9b06`（弹层锚点修复尝试 + 一行输入回滚）。门禁：`npm run check` 299 项 / 291 pass / 0 fail。
+
+### 11.1 已落地并 AVD 实测通过
+
+| 能力 | 证据 | 备注 |
+|---|---|---|
+| 底栏与输入卡合并成一块卡片 | 实拍：圆角卡片从输入行贯通到把手；`[data-composer-card]` 圆角 = `28 28 0 0` | 接缝靠「卡片只留上圆角 + 底栏只留下圆角」，底栏用 `clip-path` 裁掉上沿阴影 |
+| 灰底导航槽 + 单条把手 | `track` 429×64；`grabber` 高 44、单条 40×4 | 与 `.dshm-sheet-grabber` 同语法 |
+| 五项：会话/插件/工作权限/模型/更多 | 官方图标实测存在 | `IconShield / IconSparkle / IconEllipsis` 等 |
+| 按页换项 | 面板块实测 `[sessions, plugins, settings, automation, workbench]` | 权限/模型只在会话页；其他页由「更多」项补位，恒五格 |
+| 危险权限标红 | 实拍「工作权限」整项红色 | 根属性 `data-dshm-perm-alert`，切形态自动摘 |
+| 回形针 + 两项小菜单 | 实拍：`⊕ 回形针 发送`；菜单 `["图片","文件"]` | 注入式按钮（幂等重挂）+ 自建 `input[type=file]` → `injectOfficialFiles` |
+| 圆角分档 / 无新增 `!important` | `dock-radius 28` / `track-radius 22` / 输入卡 20 不动；`!important` 594 → 594 | 卡片上下圆角改成变量 `--dshm-v2-card-radius*` |
+
+### 11.2 待修（按优先级）
+
+**A. 权限/模型弹层跑到屏幕顶部（task-9）**
+
+- 根因：胶囊态把两枚 chip `display:none`，官方弹层锚在 0×0 的锚点上 → 出现位置在状态栏下方；改内层 `listbox` 的 `bottom` 无效（它是 `static`），真正的定位层在祖先链上。
+- 方案 A1（推荐，改动最小）：**不再隐藏 chip**，改成 `opacity: 0; pointer-events: none;`（保留原位置与尺寸）→ 官方弹层天然锚在输入行上方；再用一次 JS 微调把 `bottom` 抬到 `nav-total + 8px`、`left` 对齐到所点底栏项。
+- 方案 A2：保留 `display:none`，点击后沿祖先链找 `position≠static` 的层，直接改 `bottom`/`left`（本轮已写，未复验）。
+- 验收：点两项，弹层紧贴底栏上方 8px、左右对齐所点项；点空白可关；断言「弹层底边 ≤ 底栏上沿 − 4px」。
+
+**B. 输入行合成一行（task-8）：`[(输入) ⊕ 回形针 发送]`**
+
+- 已踩坑：`flex-direction: row` 会让官方 `overlayAnchor`（441px 宽、0 高）吃掉整行，把工具行挤出卡片（实拍），已回滚。
+- 方案 B1（推荐，纯视觉）：保持卡片纵向 flex，用 `margin-top: calc(-1 * var(--dshm-input-row-h))` + `align-self: flex-end` 把工具行上提到输入行同一基线，输入行加 `padding-right` 让位。
+- 方案 B2：只让 `[data-dshm-input-row]` 与 `[data-dshm-tools-row]` 参与横排，overlayAnchor 等 0 高兄弟节点改 `position:absolute; width:0`（须验证弹层锚点不受影响——与 A 是同一个坑）。
+- 验收：四个元素同一行垂直居中；多行输入时自动长高、按钮贴底；键盘态不跳位。
+
+**C. 顶部卡片头 + 居中分段控件（task-4）**
+
+- 已查清阻塞：官方 `[data-dshm-viewtabs-row]` 实测 **769px 宽**（视口 457），在横向可滚容器里 → 纯 CSS 居中会把内容推出屏外。
+- 方案 C1（已获授权，推荐）：直接干预 —— 给 ViewTabs 的外层容器打锚点并 `width: 100%; overflow: hidden`，把 row 的 `flex` 约束回 100%，再套「灰轨道 + 白胶囊」；header 本体打 `data-dshm-header-card` 做卡片化。
+- 方案 C2：在 header 内重注入一个自绘容器承载 tab 列表（更大改动，需把点击转发回官方 tab；不推荐）。
+- 必须同步复核：`--dshm-header-menu-top/right`（JS 量取）、`--dshm-stats-top`（按 header.bottom 量取，会自动跟随）、底部表 `max-height`。
+- 验收：分段控件真正居中不溢出、切页签选中跟随、标题省略、菜单锚点正确、统计带不压卡片。
+
+**D. 弹层让位回归（task-7）**：会话表 `inset/bottom`、表遮罩、加号面板底边仍按 `--dshm-bar-height`（56px）算；胶囊态底栏 122px → 需要改成 `--dshm-v2-nav-total` 并逐层截图。
+
+**E. 对话区重排（task-5，最后做）**：用户气泡规格、工具调用 chip、代码块卡片、操作行图标（`IconCopy/IconRefresh/IconBranch`）、居中日期分隔、深色字号 +1。
+
+### 11.3 验证口径（本轮已建立，后续沿用）
+
+1. 部署：`.tmp-shot/deploy.ps1`（npm pack → push → `run-as` 解包 → 强停重开 → 等 `data-dshm-preset` 出现）。
+2. 断言：`.tmp-shot/cdp.mjs @表达式文件`（`adb forward tcp:9222 localabstract:webview_devtools_remote_<pid>`）；表达式写文件避免 PowerShell 引号踩坑。
+3. 截图：`screencap` → `.tmp-shot/avd/`；矩阵 = 浅/深 × 会话/面板/设置 × 展开/收起/键盘。
+4. 平板：`Pixel_Tablet_API_35` 跑同一脚本，与改动前逐像素 diff，必须完全一致。
+5. 门禁：每个可交付点跑 `npm run check`；新增选择器必须带 `html[data-dshm-mode="mobile"]`；新增 `--dshm-*` 走三方同步。
+
+### 11.4 需要确认
+
+1. **A 方案**用「chip 保留原位但透明」（A1）是否可接受？它会牺牲「chips 视觉上收进底栏」这一点（chip 仍占据布局位置，只是看不见）——但弹层锚点最稳。
+2. **B 方案**用「负 margin 视觉上提」（B1）是否可接受？它不改 flex 方向，风险最小，但多行输入时工具行会跟着走。
+3. **C 方案**允许我改官方 header 内部容器的宽度（C1）吗？这是本轮唯一「直接干预原生布局」的地方。
+4. 平板 `Pixel_Tablet_API_35` 这轮是否也要跑一遍像素 diff（需要额外一轮部署 + 截图）？
