@@ -424,3 +424,13 @@
 | 深色实拍 | `mx-13-dark-settings.png`、`mx-14-dark-conv.png`：`color-scheme=dark`、bg `rgb(21,21,23)` | 卡片头/代码块/输入卡/底栏/分段控件全部跟随深色；深色下正文 +1px 生效 |
 
 另：App 外观入口在 **设置 → 通用设置 → 外观（浅色/深色/跟随系统）**，系统夜间模式不影响该壳。
+
+### 11.7 平板不变性（真实 AVD，2026-11-09）
+
+启动 `Pixel_Tablet_API_35`（先 `wm size reset` 去掉遗留的手机尺寸覆盖，恢复 2560×1600 平板尺寸）后实测：
+
+- 界面是**官方原生双栏**（左侧栏 + 会话区 + 原生输入条），没有胶囊底栏、没有分段控件、没有自绘动作行；
+- CDP 读取根属性：`data-dshm-mode = null`、`data-dshm-preset = classic`、`data-dshm-dock = null`，`.dshm-v2-nav` / `[data-dshm-actions]` 均不存在；
+- 视口 1280×744（短边 > 600，判定为非手机）。
+
+结论：平板走原生布局，插件不激活、不注入节点、样式不命中 —— 与改造前一致。截图 `mx-16-tablet.png`。
