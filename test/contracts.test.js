@@ -66,3 +66,20 @@ test('契约基线：与检测脚本结构一致', () => {
   const methods = Object.values(baseline.services).reduce((sum, list) => sum + list.length, 0)
   assert.ok(methods > 0, 'baseline 应记录到服务方法')
 })
+
+test('官方契约登记表：ARIA role 依赖同样必须登记', () => {
+  const roles = registry.roles || []
+  assert.ok(roles.length > 0, 'roles 不应为空')
+  const seen = new Set()
+  for (const entry of roles) {
+    assert.match(entry.role, /^[a-z]+$/, entry.role)
+    assert.equal(seen.has(entry.role), false, `重复登记：${entry.role}`)
+    seen.add(entry.role)
+    assert.ok(entry.usedFor && entry.usedFor.trim(), `role=${entry.role} 缺 usedFor`)
+    assert.ok(entry.evidence && entry.evidence.trim(), `role=${entry.role} 缺 evidence`)
+  }
+  const used = new Set()
+  for (const match of bare.matchAll(/\[role="([a-z]+)"\]/g)) used.add(match[1])
+  const missing = [...used].filter((role) => !seen.has(role)).sort()
+  assert.deepEqual(missing, [], `未登记的 role：${missing.join(', ')}`)
+})

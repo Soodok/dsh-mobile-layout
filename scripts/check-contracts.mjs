@@ -40,12 +40,33 @@ for (const entry of entries) {
   registered.set(entry.name, entry)
 }
 
+// 收集 client.js 里实际用到的官方 ARIA role
+const usedRoles = new Set()
+for (const match of bare.matchAll(/\[role="([a-z]+)"\]/g)) usedRoles.add(match[1])
+
+const roleEntries = Array.isArray(registry.roles) ? registry.roles : []
+const registeredRoles = new Map()
+for (const entry of roleEntries) {
+  if (!/^[a-z]+$/.test(entry.role || '')) {
+    fail(`role 登记项名字不合法：${entry.role}`)
+    continue
+  }
+  if (registeredRoles.has(entry.role)) fail(`重复登记的 role：${entry.role}`)
+  if (typeof entry.usedFor !== 'string' || !entry.usedFor.trim()) fail(`role=${entry.role} 缺少 usedFor`)
+  if (typeof entry.evidence !== 'string' || !entry.evidence.trim()) fail(`role=${entry.role} 缺少 evidence`)
+  registeredRoles.set(entry.role, entry)
+}
+
+for (const role of usedRoles) {
+  if (!registeredRoles.has(role)) fail(`源码使用了未登记的官方 role：${role}（请补进 contracts/official-selectors.json 的 roles）`)
+}
+
 // 收集 client.js 里实际用到的官方属性
 const used = new Set()
 for (const match of bare.matchAll(/\[(data-(?!dshm-)[a-z0-9-]+)/g)) used.add(match[1])
 for (const match of bare.matchAll(/querySelector(?:All)?\(\s*'\[(data-(?!dshm-)[a-z0-9-]+)/g)) used.add(match[1])
 
-console.log(`check-contracts: 登记 ${registered.size} 项，源码使用 ${used.size} 项`)
+console.log(`check-contracts: 属性登记 ${registered.size} 项 / 使用 ${used.size} 项；role 登记 ${registeredRoles.size} 项 / 使用 ${usedRoles.size} 项`)
 
 for (const name of used) {
   if (!registered.has(name)) fail(`源码使用了未登记的官方属性：${name}（请补进 contracts/official-selectors.json）`)
@@ -60,4 +81,5 @@ if (failures > 0) {
   process.exit(1)
 }
 if (used.size > 0) ok('全部官方属性依赖均已登记')
+if (usedRoles.size > 0) ok('全部官方 ARIA role 依赖均已登记')
 console.log('check-contracts: ALL PASS')

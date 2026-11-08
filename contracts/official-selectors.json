@@ -1,5 +1,5 @@
 {
-  "$comment": "本插件依赖的**官方** DOM 契约登记表。新增任何官方 data-* 依赖都必须先登记（含证据），否则 scripts/check-contracts.mjs 让构建失败。evidence 写清「在哪一版宿主 / 用什么方式核验过」。",
+  "$comment": "本插件依赖的**官方** DOM 契约登记表：data-* 属性与 ARIA role 两节。新增任何官方依赖都必须先登记（含证据），否则 scripts/check-contracts.mjs 让构建失败。evidence 写清「在哪一版宿主 / 用什么方式核验过」。",
   "version": 1,
   "hostVerified": "0.2.2-rc.1",
   "selectors": [
@@ -127,6 +127,108 @@
       "name": "data-state",
       "usedFor": "状态机取值域探针（sending 等阶段）",
       "evidence": "宿主 conversation 包属性（取值域需按版本复核）"
+    }
+  ],
+  "roles": [
+    {
+      "role": "listbox",
+      "usedFor": "加号面板 / 选择器的官方浮层容器",
+      "evidence": "AVD 实测 ⊕ 菜单为 [role=listbox]，子项为 [role=option]"
+    },
+    {
+      "role": "option",
+      "usedFor": "加号面板与选择器的可选项",
+      "evidence": "AVD 实测；分页与分组都建立在 option 顺序上"
+    },
+    {
+      "role": "presentation",
+      "usedFor": "加号面板的组标题节点",
+      "evidence": "AVD 实测组标题为 [role=presentation]，官方默认 display:none"
+    },
+    {
+      "role": "dialog",
+      "usedFor": "设置 / 抽屉 / 抽屉详情弹层的正向识别",
+      "evidence": "宿主 0.2.2-rc.1；配合 aria-modal 与 nav 数判定"
+    },
+    {
+      "role": "alertdialog",
+      "usedFor": "强制确认类弹层（不接管）",
+      "evidence": "宿主确认对话框；用于排除接管"
+    },
+    {
+      "role": "tablist",
+      "usedFor": "会话视图页签行与右栏页签条（手势让位）",
+      "evidence": "AVD 实测右栏页签条带 role=tablist"
+    },
+    {
+      "role": "tab",
+      "usedFor": "页签项",
+      "evidence": "宿主右栏 / 视图页签"
+    },
+    {
+      "role": "menu",
+      "usedFor": "顶栏与账号菜单",
+      "evidence": "AVD 实测菜单为 [role=menu] + [role=menuitem]"
+    },
+    {
+      "role": "menuitem",
+      "usedFor": "菜单项匹配",
+      "evidence": "AVD 实测"
+    },
+    {
+      "role": "menuitemradio",
+      "usedFor": "单选菜单项（模型 / 模式选择）",
+      "evidence": "宿主菜单变体"
+    },
+    {
+      "role": "radio",
+      "usedFor": "单选项（权限模式等）",
+      "evidence": "宿主设置与浮层"
+    },
+    {
+      "role": "radiogroup",
+      "usedFor": "单选组容器",
+      "evidence": "宿主设置与浮层"
+    },
+    {
+      "role": "group",
+      "usedFor": "分组容器（选择器组标题）",
+      "evidence": "宿主选择器"
+    },
+    {
+      "role": "combobox",
+      "usedFor": "选择器触发按钮",
+      "evidence": "宿主 composer 选择器"
+    },
+    {
+      "role": "textbox",
+      "usedFor": "输入编辑器",
+      "evidence": "AVD 实测与 data-composer-input 同节点"
+    },
+    {
+      "role": "searchbox",
+      "usedFor": "搜索输入",
+      "evidence": "宿主侧栏搜索"
+    },
+    {
+      "role": "button",
+      "usedFor": "官方按钮匹配（索引兜底弃用后仅作语义判断）",
+      "evidence": "宿主通用"
+    },
+    {
+      "role": "switch",
+      "usedFor": "开关项",
+      "evidence": "宿主设置页"
+    },
+    {
+      "role": "slider",
+      "usedFor": "滑块项（字号等）",
+      "evidence": "宿主设置页"
+    },
+    {
+      "role": "treeitem",
+      "usedFor": "文件树项",
+      "evidence": "宿主工作区文件树"
     }
   ]
 }
