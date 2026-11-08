@@ -52,6 +52,7 @@ const {
   syncDockMarker,
   readDockPrefs,
   writeDockPrefs,
+  dockPages,
   DOCK_STYLE_PLAIN,
   DOCK_STYLE_CAPSULE,
   DOCK_STYLE_KEY,
@@ -299,6 +300,102 @@ test('CSS 契约：胶囊态收掉阴影净空，收起态让位量跟着缩', (
     source.includes("'  --dshm-v2-nav-total: calc(var(--dshm-v2-dock-handle) + var(--dshm-v2-gutter));'"),
     '收起态必须把 --dshm-v2-nav-total 缩到只剩把手行',
   )
+})
+
+/**
+ * 两页导航的取舍规则（设计稿：第一页「目的地 + 能力」，第二页放下沉的目的地）。
+ *
+ * 产品结论：工作权限 / 模型 只在**会话页**出现（它们是输入行两枚 chip 的弹层），
+ * 换页后这两格由「更多」里的目的地补位，底栏恒为五格、不跳宽。
+ */
+test('dockPages：会话页五项、第二页四项（返回在最后）', () => {
+  const pages = dockPages(['sessions', 'automation', 'plugins', 'workbench', 'settings'], {
+    conversation: true,
+    permission: true,
+    model: true,
+  })
+  assert.deepEqual(plain(pages.page1), ['sessions', 'plugins', 'permission', 'model', 'more'])
+  assert.deepEqual(plain(pages.page2), ['settings', 'automation', 'workbench', 'back'])
+})
+
+test('dockPages：非会话页不出现工作权限 / 模型，改由更多里的目的地补位', () => {
+  const pages = dockPages(['sessions', 'automation', 'plugins', 'workbench', 'settings'], {
+    conversation: false,
+    permission: true,
+    model: true,
+  })
+  assert.deepEqual(plain(pages.page1), ['sessions', 'plugins', 'settings', 'automation', 'workbench'])
+  assert.deepEqual(plain(pages.page2), [])
+})
+
+test('dockPages：非会话页补位不足三格时按可达情况少一格，不留死键', () => {
+  const pages = plain(dockPages(['sessions', 'plugins'], { conversation: false, permission: true, model: true }))
+  assert.deepEqual(pages.page1, ['sessions', 'plugins'])
+  assert.deepEqual(pages.page2, [])
+})
+
+test('dockPages：官方 chip 缺席时会话页不渲染对应项', () => {
+  const pages = plain(dockPages(['sessions', 'plugins', 'settings'], { conversation: true, permission: false, model: false }))
+  assert.deepEqual(pages.page1, ['sessions', 'plugins', 'more'])
+  assert.deepEqual(pages.page2, ['settings', 'back'])
+})
+
+test('dockPages：退化输入不抛，且两页不重复', () => {
+  assert.doesNotThrow(() => dockPages(null, null))
+  assert.doesNotThrow(() => dockPages(undefined, undefined))
+  const pages = plain(dockPages(undefined, { conversation: true }))
+  assert.deepEqual(pages.page1, ['sessions', 'plugins'])
+  const all = [...pages.page1, ...pages.page2]
+  assert.equal(new Set(all).size, all.length)
+})
+
+test('CSS 契约：把手是**一条**横杠（设计稿），且与 bus 表同语法', () => {
+  const grabberAt = source.indexOf("className: 'dshm-dock-grabber',")
+  assert.ok(grabberAt > 0, '找不到把手节点')
+  const block = source.slice(grabberAt, grabberAt + 500)
+  const spans = block.match(/h\('span', \{ 'aria-hidden': 'true' \}\)/g) || []
+  assert.equal(spans.length, 1, '设计稿是单条横杠：多画一条就与底部表的把手不是同一语法了')
+})
+
+test('CSS 契约：胶囊是合并形态——卡片下侧压平、底栏只留下圆角', () => {
+  assert.ok(
+    source.includes("'  --dshm-v2-card-radius-bottom: 0px;'"),
+    '胶囊态必须把输入卡下侧圆角压成 0，否则接缝处是两个圆角对不上',
+  )
+  assert.ok(
+    source.includes("'  --dshm-v2-card-radius-bottom: var(--dshm-v2-dock-radius);'"),
+    '键盘态（底栏收掉）要把下侧圆角圆回来，否则卡片贴着键盘是直角',
+  )
+  assert.ok(
+    source.includes("'  border-radius: 0 0 var(--dshm-v2-dock-radius) var(--dshm-v2-dock-radius);'"),
+    '底栏只留下圆角，上沿要与卡片接平',
+  )
+  assert.ok(
+    source.includes("'  --dshm-v2-dock-radius: 28px;'") && source.includes("'  --dshm-v2-dock-track-radius: 22px;'"),
+    '圆角单独一档：胶囊 28 / 导航槽 22，不借用输入卡的 20',
+  )
+  assert.ok(
+    source.includes("'  background: var(--dsw-alias-bg-secondary, rgba(127, 127, 127, 0.09));'"),
+    '导航槽要铺官方灰底（设计稿的灰胶囊）',
+  )
+})
+
+test('CSS 契约：合并形态不靠新增 !important 压圆角', () => {
+  const cardRule = source.indexOf("'  border-radius: var(--dshm-v2-card-radius) var(--dshm-v2-card-radius) var(--dshm-v2-card-radius-bottom) var(--dshm-v2-card-radius-bottom) !important;'")
+  assert.ok(cardRule > 0, '卡片圆角应消费上/下两组变量')
+  assert.equal(
+    source.includes('[data-dshm-dock="capsule"] [data-composer-card] {'),
+    false,
+    '胶囊态不应再写一条带 !important 的卡片圆角覆盖——变量已经够用',
+  )
+})
+
+test('CSS 契约：胶囊态底栏宽度改回 auto（100% + 左右 margin 会溢出屏外）', () => {
+  const navAt = source.indexOf("'html[data-dshm-mode=\"mobile\"][data-dshm-preset=\"v2\"][data-dshm-dock=\"capsule\"] .dshm-v2-nav {',")
+  assert.ok(navAt > 0, '找不到胶囊底栏规则')
+  const block = source.slice(navAt, navAt + 700)
+  assert.ok(block.includes("'  width: calc(100% - 2 * var(--dshm-v2-gutter));'"), '底栏要显式扣掉两侧留白，否则 margin 会把胶囊顶出屏幕；也不能用 auto（设置页是 flex 容器，会缩成内容宽）')
+  assert.ok(block.includes("'  box-sizing: border-box;'"), '盒模型要显式 border-box，min-height 才与 token 相加一致')
 })
 
 test('i18n：底栏样式与把手的文案中英成对', () => {

@@ -136,6 +136,48 @@
       "summary": "胶囊底栏把手行的高度，同时是把手的触控区下限（内部几何，不承诺第三方可用）"
     },
     {
+      "name": "--dshm-v2-dock-radius",
+      "layer": "size",
+      "public": true,
+      "default": "28px",
+      "summary": "胶囊底栏（输入区与底栏合并）的卡片圆角；单独一档，不影响输入卡 --dshm-v2-radius"
+    },
+    {
+      "name": "--dshm-v2-card-radius",
+      "layer": "size",
+      "public": false,
+      "default": "var(--dshm-v2-radius)",
+      "summary": "输入卡上侧圆角；胶囊合并形态改用 28px 档（内部几何，改值即可，无需 !important）"
+    },
+    {
+      "name": "--dshm-v2-card-radius-bottom",
+      "layer": "size",
+      "public": false,
+      "default": "var(--dshm-v2-radius)",
+      "summary": "输入卡下侧圆角；胶囊合并形态压成 0 与底栏接成一块，键盘态圆回来（内部几何）"
+    },
+    {
+      "name": "--dshm-v2-dock-track-radius",
+      "layer": "size",
+      "public": true,
+      "default": "22px",
+      "summary": "胶囊底栏内导航槽（灰底胶囊）的圆角"
+    },
+    {
+      "name": "--dshm-v2-dock-pad",
+      "layer": "size",
+      "public": false,
+      "default": "6px",
+      "summary": "胶囊底栏卡片的左右/上侧内边距（内部几何）"
+    },
+    {
+      "name": "--dshm-v2-dock-track-pad",
+      "layer": "size",
+      "public": false,
+      "default": "4px",
+      "summary": "导航槽的内边距，与槽高一起决定五项是否等分（内部几何）"
+    },
+    {
       "name": "--dshm-v2-radius",
       "layer": "size",
       "public": true,

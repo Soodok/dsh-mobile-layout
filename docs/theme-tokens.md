@@ -35,6 +35,8 @@
 | `--dshm-v2-gutter` | `8px` | 悬浮预设输入卡四周留白 |
 | `--dshm-v2-nav` | `56px` | 悬浮预设五项导航高度 |
 | `--dshm-v2-nav-total` | `var(--dshm-v2-nav)` | 底栏行总高（含把手行）；默认等于导航高度，胶囊底栏样式下多出把手行 |
+| `--dshm-v2-dock-radius` | `28px` | 胶囊底栏（输入区与底栏合并）的卡片圆角，单独一档 |
+| `--dshm-v2-dock-track-radius` | `22px` | 胶囊底栏内导航槽的圆角 |
 | `--dshm-v2-radius` | `20px` | 悬浮预设输入卡圆角 |
 | `--dshm-v2-shadow-gap` | `8px` | 悬浮预设阴影净空 |
 | `--dshm-engine-bar` | `56px` | 宿主引擎悬浮条占位高度 |

@@ -39,6 +39,8 @@ html[data-dshm-mode="mobile"] {
   --dshm-v2-gutter: 8px;
   --dshm-v2-nav: 56px;
   --dshm-v2-nav-total: var(--dshm-v2-nav);
+  --dshm-v2-dock-radius: 28px;
+  --dshm-v2-dock-track-radius: 22px;
   --dshm-v2-radius: 20px;
   --dshm-v2-shadow-gap: 8px;
   --dshm-engine-bar: 56px;
