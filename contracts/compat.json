@@ -1,0 +1,90 @@
+{
+  "$comment": "特征级兼容清单（E5 四档）。每个特征回答：在已核验宿主上是什么档位、缺席时降级成什么、证据强度如何。scripts/check-compat.mjs 校验它覆盖 lib/client.js 的全部 FEATURE_KEYS。",
+  "version": 1,
+  "hostVerified": "0.2.2-rc.1",
+  "statusLegend": {
+    "native": "官方契约在场，走原生通道",
+    "legacy": "契约缺席，走既有 DOM / 启发式兜底",
+    "degraded": "部分可用，按需降级",
+    "unknown": "未核验，运行时探针决定"
+  },
+  "features": [
+    {
+      "key": "themeOverride",
+      "status": "native",
+      "verifiedValue": "ctx.theme.overrideTokens/2 在场（AVD 实测 13 个方法）",
+      "whenMissing": "仅诊断记录；自有 token 始终走 CSS 契约，功能不受影响",
+      "evidence": "A（真机 serviceShapes 快照）"
+    },
+    {
+      "key": "settingsSlot",
+      "status": "native",
+      "verifiedValue": "settings.general.item 注册成功且挂载后 mounts≥1",
+      "whenMissing": "退 legacy DOM 注入；default 预设额外提供 native 档开关，避免锁死",
+      "evidence": "A（AVD 实测 settingsPath=slot/legacy 两条路径）"
+    },
+    {
+      "key": "dialogContract",
+      "status": "native",
+      "verifiedValue": "data-shortcut-modal=\"settings\" 在场",
+      "whenMissing": "退 role/aria-modal/nav≥3 启发式分类",
+      "evidence": "A（AVD 实测设置弹窗属性）"
+    },
+    {
+      "key": "commandUi",
+      "status": "native",
+      "verifiedValue": "ctx.commandUi 21 个方法，含 candidates/2、dispatch/1",
+      "whenMissing": "加号面板保持现有 DOM 接管链（已实测可用）",
+      "evidence": "A（serviceShapes 快照）；迁移到服务调用仍需候选对象形状验证"
+    },
+    {
+      "key": "sidebarRightTabs",
+      "status": "native",
+      "verifiedValue": "register/1、entries/0 在场",
+      "whenMissing": "手势让位退 role=tablist + data-dockkit-strip",
+      "evidence": "A（serviceShapes 快照）"
+    },
+    {
+      "key": "composerCard",
+      "status": "native",
+      "verifiedValue": "输入卡带 data-composer-card",
+      "whenMissing": "移动输入区几何规则整体不生效，交还官方布局",
+      "evidence": "A（AVD DOM）"
+    },
+    {
+      "key": "composerSeat",
+      "status": "native",
+      "verifiedValue": "输入区容器带 data-composer-seat",
+      "whenMissing": "will-change 修正与留白规则不生效（视觉退化，不报错）",
+      "evidence": "A（AVD DOM）"
+    },
+    {
+      "key": "composerInputAttr",
+      "status": "native",
+      "verifiedValue": "编辑器节点带 data-composer-input + data-lexical-editor",
+      "whenMissing": "回退 textarea / contenteditable 选择器",
+      "evidence": "A（AVD DOM）"
+    },
+    {
+      "key": "sidebarDrawerAttr",
+      "status": "native",
+      "verifiedValue": "官方窄屏抽屉属性存在（本插件仅探测，未依赖）",
+      "whenMissing": "不影响本插件（自有抽屉由布局服务驱动）",
+      "evidence": "A（AVD DOM）"
+    },
+    {
+      "key": "sidebarMaskAttr",
+      "status": "native",
+      "verifiedValue": "官方抽屉遮罩属性存在（仅探测）",
+      "whenMissing": "不影响本插件",
+      "evidence": "A（AVD DOM）"
+    },
+    {
+      "key": "sidebarOpenerAttr",
+      "status": "native",
+      "verifiedValue": "data-sidebar-toggle / data-sidebar-opener（仅探测）",
+      "whenMissing": "不影响本插件",
+      "evidence": "A（AVD DOM）"
+    }
+  ]
+}
