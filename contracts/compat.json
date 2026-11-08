@@ -87,5 +87,14 @@
       "whenMissing": "不影响本插件",
       "evidence": "A（AVD DOM）"
     }
+  ],
+  "observations": [
+    {
+      "key": "classicTriggerCard",
+      "finding": "data-composer-card 的 cardWorkspaceTrigger 变体只在特定时机出现（启动/工作区落地页），会话恢复后即被普通卡片替换；AVD 上既观察到 0 命中，也观察到短暂命中的两种状态",
+      "impact": "融合预设的虚线卡样式依赖这个瞬时变体，可能在「闪现后消失」与「持续生效」之间摇摆",
+      "action": "规则保留并改用自有锚点 data-dshm-card-trigger；新增 __dshmCompat.triggerCardSeen 粘性诊断，宿主行为变化时可立刻发现（本次正是它纠正了“从未命中”的错误结论）",
+      "verifiedAt": "2026-11-08 AVD Medium_Phone_API_35，classic 预设，重启与新建会话两种路径"
+    }
   ]
 }

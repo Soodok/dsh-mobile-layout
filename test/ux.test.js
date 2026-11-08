@@ -596,12 +596,13 @@ test('classic 空态虚线卡：滚动容器铺满 + 虚线卡左右对称留白
   assert.ok(source.includes("'  scrollbar-gutter: auto !important;'"), '应取消滚动条沟槽占位')
   assert.ok(source.includes("'  width: 100% !important;'") && source.includes("'  margin-right: 0 !important;',"), '滚动容器应钉满宽度并清右外边距')
   // 空态虚线卡左右留白：左右 margin 表达式逐字符相同（对称契约）
-  const cardSel = '[data-composer-card][class*="cardWorkspaceTrigger"]'
+  // 哈希类名已收敛为自有锚点（见 hasClassSuffix），CSS 不再依赖 [class*=]。
+  const cardSel = '[data-dshm-card-trigger]'
   const mlIdx = source.indexOf("'  margin-left: var(--dshm-classic-gutter, 12px) !important;',")
   const mrIdx = source.indexOf("'  margin-right: var(--dshm-classic-gutter, 12px) !important;',")
   assert.ok(mlIdx > 0 && mrIdx > mlIdx, '虚线卡应有对称的左右 margin 规则（且 margin-left 在前）')
   assert.ok(source.includes("'  width: calc(100% - 2 * var(--dshm-classic-gutter, 12px)) !important;',"), '宽度应为满宽减两倍 gutter')
-  assert.ok(source.includes(`'html[data-dshm-mode="mobile"][data-dshm-preset="classic"] ${cardSel}::after {'`) || source.includes(cardSel + '::after'), '虚线伪元素应有独立规则')
+  assert.ok(source.includes(cardSel + '::after'), '虚线伪元素应有独立规则')
   assert.ok(source.includes("'  border-radius: inherit !important;',"), '伪元素圆角应继承卡片圆角')
   // gutter 变量多机型自适应（clamp 带兜底 12px）
   assert.ok(source.includes("'  --dshm-classic-gutter: clamp(12px, 3.4vw, 20px);',"), 'gutter 应随屏宽 clamp 自适应')
@@ -662,4 +663,12 @@ test('原生设置悬浮窗：纵向留白按 10vh 比例并双向钳制（源�
   assert.ok(source.includes("'  --dshm-settings-vpad-max: 120px;',"), '应有大视口封顶变量')
   // metrics 函数继续引用 vpad 变量（不把数值写进 JS）
   assert.ok(source.includes("const vpad = 'var(--dshm-settings-vpad, 24px)';"), 'settingsFrameMetrics 应引用 vpad 变量')
+})
+
+test('源码契约：不依赖官方构建哈希类名（CSS 无 [class*=]）', () => {
+  const css = fs.readFileSync(path.join(__dirname, '..', 'lib', 'client.js'), 'utf8')
+  const bare = css.replace(/\/\*[\s\S]*?\*\//g, '')
+  assert.equal(/\[class\s*\*=/.test(bare), false, '应通过自行锚点（data-dshm-*）替代哈希类名选择器')
+  // 且哈希后缀匹配只有一个落点
+  assert.ok(bare.includes('function hasClassSuffix'), '哈希后缀匹配应收敛在 hasClassSuffix')
 })

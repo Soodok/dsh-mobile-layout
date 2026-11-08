@@ -18,7 +18,10 @@ const here = dirname(fileURLToPath(import.meta.url));
 const sourcePath = join(here, '..', 'lib', 'client.js');
 const source = readFileSync(sourcePath, 'utf8');
 
+// 注释里会写 `[class*=]` 举例，指标要的是「真正的选择器」，先剥块注释。
+const sourceBare = source.replace(/\/\*[\s\S]*?\*\//g, '');
 const count = (pattern) => (source.match(pattern) || []).length;
+const countBare = (pattern) => (sourceBare.match(pattern) || []).length;
 const unique = (pattern) => new Set(source.match(pattern) || []).size;
 const line = (name, value, scope) => console.log(`${name}: ${value} [${scope}]`);
 
@@ -37,7 +40,7 @@ line('color literals (controlled)', colors.controlled, 'fallback values inside v
 line('color literals (exempt)', colors.exempt.length, 'explicit TOKEN-OK exemptions (palette, debug, token definitions)');
 line('color literals (raw)', colors.raw.length, 'uncontrolled literals; must stay 0');
 line('!important', count(/!important\b/g), 'source occurrences, including CSS strings');
-line('[class*=]', count(/\[class\s*\*=/g), 'attribute-substring selector occurrences');
+line('[class*=]', countBare(/\[class\s*\*=/g), 'attribute-substring selector occurrences (comments excluded)');
 line('Chinese aria exact selectors', count(/aria-label\s*=\s*["'][^"']*[\u3400-\u9fff][^"']*["']/g), 'literal aria-label selectors containing CJK text');
 line('DOM insertion calls', count(/\.(?:appendChild|insertBefore|insertAdjacent(?:Element|HTML)|replaceWith)\s*\(/g), 'static calls to browser DOM insertion APIs; targets are not resolved');
 line('unique data-dshm anchors', unique(/data-dshm-[a-z0-9-]+/g), 'unique self-owned data-dshm-* attribute names');
