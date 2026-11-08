@@ -34,6 +34,7 @@
 | `--dshm-classic-radius` | `16px` | 融合预设空态虚线卡圆角 |
 | `--dshm-v2-gutter` | `8px` | 悬浮预设输入卡四周留白 |
 | `--dshm-v2-nav` | `56px` | 悬浮预设五项导航高度 |
+| `--dshm-v2-nav-total` | `var(--dshm-v2-nav)` | 底栏行总高（含把手行）；默认等于导航高度，胶囊底栏样式下多出把手行 |
 | `--dshm-v2-radius` | `20px` | 悬浮预设输入卡圆角 |
 | `--dshm-v2-shadow-gap` | `8px` | 悬浮预设阴影净空 |
 | `--dshm-engine-bar` | `56px` | 宿主引擎悬浮条占位高度 |
@@ -42,6 +43,10 @@
 | `--dshm-quick-gap` | `clamp(6px, 1.6vw, 10px)` | 原生预设附件入口与输入行的间距 |
 | `--dshm-quick-menu-w` | `clamp(132px, 42vw, 168px)` | 原生预设附件浮层宽度 |
 | `--dshm-native-option-min-height` | （仅覆盖） | 原生设置模式选项最小高度；插件只用 `var(..., 40px)` 消费，不写默认值 |
+
+胶囊底栏样式（可选层，见 [悬浮预设](preset-v2.md)）的官方 token 选用，按「官方有的就消费官方」：卡片面 `--dsw-alias-bg-layer-2`、1px 描边 `--dsw-alias-border-l1`、投影 `--dsw-elevation-panel`。投影的缺省回退是**整条阴影表达式** `0 0.35em 0.9em var(--dshm-color-shadow-2)`，不是裸颜色——官方投影是复合值，只回退颜色会让 `box-shadow` 整条失效；颜色取 0.16 档「弹出层」（`--dshm-color-shadow-2`），与本插件既有浮起面板的写法一致。
+
+**官方卡片面是 `--dsw-alias-bg-layer-2`；不存在 `--dsw-alias-bg-elevated`** —— 该 token 在当前 DSH 运行时里未定义，写了只会静默拿到回退值（实测），属于「按名字猜 token」的典型翻车。这类地方一律 `var(官方, 回退)`，不新增 `--dshm-color-*`。
 
 ## 3. 颜色层（layer=color）
 

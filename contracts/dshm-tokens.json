@@ -122,6 +122,20 @@
       "summary": "悬浮预设五项导航高度"
     },
     {
+      "name": "--dshm-v2-nav-total",
+      "layer": "size",
+      "public": true,
+      "default": "var(--dshm-v2-nav)",
+      "summary": "悬浮预设底栏行总高（胶囊底栏样式下含把手行）；所有按底栏让位的地方消费它"
+    },
+    {
+      "name": "--dshm-v2-dock-handle",
+      "layer": "size",
+      "public": false,
+      "default": "44px",
+      "summary": "胶囊底栏把手行的高度，同时是把手的触控区下限（内部几何，不承诺第三方可用）"
+    },
+    {
       "name": "--dshm-v2-radius",
       "layer": "size",
       "public": true,

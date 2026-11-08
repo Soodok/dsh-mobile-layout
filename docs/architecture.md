@@ -103,6 +103,7 @@ dsh-mobile-layout 是一个 Cordis 插件，把 DSH Web 客户端在**手机竖�
 - 预设持久化在 `localStorage['dshm-layout-preset']`；切换入口只有设置页「布局模式」三卡片（挂官方滚动容器，不订阅 state，因此文案刷新由 `syncLayoutPickerTexts` 显式补刀）。
 - `apply(ctx)` 开头有 **`activeDispose` 单实例守卫**：宿主「禁用插件不调 dispose、启用不重新 apply」时，旧实例晚于新实例启动会把订阅者清空、`runtime.setPreset` 置空——守卫保证任一时刻只有一个活实例。
 - `default` 预设不进入手机布局（`mode=default` 时样式整体不生效），只接管官方设置弹窗（悬浮窗形态）。
+- 预设之上还有一层**可选的底栏样式层**，同样根属性驱动，不再新增预设档位：`html[data-dshm-dock="capsule"]`（值型；属性不存在 = 透明底栏，即默认）打开胶囊底栏，`html[data-dshm-dock-collapsed]`（无值布尔属性，与 `data-dshm-ime` 同一习惯）表示导航已收起。`resolveDockStyle()` 把写坏的 localStorage 值归一化成 `plain`，`syncDockMarker()` 幂等重打这两条；切走 v2 / 切回原生 / `clearAnchors()` / `dispose()` 全部摘掉，保证「三档双向不残留」。让位高度由 `--dshm-v2-nav-total` 统一表达（默认 `var(--dshm-v2-nav)`），而不是把 56px 复制到四处。
 
 ### 4.1 锚点标记层（插件与官方 DOM 的唯一接触面）
 
@@ -134,6 +135,7 @@ MutationObserver 在 mobile 模式下全局监听，回调里按需分发到各 
 | 设置页手机化 | `tagSettings` | 官方设置对话框改全屏：品牌行 + 可横滑页签 + 返回键；自带页签滑动手势；仅最左页签右滑跟手退出（`settingsPagerCanConsume` 按翻页边界让路），开合补滑动过渡 |
 | 设置页接管（预设感知） | `syncSettingsPanel` / `settingsFrameMetrics` | 双形态：融合 / 悬浮钉全屏、原生钉居中悬浮窗（10vh 留白、等宽 gutter、安全区叠加）；清场时逐键还原官方内联样式 |
 | 布局模式选择器 | `syncLayoutPicker` / `syncLayoutPickerState` / `syncLayoutPickerTexts` | 三卡片挂官方滚动容器、不订阅 state；选中态同步顺带刷文案，locale/change 后显式补刀（i18n 实时刷新） |
+| 底栏样式与收起 | `resolveDockStyle` / `syncDockMarker` / `V2Nav` 的把手 | 透明（默认）/ 胶囊两档：`data-dshm-dock="capsule"` 打开样式层，`data-dshm-dock-collapsed` 只藏五个导航键、把手留在原位；面板页让位、设置弹窗底边、工作台右栏底部统一消费 `--dshm-v2-nav-total`；持久化在 `dshm-dock-style` / `dshm-dock-collapsed` |
 | Composer 融合 | `syncComposerPad` / `syncComposerFrame` / `syncComposerClip` | 输入区去边框融合底部面板；权限 / 模型 chip 留输入行；滚动容器全预设收敛（隐藏滚动条 + 取消 gutter 沟槽） |
 
 ## 6. 模块地图（函数分组）
@@ -141,7 +143,7 @@ MutationObserver 在 mobile 模式下全局监听，回调里按需分发到各 
 | 分组 | 代表函数 |
 |---|---|
 | 宿主 / 模式 | `detectHost` · `classify` · `resolveMode` · `measure` |
-| 预设 | `resolvePreset` · `setPreset` · `currentPreset` · `syncComposerClip` · `settingsFrameMetrics` |
+| 预设 | `resolvePreset` · `setPreset` · `currentPreset` · `syncComposerClip` · `settingsFrameMetrics` · `resolveDockStyle` · `syncDockMarker` |
 | i18n | `STRINGS` · `t` · `detectLang` · `setLang` · `syncLayoutPickerTexts` |
 | 状态 store | `getState` · `setState` · `subscribe` · `useLayoutState` |
 | 锚点 / 样式 | `applyAnchors` · `clearAnchors` · `injectStyle` · `frameElement` |
@@ -152,7 +154,7 @@ MutationObserver 在 mobile 模式下全局监听，回调里按需分发到各 
 | 布局选择器 | `ensureLayoutPicker` · `syncLayoutPicker` · `syncLayoutPickerState` · `syncLayoutPickerTexts` |
 | 会话表 | `sessionRows` · `groupSessionsByWorkspace` · `workspaceLabelFor` · `formatRelativeTime` |
 | 浮层 / 手势 | `openSheet` · `closeSheet` · `openOfficialAddMenu` · `closeOfficialAddMenu` · `syncOverlayHistory` · `requestDrawer` |
-| 组件 | `BottomBar` · `Sheet` · `AddPager` · `OverlayLayer` |
+| 组件 | `BottomBar` · `V2Nav` · `Sheet` · `AddPager` · `OverlayLayer` |
 | 生命周期 | `apply` · `dispose` · `activeDispose`（单实例守卫） |
 
 ## 7. 生命周期
@@ -172,6 +174,7 @@ apply(ctx)
 dispose()
   ├─ 移除全部监听与 observer
   ├─ clearAnchors + clearPageHead（还原官方 DOM，含内联样式逐键还原）
+  ├─ 摘掉 data-dshm-dock / data-dshm-dock-collapsed（底栏样式与收起态一并退场）
   ├─ 摘除注入样式
   ├─ activeDispose === dispose 时自清引用
   └─ 官方槽位由 cordis 随插件卸载回收
