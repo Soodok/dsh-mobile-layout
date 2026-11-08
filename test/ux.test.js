@@ -712,12 +712,13 @@ test('源码契约：不依赖官方构建哈希类名（CSS 无 [class*=]）', 
   assert.ok(bare.includes('function hasClassSuffix'), '哈希后缀匹配应收敛在 hasClassSuffix')
 })
 
-test('源码契约：空会话标记挂 html 且随 clearAnchors 清理', () => {
+test('源码契约：空会话标记挂 html、随 clearAnchors 清理且被 classic CSS 消费', () => {
   const css = fs.readFileSync(path.join(__dirname, '..', 'lib', 'client.js'), 'utf8')
   assert.match(css, /const ATTR_EMPTY = 'data-dshm-empty'/)
   assert.match(css, /function syncEmptyState\(\)/)
-  // 清理名单里必须有它，否则退出手机布局后标记会一直留在 <html> 上
-  const listLine = css.split('\n').find((line) => line.includes('function clearAnchors')) ? null : null
   const clearBlock = css.slice(css.indexOf('function clearAnchors'), css.indexOf('function clearAnchors') + 1200)
   assert.ok(clearBlock.includes('ATTR_EMPTY'), 'clearAnchors 应清理 ATTR_EMPTY')
+  assert.match(css, /data-dshm-preset="classic"\]\[data-dshm-empty\] \[data-composer-card\]/)
+  assert.match(css, /--dshm-classic-gutter/)
+  assert.match(css, /border: 1px dashed/)
 })

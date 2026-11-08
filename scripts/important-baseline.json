@@ -1,6 +1,6 @@
 {
   "_comment": "!important baseline（见 scripts/check-important.mjs）。减量口径：先在真机比对结构度量，再删、再跑 npm run important:baseline 收紧。",
-  "total": 587,
+  "total": 594,
   "rules": [
     {
       "hash": "f2ee765234dc",
@@ -130,6 +130,16 @@
     {
       "hash": "02fa563d19bb",
       "selector": "html[data-dshm-mode=\"mobile\"][data-dshm-preset=\"classic\"] [data-dshm-card-trigger]::after",
+      "count": 1
+    },
+    {
+      "hash": "3012ab223652",
+      "selector": "html[data-dshm-mode=\"mobile\"][data-dshm-preset=\"classic\"][data-dshm-empty] [data-composer-card]",
+      "count": 6
+    },
+    {
+      "hash": "31b4dde14567",
+      "selector": "html[data-dshm-mode=\"mobile\"][data-dshm-preset=\"classic\"][data-dshm-empty] [data-composer-card]::after",
       "count": 1
     },
     {
