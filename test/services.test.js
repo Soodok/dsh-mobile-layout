@@ -32,7 +32,7 @@ function loadClient() {
 }
 
 const api = loadClient().__test
-const { resolveServiceBundle, bindServices, describeService, hasClassSuffix, classTokensOf } = api
+const { resolveServiceBundle, bindServices, describeService, hasClassSuffix, classTokensOf, isEmptyConversation } = api
 
 test('resolveServiceBundle：齐活 / 缺失 / ctx 不可用三种情形', () => {
   const full = { get: (name) => (name === 'a' ? { id: 'A' } : name === 'b' ? { id: 'B' } : null) }
@@ -178,4 +178,12 @@ test('hasClassSuffix：只认下划线分段后的末段，哈希变化不影响
   assert.equal(hasClassSuffix({ className: 'a_x' }, ''), false)
   // SVG 的 className 是对象：安全返回空集合
   assert.equal(classTokensOf({ className: { baseVal: 'x_y' } }).length, 0)
+})
+
+test('isEmptyConversation：hero 与官方瞬时变体任一在场即为空态', () => {
+  assert.equal(isEmptyConversation(true, false), true, '只有 hero 也算空态')
+  assert.equal(isEmptyConversation(false, true), true, '只有官方变体也算空态')
+  assert.equal(isEmptyConversation(true, true), true)
+  assert.equal(isEmptyConversation(false, false), false)
+  assert.equal(isEmptyConversation(undefined, undefined), false, '缺参按非空态处理')
 })

@@ -91,10 +91,10 @@
   "observations": [
     {
       "key": "classicTriggerCard",
-      "finding": "data-composer-card 的 cardWorkspaceTrigger 变体只在特定时机出现（启动/工作区落地页），会话恢复后即被普通卡片替换；AVD 上既观察到 0 命中，也观察到短暂命中的两种状态",
-      "impact": "融合预设的虚线卡样式依赖这个瞬时变体，可能在「闪现后消失」与「持续生效」之间摇摆",
-      "action": "规则保留并改用自有锚点 data-dshm-card-trigger；新增 __dshmCompat.triggerCardSeen 粘性诊断，宿主行为变化时可立刻发现（本次正是它纠正了“从未命中”的错误结论）",
-      "verifiedAt": "2026-11-08 AVD Medium_Phone_API_35，classic 预设，重启与新建会话两种路径"
+      "finding": "data-composer-card 的 cardWorkspaceTrigger 变体只在「无会话的落地视图」出现；在已有会话里点「新建会话」不会出现该变体，空态 hero 也找不到（v2 与 classic 均如此，AVD 实测）",
+      "impact": "融合预设的虚线卡样式只在落地视图生效；这是官方结构决定的覆盖范围，不是插件失效",
+      "action": "规则改用自有锚点 data-dshm-card-trigger；新增 <html data-dshm-empty> 稳定空态标记（hero 或变体任一在场），CSS 暂不消费；__dshmCompat.triggerCardSeen 记录是否见过该变体",
+      "verifiedAt": "2026-11-08 AVD Medium_Phone_API_35：启动落地视图（命中）、classic 新建会话（未命中）、v2 新建会话（未命中）"
     }
   ]
 }
