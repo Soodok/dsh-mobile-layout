@@ -2,6 +2,32 @@
 
 格式参照 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/)，版本号遵循 [SemVer](https://semver.org/lang/zh-CN/)。
 
+## [未发布]
+
+v2 悬浮预设的底栏改造成**可选的样式层**：默认外观保持透明（属性不存在 = 透明底栏），胶囊底栏由根属性 `html[data-dshm-dock="capsule"]` 显式打开。
+
+### 新增
+
+- **底栏样式层（胶囊）**：浮起的圆角胶囊 = 官方卡片面 `--dsw-alias-bg-layer-2` + 1px 描边 `--dsw-alias-border-l1` + 官方投影 `--dsw-elevation-panel`（缺省回退为整条阴影表达式，颜色取 `--dshm-color-shadow-2`）。入口：设置 → 通用设置 → 布局模式 →「悬浮」下的「底栏样式」（透明底栏 / 胶囊底栏），与原生预设的「原生设置」行同一套 UI。
+- **抽屉把手可收起**：胶囊底部两条小横杠，点一下收起导航、再点展开。收起态由根属性 `html[data-dshm-dock-collapsed]` 驱动，CSS 只把五个 `.dshm-bar-btn` 设 `display: none`，把手留在原位（胶囊收缩到把手那一行，屏幕底边固定，把手位置不动）；触控区 `min-height: var(--dshm-v2-dock-handle)`（默认 44px）。按设备持久化在 `localStorage['dshm-dock-collapsed']`（`'1'` 表示收起）。
+- **新 token `--dshm-v2-nav-total`**：默认 `var(--dshm-v2-nav)`（等于导航高度，行为不变），胶囊态下含把手行；面板页正文底部 padding、设置弹窗底边、工作台右栏底部 padding、设置面板内联 `bottom` 统一消费它。
+- **样式偏好按设备记住**：`localStorage['dshm-dock-style']`（`capsule` / 缺省即透明）；隐私模式写不进去只影响本次会话。
+
+### 修复
+
+- **颜色裸值**：胶囊的描边与投影改为 `var(官方 token, 回退)`，不留 rgba 字面量。
+- **官方 token 名不存在**：原实现拿 `--dsw-alias-bg-elevated` 当卡片面，该 token 在当前 DSH 运行时里未定义（实测），一直静默渲染成回退值；改为 `--dsw-alias-bg-layer-2`。
+- **底栏高度契约**：`--dshm-v2-nav` 只表示导航行（56px），胶囊态多一行把手后，四处按它让位的硬编码开始错位；新增 `--dshm-v2-nav-total` 统一消费，默认值与旧行为一致。
+- **根属性生命周期**：切走 v2 预设、切回原生、`clearAnchors()`、`dispose()` 都摘掉 `data-dshm-dock` 与 `data-dshm-dock-collapsed`，不再残留到其它预设（「三档双向不残留」）。
+- **触控目标**：把手补 `min-height: var(--dshm-v2-dock-handle)`（默认 44px），与 `.dshm-bar-btn` 的 44px 约定同一口径。
+- **ARIA 结构**：把手从 `role="tablist"` 里移出（tablist 只包五个导航键）；把手是 `<button>` 带 `aria-controls` / `aria-label`（收起时念「展开底栏」）/ `aria-expanded`，两条横杠 `aria-hidden="true"` 纯装饰；收起时焦点若落在被隐藏的导航键上会移到把手。
+
+### 验证
+
+- 待发布前补真机矩阵与门禁结果。
+
+---
+
 ## [0.4.10] - 2026-11-08
 
 三预设稳定性与低耦合加固，继续兼容已验证的 DSH `0.2.1-rc.2`、`0.2.1-rc.5`、`0.2.2-rc.1`。
