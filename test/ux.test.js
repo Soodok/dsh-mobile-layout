@@ -58,6 +58,7 @@ const {
   ADD_MAX_ROWS,
   ADD_TINTS,
   addOptionKey,
+  mergeCommandCandidates,
   tintHash,
   planAddTints,
 } = loadClient().__test
@@ -512,6 +513,44 @@ test('addOptionKey：优先用官方别名（命令 id），缺失时退回名�
   // 全空退回分组，再空回 misc
   assert.equal(addOptionKey([], '指令'), 'group:指令')
   assert.equal(addOptionKey(null, ''), 'misc')
+})
+
+test('mergeCommandCandidates：仅用 service 与 DOM 同时存在的候选更新文案和分组', () => {
+  const model = {
+    attachments: [{ key: 'alias:file', alias: 'file', label: '文件（DOM）', desc: 'DOM 描述' }],
+    groups: [{
+      name: '指令（DOM）',
+      items: [
+        { key: 'alias:compact', alias: 'compact', label: '压缩（DOM）', desc: '旧描述' },
+        { key: 'alias:local-only', alias: 'local-only', label: '本地项', desc: '' },
+      ],
+    }],
+  }
+  const candidates = [
+    { name: 'file', label: '文件', description: '官方候选描述', section: '添加' },
+    { name: 'compact', label: '压缩', description: 'service 描述', section: '指令' },
+    { name: 'unmatched', label: '未在 DOM 的候选', section: '指令' },
+  ]
+
+  const merged = mergeCommandCandidates(model, candidates)
+  assert.equal(merged.attachments.length, 1)
+  assert.equal(merged.attachments[0].key, 'alias:file', '保留 DOM action key')
+  assert.equal(merged.attachments[0].label, '文件', '匹配项采用 commandUi 本地化标签')
+  assert.equal(merged.attachments[0].desc, '官方候选描述')
+  assert.equal(merged.groups.length, 1)
+  assert.equal(merged.groups[0].name, '指令', '分组名称来自官方候选 section')
+  assert.equal(merged.groups[0].items.length, 2, '不能引入没有 DOM 派发节点的候选')
+  assert.equal(merged.groups[0].items[0].key, 'alias:compact')
+  assert.equal(merged.groups[0].items[0].label, '压缩')
+  assert.equal(merged.groups[0].items[0].desc, 'service 描述')
+  assert.equal(merged.groups[0].items[1].label, '本地项', 'service 未提供时保留 DOM 兜底')
+  assert.notEqual(merged, model, '纯函数返回新对象')
+})
+
+test('mergeCommandCandidates：缺失/异常数据安全回退且不引入条目', () => {
+  const model = { attachments: [], groups: [{ name: 'G', items: [{ key: 'x', alias: 'x', label: 'X', desc: '' }] }] }
+  assert.equal(mergeCommandCandidates(model, null).groups[0].items[0].label, 'X')
+  assert.equal(mergeCommandCandidates(model, [{ name: '', label: 'bad' }]).groups[0].items[0].label, 'X')
 })
 
 test('planAddTints：同类型同色、同屏不撞色、新增项自动落位', () => {
