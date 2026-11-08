@@ -81,8 +81,8 @@ test('shouldCloseSheetByDrag：调用点不再硬编码阈值', () => {
 
 test('视觉契约：抽屉抬升面与官方圆角', () => {
   assert.ok(SOURCE.includes('border-radius: 28px 28px 0 0;'), '缺 28px 顶部圆角')
-  assert.ok(SOURCE.includes('rgba(255, 255, 255, 0.09)'), '缺 9% 白叠加的抬升面')
-  assert.ok(SOURCE.includes('border: 1px solid rgba(127, 127, 127, 0.25)'), '缺 1px 淡描边')
+  assert.ok(SOURCE.includes('var(--dshm-color-sheen, rgba(255, 255, 255, 0.09))'), '缺 9% 白叠加的抬升面')
+  assert.ok(SOURCE.includes('border: 1px solid var(--dshm-color-border-soft, rgba(127, 127, 127, 0.25))'), '缺 1px 淡描边')
 })
 
 test('视觉契约：高度上限 64% / 下限 300px', () => {
@@ -94,7 +94,7 @@ test('视觉契约：入场动效（上滑 + 淡入）', () => {
   assert.ok(SOURCE.includes('@keyframes dshm-sheet-up'), '缺上滑关键帧')
   assert.ok(SOURCE.includes('@keyframes dshm-sheet-fade'), '缺淡入关键帧')
   assert.ok(SOURCE.includes('animation: dshm-sheet-up 220ms'), '面板未挂入场动画')
-  assert.ok(SOURCE.includes('rgba(0, 0, 0, 0.45)'), '遮罩应加深到 45%')
+  assert.ok(SOURCE.includes('var(--dshm-color-scrim, rgba(0, 0, 0, 0.45))'), '遮罩应加深到 45%')
 })
 
 test('视觉契约：主操作按钮为胶囊反色', () => {

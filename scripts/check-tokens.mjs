@@ -30,6 +30,9 @@ const check = (cond, msg) => (cond ? ok(msg) : fail(msg))
 const catalog = JSON.parse(read('contracts/dshm-tokens.json'))
 const tokens = Array.isArray(catalog.tokens) ? catalog.tokens : []
 const client = read('lib/client.js')
+// 注释里会出现 `var(--dshm-color-*)` 这类示例，扫描前必须剥离块注释，
+// 否则会把示例里的前缀当成一个真实引用。
+const clientBare = client.replace(/\/\*[\s\S]*?\*\//g, '')
 const tokensCss = read('styles/tokens.css')
 // 注释里会出现「用法示例」的同名声明（如 --dshm-bar-height: 64px），
 // 校验前必须先剥离，否则会把示例值当成实际默认值。
@@ -47,7 +50,7 @@ for (const token of tokens) {
   }
   if (names.has(token.name)) fail(`token 重复登记：${token.name}`)
   names.add(token.name)
-  if (token.layer !== 'size' && token.layer !== 'rt') fail(`${token.name} 的 layer 必须是 size 或 rt`)
+  if (!['size', 'color', 'rt'].includes(token.layer)) fail(`${token.name} 的 layer 必须是 size / color / rt`)
   if (typeof token.public !== 'boolean') fail(`${token.name} 缺少 public 布尔值`)
   if (typeof token.summary !== 'string' || !token.summary.trim()) fail(`${token.name} 缺少 summary`)
   if (token.layer === 'rt' && token.default !== null) fail(`${token.name} 是运行时 token，default 必须为 null`)
@@ -55,12 +58,12 @@ for (const token of tokens) {
 
 // ---- client.js 里的定义 ----
 const definedInClient = new Map()
-for (const match of client.matchAll(/'[^']*?(--dshm-[a-z0-9-]+)\s*:\s*([^';]+);/g)) {
+for (const match of clientBare.matchAll(/'[^']*?(--dshm-[a-z0-9-]+)\s*:\s*([^';]+);/g)) {
   if (!definedInClient.has(match[1])) definedInClient.set(match[1], match[2].trim())
 }
 
 for (const token of tokens) {
-  if (token.layer !== 'size' || token.default === null) continue
+  if (token.layer === 'rt' || token.default === null) continue
   const actual = definedInClient.get(token.name)
   check(actual === token.default, `${token.name} 默认值与 client.js 一致${actual === undefined ? '（client.js 未定义）' : actual === token.default ? '' : `（实为 ${actual}）`}`)
 }
@@ -71,7 +74,7 @@ for (const [name] of definedInClient) {
 
 // ---- 引用是否都有登记 ----
 const referenced = new Set()
-for (const match of client.matchAll(/var\(\s*(--dshm-[a-z0-9-]+)/g)) referenced.add(match[1])
+for (const match of clientBare.matchAll(/var\(\s*(--dshm-[a-z0-9-]+)/g)) referenced.add(match[1])
 for (const name of referenced) {
   if (!names.has(name)) fail(`client.js 引用了未登记的 token：${name}`)
 }
@@ -79,7 +82,7 @@ check(referenced.size > 0, `client.js 引用 ${referenced.size} 个自有 token`
 
 // ---- 参考样式表 ----
 for (const token of tokens) {
-  if (token.layer !== 'size' || token.default === null) continue
+  if (token.layer === 'rt' || token.default === null) continue
   if (!token.public) continue
   const declared = new RegExp(`${token.name}\\s*:\\s*([^;]+);`).exec(tokensCssBare)
   check(Boolean(declared), `styles/tokens.css 声明 ${token.name}`)

@@ -16,13 +16,15 @@
   ],
   "scripts": {
     "test": "node --test --test-force-exit test/*.test.js",
-    "check": "node --check lib/client.js && npm test && node scripts/verify-package.mjs && node scripts/check-hardcoded.mjs && node scripts/check-tokens.mjs",
+    "check": "node --check lib/client.js && npm test && node scripts/verify-package.mjs && node scripts/check-hardcoded.mjs && node scripts/check-tokens.mjs && node scripts/check-colors.mjs",
     "tokens:check": "node scripts/check-tokens.mjs",
     "metrics": "node scripts/metrics.mjs",
     "hardcode:check": "node scripts/check-hardcoded.mjs",
     "hardcode:baseline": "node scripts/check-hardcoded.mjs --update",
     "pack:dry": "npm pack --dry-run",
-    "prepack": "node scripts/verify-package.mjs"
+    "prepack": "node scripts/verify-package.mjs",
+    "colors:check": "node scripts/check-colors.mjs",
+    "colors:baseline": "node scripts/check-colors.mjs --update"
   },
   "dsh": {
     "manifestVersion": 1,

@@ -178,6 +178,125 @@
       "summary": "原生设置模式选项最小高度（仅覆盖，插件不写默认值）"
     },
     {
+      "name": "--dshm-color-danger",
+      "layer": "color",
+      "public": true,
+      "default": "#e5484d",
+      "summary": "高危 / 错误前景色（完全访问、danger 项）"
+    },
+    {
+      "name": "--dshm-color-danger-strong",
+      "layer": "color",
+      "public": true,
+      "default": "#d9363e",
+      "summary": "高危前景色加深档（悬停 / 强调）"
+    },
+    {
+      "name": "--dshm-color-hairline",
+      "layer": "color",
+      "public": true,
+      "default": "rgba(0, 0, 0, 0.14)",
+      "summary": "输入区与正文之间的分界线"
+    },
+    {
+      "name": "--dshm-color-label-muted",
+      "layer": "color",
+      "public": true,
+      "default": "rgba(0, 0, 0, 0.45)",
+      "summary": "次级文字（官方 label-tertiary 缺席时的回退）"
+    },
+    {
+      "name": "--dshm-color-scrim",
+      "layer": "color",
+      "public": true,
+      "default": "rgba(0, 0, 0, 0.45)",
+      "summary": "抽屉 / 底部表遮罩底色"
+    },
+    {
+      "name": "--dshm-color-scrim-soft",
+      "layer": "color",
+      "public": true,
+      "default": "rgba(0, 0, 0, 0.32)",
+      "summary": "悬浮加号面板的轻遮罩底色"
+    },
+    {
+      "name": "--dshm-color-sheen",
+      "layer": "color",
+      "public": true,
+      "default": "rgba(255, 255, 255, 0.09)",
+      "summary": "面板顶部高光叠加层"
+    },
+    {
+      "name": "--dshm-color-border-soft",
+      "layer": "color",
+      "public": true,
+      "default": "rgba(127, 127, 127, 0.25)",
+      "summary": "自有容器描边（浅）"
+    },
+    {
+      "name": "--dshm-color-border-strong",
+      "layer": "color",
+      "public": true,
+      "default": "rgba(127, 127, 127, 0.28)",
+      "summary": "自有容器描边（深）"
+    },
+    {
+      "name": "--dshm-color-tint-primary",
+      "layer": "color",
+      "public": true,
+      "default": "rgba(65, 118, 230, 0.18)",
+      "summary": "品牌蓝 18% 透明底（选中 / 强调块）"
+    },
+    {
+      "name": "--dshm-color-tint-secondary",
+      "layer": "color",
+      "public": true,
+      "default": "rgba(77, 107, 254, 0.10)",
+      "summary": "次级蓝 10% 透明底"
+    },
+    {
+      "name": "--dshm-color-tint-danger",
+      "layer": "color",
+      "public": true,
+      "default": "rgba(229, 72, 77, 0.10)",
+      "summary": "危险色 10% 透明底"
+    },
+    {
+      "name": "--dshm-color-shadow-1",
+      "layer": "color",
+      "public": true,
+      "default": "rgba(0, 0, 0, 0.12)",
+      "summary": "阴影色第 1 档（浮起卡片）"
+    },
+    {
+      "name": "--dshm-color-shadow-2",
+      "layer": "color",
+      "public": true,
+      "default": "rgba(0, 0, 0, 0.16)",
+      "summary": "阴影色第 2 档（弹出层）"
+    },
+    {
+      "name": "--dshm-color-shadow-3",
+      "layer": "color",
+      "public": true,
+      "default": "rgba(0, 0, 0, 0.18)",
+      "summary": "阴影色第 3 档（菜单 / 浮层）"
+    },
+    {
+      "name": "--dshm-color-shadow-4",
+      "layer": "color",
+      "public": true,
+      "default": "rgba(0, 0, 0, 0.28)",
+      "summary": "阴影色第 4 档（抽屉 / 面板）"
+    },
+    {
+      "name": "--dshm-color-shadow-5",
+      "layer": "color",
+      "public": true,
+      "default": "rgba(0, 0, 0, 0.32)",
+      "summary": "阴影色第 5 档（最重投影）"
+    },
+    {
       "name": "--dshm-viewport-height",
       "layer": "rt",
       "public": false,

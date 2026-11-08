@@ -54,6 +54,7 @@ const {
   countFeatures,
   featureMode,
   collectFeatures,
+  mergeFeatures,
   FEATURE_KEYS,
   resolvePreset,
   VERSION,
@@ -224,6 +225,16 @@ test('源码契约：版本正则已删除，特征探针进入诊断快照', ()
   assert.match(source, /runtime\.compat\.features = collectFeatures\(ctx, doc\);/)
   assert.match(source, /runtime\.compat\.featureCount = countFeatures\(caps\.features\);/)
   assert.match(source, /if \(runtime\.compat\.features\) runtime\.compat\.features\.settingsSlot = true;/)
+})
+
+test('特征合并：观察到即记住，不因瞬时缺席回退', () => {
+  const first = mergeFeatures({ composerCard: true }, { composerCard: false, dialogContract: false })
+  assert.equal(first.composerCard, true, '已观察到的契约不因后续帧缺席而回退')
+  const later = mergeFeatures(first, { dialogContract: true })
+  assert.equal(later.composerCard, true)
+  assert.equal(later.dialogContract, true, '新观察到的契约要并入')
+  const empty = mergeFeatures(null, null)
+  for (const key of FEATURE_KEYS) assert.equal(empty[key], false, key)
 })
 
 test('预设白名单在适配改动后不变', () => {

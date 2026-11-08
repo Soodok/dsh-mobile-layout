@@ -46,3 +46,32 @@ html[data-dshm-mode="mobile"] {
   --dshm-quick-gap: clamp(6px, 1.6vw, 10px);
   --dshm-quick-menu-w: clamp(132px, 42vw, 168px);
 }
+
+/*
+ * 颜色层（layer=color）
+ *
+ * 官方没有等价 token 的几种颜色统一收在这里；值与迁移前的字面量逐一相同，
+ * 属于「提权」而非「调色」。第三方可以整套换色：
+ *
+ *   html[data-dshm-form="phone"] { --dshm-color-danger: #ff5a5f; }
+ */
+html[data-dshm-form="phone"],
+html[data-dshm-mode="mobile"] {
+  --dshm-color-danger: #e5484d;
+  --dshm-color-danger-strong: #d9363e;
+  --dshm-color-hairline: rgba(0, 0, 0, 0.14);
+  --dshm-color-label-muted: rgba(0, 0, 0, 0.45);
+  --dshm-color-scrim: rgba(0, 0, 0, 0.45);
+  --dshm-color-scrim-soft: rgba(0, 0, 0, 0.32);
+  --dshm-color-sheen: rgba(255, 255, 255, 0.09);
+  --dshm-color-border-soft: rgba(127, 127, 127, 0.25);
+  --dshm-color-border-strong: rgba(127, 127, 127, 0.28);
+  --dshm-color-tint-primary: rgba(65, 118, 230, 0.18);
+  --dshm-color-tint-secondary: rgba(77, 107, 254, 0.10);
+  --dshm-color-tint-danger: rgba(229, 72, 77, 0.10);
+  --dshm-color-shadow-1: rgba(0, 0, 0, 0.12);
+  --dshm-color-shadow-2: rgba(0, 0, 0, 0.16);
+  --dshm-color-shadow-3: rgba(0, 0, 0, 0.18);
+  --dshm-color-shadow-4: rgba(0, 0, 0, 0.28);
+  --dshm-color-shadow-5: rgba(0, 0, 0, 0.32);
+}
