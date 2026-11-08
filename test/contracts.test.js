@@ -40,12 +40,11 @@ test('官方契约登记表：源码里用到的官方属性全部已登记', ()
   assert.ok(used.size > 0, '应至少依赖一个官方属性')
 })
 
-test('npm 发布白名单：只包含显式公开的 token 文档，不放开整个 docs 目录', () => {
+test('npm 发布白名单：docs 一律不进包（与 CI tarball 守卫一致）', () => {
   const pkg = JSON.parse(read('package.json'))
-  assert.ok(pkg.files.includes('docs/theme-tokens.md'))
-  assert.equal(pkg.files.includes('docs'), false, '不能把整套开发文档与截图都装进包')
+  assert.equal(pkg.files.some((entry) => entry.startsWith('docs')), false, 'docs 不能出现在发布清单里')
   const verifier = read('scripts/verify-package.mjs')
-  assert.match(verifier, /f !== 'docs\/theme-tokens\.md'/, '包校验仅放行该公开文档')
+  assert.equal(/f !== 'docs\//.test(verifier), false, '包校验不得为 docs 开例外')
 })
 
 test('兼容清单：覆盖全部特征键且四档齐备', () => {
