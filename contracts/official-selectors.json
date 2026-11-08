@@ -127,6 +127,11 @@
       "name": "data-state",
       "usedFor": "状态机取值域探针（sending 等阶段）",
       "evidence": "宿主 conversation 包属性（取值域需按版本复核）"
+    },
+    {
+      "name": "data-lexical-editor",
+      "usedFor": "识别输入行节点（把输入行与工具行合并成一行时，用它找可编辑区域所在的那一层）",
+      "evidence": "AVD Medium_Phone_API_35 / app.dsh.mobile 1.5.0 实测：输入行内 [contenteditable] 与 [data-lexical-editor] 同节点"
     }
   ],
   "roles": [

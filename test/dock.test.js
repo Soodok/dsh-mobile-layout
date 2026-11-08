@@ -383,11 +383,16 @@ test('CSS 契约：胶囊是合并形态——卡片下侧压平、底栏只留�
 test('CSS 契约：合并形态不靠新增 !important 压圆角', () => {
   const cardRule = source.indexOf("'  border-radius: var(--dshm-v2-card-radius) var(--dshm-v2-card-radius) var(--dshm-v2-card-radius-bottom) var(--dshm-v2-card-radius-bottom) !important;'")
   assert.ok(cardRule > 0, '卡片圆角应消费上/下两组变量')
-  assert.equal(
-    source.includes('[data-dshm-dock="capsule"] [data-composer-card] {'),
-    false,
-    '胶囊态不应再写一条带 !important 的卡片圆角覆盖——变量已经够用',
-  )
+  // 胶囊态可以再给卡片加规则（比如改成一行布局），但不许再叠一条 !important 的圆角覆盖。
+  const at = source.indexOf('[data-dshm-dock="capsule"] [data-composer-card] {')
+  if (at > 0) {
+    const block = source.slice(at, at + 400)
+    assert.equal(
+      /border-radius[^;]*!important/.test(block),
+      false,
+      '胶囊态不应再写带 !important 的卡片圆角覆盖——变量已经够用',
+    )
+  }
 })
 
 test('CSS 契约：胶囊态底栏宽度改回 auto（100% + 左右 margin 会溢出屏外）', () => {
