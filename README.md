@@ -6,7 +6,7 @@
 [![Release](https://github.com/XiaoPb/dsh-mobile-layout/actions/workflows/release.yml/badge.svg)](https://github.com/XiaoPb/dsh-mobile-layout/actions/workflows/release.yml)
 [![npm](https://img.shields.io/npm/v/@xiaopb/dsh-mobile-layout?label=npm)](https://www.npmjs.com/package/@xiaopb/dsh-mobile-layout)
 
-**DSH 手机 / 平板触控布局插件（v0.4.10）**
+**DSH 手机 / 平板触控布局插件（v0.4.12）**
 
 文档：[架构文档](docs/architecture.md) ｜ [技术说明](docs/technical-notes.md) ｜ [Token / 主题覆盖契约](docs/theme-tokens.md) ｜ [预设方案 / 进度](docs/preset2-progress.md) ｜ [更新日志](CHANGELOG.md) ｜ [English](README.en.md)
 
@@ -163,7 +163,9 @@ const off = window.__dshmBack.register({
 
 | 插件版本 | `engines.dsh` 声明 | `dshReleases` 逐版本登记 | 已验证的 DSH 版本 | 对 `0.2.2-rc.1` | 说明 |
 |---|---|---|---|---|---|
-| **0.4.10**（当前） | `>=0.2.1-rc.2` | `0.2.1-rc.2`、`0.2.1-rc.5`、`0.2.2-rc.1` 均 `compatible` | `0.2.1-rc.2` / `0.2.1-rc.5` / `0.2.2-rc.1` | ✅ 兼容 | 三预设低耦合加固、候选目录元数据、稳定空态标记、token/契约/漂移门禁；新装 / 升级请直接用 0.4.10 |
+| **0.4.12**（当前） | `>=0.2.1-rc.2` | `0.2.1-rc.2`、`0.2.1-rc.5`、`0.2.2-rc.1` 均 `compatible` | `0.2.1-rc.2` / `0.2.1-rc.5` / `0.2.2-rc.1` | ✅ 兼容 | 底栏样式层隔离（透明恢复五项 / 胶囊保持按页换项）、对话正文与命令结果卡片交还官方、深色胶囊主题蓝阴影与边缘高光、TAB/设置页选择器灰阶高亮、深色用户气泡暗蓝；新装 / 升级请直接用 0.4.12 |
+| 0.4.11 | `>=0.2.1-rc.2` | 同上（逐版本 `compatible`） | 同上 | ✅ 兼容 | 胶囊形态（顶部卡片头 / 居中分段控件 / 一行输入区 / 弹层抬升与回收 / 思考链折叠）；已被 0.4.12 取代 |
+| 0.4.10 | `>=0.2.1-rc.2` | 同上（逐版本 `compatible`） | 同上 | ✅ 兼容 | 三预设低耦合加固、候选目录元数据、稳定空态标记、token/契约/漂移门禁；已被 0.4.12 取代 |
 | 0.4.9 | `>=0.2.1-rc.2` | 同上（逐版本 `compatible`） | 同上 | ✅ 兼容 | 加号面板接管时序 / 点击 / 预设清理修复 |
 | 0.4.8 | `>=0.2.1-rc.2` | `0.2.1-rc.2`、`0.2.1-rc.5`、`0.2.2-rc.1` 均 `compatible`（沿用 0.4.7） | `0.2.1-rc.2` / `0.2.1-rc.5` / `0.2.2-rc.1` | ✅ 兼容 | 0.4.7 的全部适配 + 0.2.2-rc.1 二轮修复 + 平板宽屏侧栏手势 |
 | 0.4.7 | `>=0.2.1-rc.2` | `0.2.1-rc.2`、`0.2.1-rc.5`、`0.2.2-rc.1` 均 `compatible` | `0.2.1-rc.2` / `0.2.1-rc.5` / `0.2.2-rc.1` | ✅ **首个适配版本** | 按官方 `data-shortcut-modal` 正向契约 + `settings.general.item` slot 接入；三预设统一全屏设置页；未知引擎自动 `safe` 降级 |
@@ -174,14 +176,14 @@ const off = window.__dshmBack.register({
 
 | DSH / 官方 UI 布局包版本 | 宿主 App | 建议插件版本 | 结论 |
 |---|---|---|---|
-| 0.2.2-rc.1 | Android App 1.5.0 · BUILD `2026.11.06-4566c0be` | **≥ 0.4.10** | ✅ 已适配并在 AVD 验收；0.4.6 及以下不要用 |
-| `0.2.1-rc.5` | —（未记录对应关系） | 0.4.10（也可用 0.4.4 – 0.4.9） | ✅ `compatible` |
-| `0.2.1-rc.2` | —（未记录对应关系） | 0.4.10（最低声明线） | ✅ `compatible` |
-| 其它 / 未列出 | — | 0.4.10 | ⚪ `unknown`：不接管配置 UI，走 `safe` 降级；可用 `localStorage['dshm-compat'] = 'safe'` 强制 |
+| 0.2.2-rc.1 | Android App 1.5.0 · BUILD `2026.11.06-4566c0be` | **≥ 0.4.12** | ✅ 已适配并在 AVD 验收；0.4.6 及以下不要用 |
+| `0.2.1-rc.5` | —（未记录对应关系） | 0.4.12（也可用 0.4.4 – 0.4.11） | ✅ `compatible` |
+| `0.2.1-rc.2` | —（未记录对应关系） | 0.4.12（最低声明线） | ✅ `compatible` |
+| 其它 / 未列出 | — | 0.4.12 | ⚪ `unknown`：不接管配置 UI，走 `safe` 降级；可用 `localStorage['dshm-compat'] = 'safe'` 强制 |
 
 **声明口径**：`engines.dsh` 是安装判定字段（内核 `evaluatePluginCompatibility()` 只读它和 `peerDependencies`）；`dsh.compatibility.dshReleases` 是给插件市场 / 商店索引看的逐版本声明，**不参与安装判定**，未列出的版本一律视为 `unknown`。两个字段在所有历史版本中都保持 `>=0.2.1-rc.2`，因此「能装上」不等于「已适配」。
 
-表格依据各发行标签的 `package.json`（`git show v0.4.9:package.json` 等）与 0.4.7 – 0.4.10 的实测记录；0.2.2-rc.1 的三个故障详见 [更新日志 0.4.7](CHANGELOG.md)。
+表格依据各发行标签的 `package.json`（`git show v0.4.9:package.json` 等）与 0.4.7 – 0.4.12 的实测记录；0.2.2-rc.1 的三个故障详见 [更新日志 0.4.7](CHANGELOG.md)。
 
 ### 0.4.7 适配要点
 
@@ -190,6 +192,14 @@ const off = window.__dshmBack.register({
 - **设置页**：三个预设统一为手机全屏；平板 / 桌面保持官方两列弹窗。设置弹窗按 `data-shortcut-modal="settings"` 正向识别，抽屉不会被误认成设置页。
 - **诊断**：控制台 / CDP 读 `window.__dshmCompat`（`mode` / `settingsPath` / `settingsSlotSeen` / `dialogContract` / `engineVersion` / `reason`）。
 - **回滚**：`localStorage['dshm-compat'] = 'legacy'` 强制旧注入路径；`'safe'` 完全不接管配置 UI；`localStorage['dshm-settings-slot'] = 'off'` 只关 slot 路径。全屏设置页的回滚开关是源码常量 `SETTINGS_UNIFIED_FULLSCREEN`。
+
+### 0.4.12 变更要点
+
+- **底栏样式层彻底隔离**：透明底栏回到原始五项目的地（会话 / 自动化任务 / 插件 / 工作台 / 设置，无翻页）；胶囊底栏保持「按页换项」。回形针只在胶囊态注入，透明态官方 ⊕ 行保持原样。
+- **⊕ 偶现无响应修复**：真实 `pointerdown` 先清幽灵态（`ensureAddMenuCoherent` + 世代号），遮罩 250ms 防抖避免双击「开了又关」；透明 / 胶囊行为一致。
+- **对话正文与命令交还官方**：删除日期分隔、工具 chip、代码块折叠、思考 / 步骤行、命令卡片网格与自动换行开关；对话页不再注入节点或打标。输入框敲 `/` 与 ⊕ 一致使用自绘加号面板。
+- **深色视觉**：胶囊阴影与 1px 外缘高光改用主题蓝；TAB 灰轨道 + 浅灰滑块 + 描边；布局模式 / 底栏样式选中态对齐外观卡片（官方 token，双主题跟随）；用户消息气泡底色改暗蓝（仅覆盖 `--dsw-specific-bubble`）。
+- **文档与门禁**：技术说明 §3.19–§3.24、胶囊文档、token / 官方属性登记与单测同步；`npm run check` 全绿。
 
 ### 0.4.10 变更要点
 

@@ -6,7 +6,7 @@
 [![Release](https://github.com/XiaoPb/dsh-mobile-layout/actions/workflows/release.yml/badge.svg)](https://github.com/XiaoPb/dsh-mobile-layout/actions/workflows/release.yml)
 [![npm](https://img.shields.io/npm/v/@xiaopb/dsh-mobile-layout?label=npm)](https://www.npmjs.com/package/@xiaopb/dsh-mobile-layout)
 
-**DSH phone / tablet touch layout plugin (v0.4.10)**
+**DSH phone / tablet touch layout plugin (v0.4.12)**
 
 Docs: [Architecture](docs/architecture.md) ｜ [Technical notes](docs/technical-notes.md) ｜ [Theme token contract](docs/theme-tokens.md) ｜ [Presets](docs/preset-v2.md) ｜ [Changelog](CHANGELOG.md) ｜ [中文版](README.md)
 
@@ -101,7 +101,9 @@ Archived screenshots of the early release (v0.1.6, single-column v1 layout) live
 
 | Plugin version | `engines.dsh` | `dshReleases` entries | Verified DSH versions | `0.2.2-rc.1` | Notes |
 |---|---|---|---|---|---|
-| **0.4.10** (current) | `>=0.2.1-rc.2` | `0.2.1-rc.2`, `0.2.1-rc.5`, `0.2.2-rc.1` → `compatible` | `0.2.1-rc.2` / `0.2.1-rc.5` / `0.2.2-rc.1` | ✅ compatible | Three-preset hardening, command candidate metadata, stable empty-state marker, token / contract / drift gates; use 0.4.10 for installs and upgrades |
+| **0.4.12** (current) | `>=0.2.1-rc.2` | `0.2.1-rc.2`, `0.2.1-rc.5`, `0.2.2-rc.1` → `compatible` | `0.2.1-rc.2` / `0.2.1-rc.5` / `0.2.2-rc.1` | ✅ compatible | Dock style-layer isolation (transparent restores the five destinations / capsule keeps per-page items), native dialogue body and command cards, dark-mode capsule blue shadow + edge highlight, gray TAB and settings-picker highlights, dark-blue user bubbles; use 0.4.12 for installs and upgrades |
+| 0.4.11 | `>=0.2.1-rc.2` | Same releases (`compatible`) | Same verified versions | ✅ compatible | Capsule form (header card / centered segmented control / one-line composer / popover lift / thinking-step collapse); superseded by 0.4.12 |
+| 0.4.10 | `>=0.2.1-rc.2` | Same releases (`compatible`) | Same verified versions | ✅ compatible | Three-preset hardening, command candidate metadata, stable empty-state marker, token / contract / drift gates; superseded by 0.4.12 |
 | 0.4.9 | `>=0.2.1-rc.2` | Same releases (`compatible`) | Same verified versions | ✅ compatible | Add-panel takeover timing, click and preset-cleanup fixes |
 | 0.4.7 | `>=0.2.1-rc.2` | `0.2.1-rc.2`, `0.2.1-rc.5`, `0.2.2-rc.1` → `compatible` | `0.2.1-rc.2` / `0.2.1-rc.5` / `0.2.2-rc.1` | ✅ **first adapted release** | Official `data-shortcut-modal` contract + `settings.general.item` slot; unified full-screen settings for all three presets; unknown engines degrade to `safe` |
 | 0.4.4 – 0.4.6 | `>=0.2.1-rc.2` | `0.2.1-rc.2`, `0.2.1-rc.5` → `compatible` | `0.2.1-rc.2` / `0.2.1-rc.5` | ❌ incompatible (unlisted = `unknown`) | On 0.2.2-rc.1: layout-mode picker breaks, the native preset settings page becomes a clipped floating window, and the settings page cannot be closed. Upgrade to 0.4.8 |
@@ -111,14 +113,14 @@ Archived screenshots of the early release (v0.1.6, single-column v1 layout) live
 
 | DSH / official UI layout | Host app | Recommended plugin | Verdict |
 |---|---|---|---|
-| `0.2.2-rc.1` | Android app 1.5.0 · BUILD `2026.11.06-4566c0be` | **≥ 0.4.10** | ✅ Verified on AVD; do not use 0.4.6 or older |
-| `0.2.1-rc.5` | — (no recorded mapping) | 0.4.10 (0.4.4 – 0.4.9 also work) | ✅ `compatible` |
-| `0.2.1-rc.2` | — (no recorded mapping) | 0.4.10 (minimum declared line) | ✅ `compatible` |
-| Other / unlisted | — | 0.4.10 | ⚪ `unknown`: no settings takeover, `safe` degradation; force with `localStorage['dshm-compat'] = 'safe'` |
+| `0.2.2-rc.1` | Android app 1.5.0 · BUILD `2026.11.06-4566c0be` | **≥ 0.4.12** | ✅ Verified on AVD; do not use 0.4.6 or older |
+| `0.2.1-rc.5` | — (no recorded mapping) | 0.4.12 (0.4.4 – 0.4.11 also work) | ✅ `compatible` |
+| `0.2.1-rc.2` | — (no recorded mapping) | 0.4.12 (minimum declared line) | ✅ `compatible` |
+| Other / unlisted | — | 0.4.12 | ⚪ `unknown`: no settings takeover, `safe` degradation; force with `localStorage['dshm-compat'] = 'safe'` |
 
 **Declaration semantics**: `engines.dsh` drives install-time checks (the core's `evaluatePluginCompatibility()` reads only it and `peerDependencies`). `dsh.compatibility.dshReleases` is a per-release declaration for marketplace indexing, **not** used at install time; unlisted versions count as `unknown`. Both fields have been `>=0.2.1-rc.2` in every release, so "installs successfully" does not mean "adapted".
 
-The tables are derived from each release tag's `package.json` (e.g. `git show v0.4.8:package.json`) plus the 0.4.7 / 0.4.8 test records; the three 0.2.2-rc.1 regressions are listed in the [0.4.7 changelog](CHANGELOG.md).
+The tables are derived from each release tag's `package.json` (e.g. `git show v0.4.8:package.json`) plus the 0.4.7 – 0.4.12 test records; the three 0.2.2-rc.1 regressions are listed in the [0.4.7 changelog](CHANGELOG.md).
 
 ### 0.4.7 adaptation notes
 
@@ -127,6 +129,14 @@ The tables are derived from each release tag's `package.json` (e.g. `git show v0
 - **Settings page**: all three presets use the same phone full-screen layout; tablets and desktops keep the official two-column dialog. Settings dialogs are identified by `data-shortcut-modal="settings"`, so the sidebar drawer is never mistaken for one.
 - **Diagnostics**: read `window.__dshmCompat` from the console / CDP (`mode`, `settingsPath`, `settingsSlotSeen`, `dialogContract`, `engineVersion`, `reason`).
 - **Rollback**: `localStorage['dshm-compat'] = 'legacy'` forces the old injection path, `'safe'` disables settings takeover, `localStorage['dshm-settings-slot'] = 'off'` disables only the slot path. The full-screen settings layout is gated by the source constant `SETTINGS_UNIFIED_FULLSCREEN`.
+
+### 0.4.12 changes
+
+- **Dock style layers fully isolated**: the transparent dock is back to the original five destinations (Sessions / Automations / Plugins / Workbench / Settings, no paging); the capsule dock keeps its per-page items. The paperclip is injected only in capsule mode, leaving the official ⊕ row untouched in transparent mode.
+- **Intermittent ⊕ fix**: a real `pointerdown` clears a stale ghost state (`ensureAddMenuCoherent` + generation counter), and the mask ignores clicks for 250 ms so a double tap no longer opens and immediately closes the panel; transparent and capsule behave identically.
+- **Native dialogue body and commands**: date separators, tool chips, code-block collapse, thinking / step rows, terminal-card grid and wrap toggles are gone; the dialogue page injects no nodes and tags nothing. Typing `/` uses the same self-drawn add panel as ⊕.
+- **Dark-mode polish**: capsule shadow and 1 px edge highlight use the theme blue; the top TAB gets a gray track + light-gray thumb + outlines; layout-mode / dock-style selected states match the official Appearance cards via official tokens (both themes); user message bubbles turn dark blue by overriding only `--dsw-specific-bubble`.
+- **Docs and gates**: technical notes §3.19–§3.24, the capsule doc, token / official-attribute registries and unit tests are in sync; `npm run check` is green.
 
 ### 0.4.10 changes
 
