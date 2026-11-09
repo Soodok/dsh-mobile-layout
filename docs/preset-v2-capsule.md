@@ -167,3 +167,46 @@
 1. 平板（短边 > 600）走原生布局，本样式完全不激活（已用 `Pixel_Tablet_API_35` 实测：`data-dshm-mode=null`、无胶囊节点）。
 2. 官方页签行宽度由外部给定（769px 量级），无法用 CSS 居中，因此采用「透明化 + 自绘」而不是改造官方那一行。
 3. 深色只能通过 App 内「外观」切换，系统夜间模式不生效。
+
+## 思考链与步骤折叠
+
+思考行（`思考 / Thinking`）与命令行（`运行命令 / 执行了命令`）在视觉上分开：思考行用弱化色 + 左侧细线（13px），命令行保持胶囊。点步骤头「已完成，用时 N 秒」可把这一步的**过程块**（思考行 / 命令行 / 代码块 / 输出块）整体收起，最终回答始终可见。
+
+<table>
+  <tr>
+    <th align="center">展开（v2）</th>
+    <th align="center">收起（v2）</th>
+  </tr>
+  <tr>
+    <td align="center"><img src="assets/screens/capsule/12-thinking-expanded.png" width="240"></td>
+    <td align="center"><img src="assets/screens/capsule/13-thinking-collapsed.png" width="240"></td>
+  </tr>
+  <tr>
+    <td valign="top">思考行弱化、命令行胶囊化、代码块带「收起 / 展开」开关。</td>
+    <td valign="top">过程块收起后只剩「已完成，用时 3 秒」+ <code>output in &lt;path&gt;</code> 一行摘要 + 最终回答。</td>
+  </tr>
+</table>
+
+三档预设共用（样式作用域是 `html[data-dshm-preset]`，由 `apply()` 里的独立轮询 + MutationObserver 驱动，不依赖移动布局的同步链路）：
+
+<table>
+  <tr>
+    <th align="center">default（DSH 原生）</th>
+    <th align="center">classic（融合）</th>
+  </tr>
+  <tr>
+    <td align="center"><img src="assets/screens/capsule/14-thinking-default.png" width="240"></td>
+    <td align="center"><img src="assets/screens/capsule/15-thinking-classic.png" width="240"></td>
+  </tr>
+  <tr>
+    <td valign="top">原生布局下同样能收起过程块（实测 hidden=6）。</td>
+    <td valign="top">融合预设下同样生效（hidden=6、思考行 2、代码块开关 1）。</td>
+  </tr>
+</table>
+
+**实现要点**
+
+- 折叠状态存在模块内的 `Set`（key = 步骤头文本 + 序号），同步时按状态重放，React 重渲染不会把状态冲掉；
+- `MutationObserver`（rAF 去抖）在每次 DOM 提交后立即重放，避免「点了收起又弹回来」；
+- 只藏过程块，不藏整条消息 —— 否则同一条目里的最终回答会一起消失（踩过）；
+- 收起代码块时连外层卡片一起隐藏，不留空壳。
