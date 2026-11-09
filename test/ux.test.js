@@ -722,3 +722,16 @@ test('源码契约：空会话标记挂 html、随 clearAnchors 清理且被 cla
   assert.match(css, /--dshm-classic-gutter/)
   assert.match(css, /border: 1px dashed/)
 })
+
+test('源码契约：深色用户消息气泡用主题蓝染暗（所有预设、仅手机形态）', () => {
+  const css = fs.readFileSync(path.join(__dirname, '..', 'lib', 'client.js'), 'utf8')
+  assert.ok(
+    css.includes('html[data-dshm-form="phone"] body[data-ds-dark-theme] [data-message-bubble]'),
+    '气泡改色必须同时限定手机形态与深色，桌面/浅色不受影响',
+  )
+  assert.match(
+    css,
+    /--dsw-specific-bubble: color-mix\(in srgb, var\(--dsw-alias-state-business-primary, #7aaaff\) 30%, var\(--dsw-alias-bg-base, #151517\)\)/,
+    '应覆盖官方气泡底变量为主题蓝混合的暗蓝色，而不是写死颜色',
+  )
+})

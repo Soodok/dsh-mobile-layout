@@ -135,7 +135,7 @@ MutationObserver 在 mobile 模式下全局监听，回调里按需分发到各 
 | 设置页手机化 | `tagSettings` | 官方设置对话框改全屏：品牌行 + 可横滑页签 + 返回键；自带页签滑动手势；仅最左页签右滑跟手退出（`settingsPagerCanConsume` 按翻页边界让路），开合补滑动过渡 |
 | 设置页接管（预设感知） | `syncSettingsPanel` / `settingsFrameMetrics` | 双形态：融合 / 悬浮钉全屏、原生钉居中悬浮窗（10vh 留白、等宽 gutter、安全区叠加）；清场时逐键还原官方内联样式 |
 | 布局模式选择器 | `syncLayoutPicker` / `syncLayoutPickerState` / `syncLayoutPickerTexts` | 三卡片挂官方滚动容器、不订阅 state；选中态同步顺带刷文案，locale/change 后显式补刀（i18n 实时刷新） |
-| 底栏样式与收起 | `resolveDockStyle` / `syncDockMarker` / `V2Nav` 的把手 | 透明（默认）/ 胶囊两档：`data-dshm-dock="capsule"` 打开样式层，`data-dshm-dock-collapsed` 只藏五个导航键、把手留在原位；面板页让位、设置弹窗底边、工作台右栏底部统一消费 `--dshm-v2-nav-total`；持久化在 `dshm-dock-style` / `dshm-dock-collapsed` |
+| 底栏样式与收起 | `resolveDockStyle` / `syncDockMarker` / `dockVisibleItems` / `V2Nav` 的把手 | 透明（默认）/ 胶囊两档：`data-dshm-dock="capsule"` 打开样式层，`data-dshm-dock-collapsed` 只藏五个导航键、把手留在原位；**导航项按样式层分叉**（`dockVisibleItems`：透明 = `navSlots` 五项、无翻页；胶囊 = `dockPages` 按页换项）；面板页让位、设置弹窗底边、工作台右栏底部统一消费 `--dshm-v2-nav-total`；持久化在 `dshm-dock-style` / `dshm-dock-collapsed` |
 | Composer 融合 | `syncComposerPad` / `syncComposerFrame` / `syncComposerClip` | 输入区去边框融合底部面板；权限 / 模型 chip 留输入行；滚动容器全预设收敛（隐藏滚动条 + 取消 gutter 沟槽） |
 
 ## 6. 模块地图（函数分组）

@@ -53,6 +53,7 @@ const {
   readDockPrefs,
   writeDockPrefs,
   dockPages,
+  dockVisibleItems,
   DOCK_STYLE_PLAIN,
   DOCK_STYLE_CAPSULE,
   DOCK_STYLE_KEY,
@@ -347,6 +348,95 @@ test('dockPages：退化输入不抛，且两页不重复', () => {
   assert.deepEqual(pages.page1, ['sessions', 'plugins'])
   const all = [...pages.page1, ...pages.page2]
   assert.equal(new Set(all).size, all.length)
+})
+
+/**
+ * 样式层 → 导航项（0.4.12）。
+ *
+ * 32563dc 把渲染从 `slots.map` 换成 `pageItems.map` 时没有按 `data-dshm-dock`
+ * 分叉，透明底栏被胶囊的「按页换项」覆盖（用户实拍：透明底栏出现「更多」，
+ * 设置 / 自动化 / 工作台被折叠）。这里锁死两条路径：透明 = navSlots 原样；
+ * 胶囊 = dockPages。
+ */
+test('dockVisibleItems：透明底栏 = navSlots 原样，没有翻页', () => {
+  const slots = ['sessions', 'automation', 'plugins', 'workbench', 'settings']
+  const visible = plain(dockVisibleItems({
+    capsule: false,
+    slots,
+    chipFlags: { conversation: true, permission: true, model: true },
+    page: 2,
+  }))
+  assert.deepEqual(visible.items, slots)
+  assert.equal(visible.canPage, false)
+  assert.equal(visible.items.includes('more'), false, '透明底栏不应出现「更多」')
+})
+
+test('dockVisibleItems：透明底栏能力缺失时少一格，不补位', () => {
+  const visible = plain(dockVisibleItems({ capsule: false, slots: ['sessions', 'plugins', 'settings'] }))
+  assert.deepEqual(visible.items, ['sessions', 'plugins', 'settings'])
+  assert.equal(visible.canPage, false)
+})
+
+test('dockVisibleItems：胶囊会话页 = 按页换项的第一页', () => {
+  const visible = plain(dockVisibleItems({
+    capsule: true,
+    slots: ['sessions', 'automation', 'plugins', 'workbench', 'settings'],
+    chipFlags: { conversation: true, permission: true, model: true },
+    page: 1,
+  }))
+  assert.deepEqual(visible.items, ['sessions', 'plugins', 'permission', 'model', 'more'])
+  assert.equal(visible.canPage, true)
+})
+
+test('dockVisibleItems：胶囊第二页 & 非会话页补位', () => {
+  const slots = ['sessions', 'automation', 'plugins', 'workbench', 'settings']
+  const page2 = plain(dockVisibleItems({
+    capsule: true,
+    slots,
+    chipFlags: { conversation: true, permission: true, model: true },
+    page: 2,
+  }))
+  assert.deepEqual(page2.items, ['settings', 'automation', 'workbench', 'back'])
+  const panel = plain(dockVisibleItems({ capsule: true, slots, chipFlags: { conversation: false }, page: 1 }))
+  assert.deepEqual(panel.items, ['sessions', 'plugins', 'settings', 'automation', 'workbench'])
+  assert.equal(panel.canPage, false)
+})
+
+test('dockVisibleItems：退化输入不抛，且不产生重复项', () => {
+  assert.doesNotThrow(() => dockVisibleItems(null))
+  assert.doesNotThrow(() => dockVisibleItems(undefined))
+  assert.doesNotThrow(() => dockVisibleItems({ capsule: 'yes' }))
+  const visible = plain(dockVisibleItems({ capsule: true, slots: null, chipFlags: null }))
+  assert.deepEqual(visible.items, ['sessions', 'plugins'])
+})
+
+test('源码契约：透明导航不回到胶囊的按页换项', () => {
+  const at = source.indexOf('function dockVisibleItems(')
+  assert.ok(at > 0, '找不到 dockVisibleItems')
+  const block = source.slice(at, at + 900)
+  assert.ok(block.includes('if (data.capsule !== true)'), '透明分支必须先判断样式层')
+  assert.ok(block.includes('return { items: slots.slice(), canPage: false };'), '透明必须是 navSlots 原样、无翻页')
+  assert.ok(source.includes('const visibleNav = dockVisibleItems('), 'V2Nav 必须走样式层分叉')
+})
+
+test('源码契约：回形针只在胶囊样式下创建', () => {
+  const at = source.indexOf('function syncComposerAttach(')
+  assert.ok(at > 0, '找不到 syncComposerAttach')
+  const block = source.slice(at, at + 3000)
+  assert.ok(block.includes("getAttribute('data-dshm-dock') !== DOCK_STYLE_CAPSULE"), '必须先判样式层')
+  assert.ok(block.indexOf('DOCK_STYLE_CAPSULE') < block.indexOf('insertBefore('), '门禁必须在插入之前')
+})
+
+test('源码契约：加号面板幽灵态自愈 + 遮罩防抖 + ⊕ 点前修复', () => {
+  assert.ok(source.includes('function ensureAddMenuCoherent('), '缺少幽灵态自愈')
+  assert.ok(source.includes('addMenuGhostEpoch'), '延迟收尾必须带世代号')
+  assert.ok(source.includes('v2AddMenuOpenedAt'), '遮罩防抖需要打开时刻')
+  assert.ok(source.includes('if (Date.now() - v2AddMenuOpenedAt < 250) return;'), '遮罩 250ms 防抖')
+  const intentAt = source.indexOf('const onAddChipIntent = ')
+  assert.ok(intentAt > 0, '缺少 ⊕ 真实按下的捕获处理')
+  const block = source.slice(intentAt, intentAt + 800)
+  assert.ok(block.includes('ensureAddMenuCoherent(true)'), '点 ⊕ 必须先修幽灵态')
+  assert.ok(block.includes('addMenuGhostEpoch += 1'), '点 ⊕ 必须作废旧收尾')
 })
 
 test('CSS 契约：把手是**一条**横杠（设计稿），且与 bus 表同语法', () => {

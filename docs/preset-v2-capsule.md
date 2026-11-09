@@ -2,10 +2,12 @@
 
 > v2 悬浮布局之上的**第二套底栏样式**：底栏浮起成圆角胶囊，顶部是悬浮卡片头，输入区合成一行。
 > 入口：**设置 → 通用设置 → 布局模式 → 悬浮 → 底栏样式 → 胶囊**（默认仍是「透明底栏」，老外观逐像素不变）。
+> **「按页换项」是胶囊专属**：会话页 会话 / 插件 / 工作权限 / 模型 / 更多，面板页由「更多」里的目的地补位；透明底栏始终是 会话 / 自动化任务 / 插件 / 工作台 / 设置 五项，没有第二页。
 
 其他预设：[原生](preset-default.md) ｜ [融合](preset-classic.md) ｜ [v2 悬浮](preset-v2.md) ｜ 回到 [README](../README.md)
 
 > 截图为 `Medium_Phone_API_35` 模拟器（物理 1080×2400，CSS 视口 457×962，时区 Asia/Shanghai）的整机实拍，浅色主题（深色单独一节）。
+> **0.4.12 起对话正文交还 DSH 原生渲染**：以下截图拍摄于 0.4.9–0.4.11，消息区里的日期分隔、工具 chip、代码块折叠开关等属于历史形态；当前只保留外壳（卡片头 / 分段控件 / 输入区 / 底栏 / 设置页）。
 > 根属性：`html[data-dshm-mode="mobile"][data-dshm-preset="v2"][data-dshm-dock="capsule"]`。
 
 ---
@@ -93,21 +95,13 @@
   </tr>
 </table>
 
-## 对话区
+## 对话正文
 
-<table>
-  <tr>
-    <th align="center">居中日期分隔 + 工具调用 chip + 代码块卡片</th>
-  </tr>
-  <tr>
-    <td align="center"><img src="assets/screens/capsule/09-dialogue.png" width="320"></td>
-  </tr>
-  <tr>
-    <td valign="top">
-      「11月2日」居中显示（<code>::before</code> 画在当天第一条消息上方，不插入节点）；工具调用渲染成 <code>执行了命令</code> 小胶囊；代码块独立成卡片；操作行按钮统一 2em。
-    </td>
-  </tr>
-</table>
+**对话页正文完全交给 DSH 原生渲染**：插件不注入节点、不打标、不改字体/行高/间距、不画日期分隔、不接管代码块或步骤折叠，消息气泡、时间戳、操作行、工具调用行都用官方原样。胶囊样式只改外壳（卡片头、分段控件、输入区、底栏、设置页），不碰消息列表内部。
+
+> 唯一的例外：**深色下用户消息气泡的底色**改为暗蓝（只覆盖官方变量 `--dsw-specific-bubble`，主题蓝 30% 混底），因为官方深色底 `#2c2c2e` 与页面/卡片几乎没有区分度。其余主题/预设下气泡保持官方原色。
+
+> 0.4.9–0.4.11 期间的「居中日期 / 工具 chip 胶囊 / 代码块收起 / 思考行弱化 / 步骤折叠」已全部移除；对应截图仅作历史存档，不再代表当前行为。
 
 ## 换页与设置
 
@@ -136,7 +130,7 @@
     <td align="center"><img src="assets/screens/capsule/11-dark.png" width="320"></td>
   </tr>
   <tr>
-    <td valign="top">卡片头、分段控件、代码块、输入卡、底栏全部跟随深色 token；正文在深色下字号 +1px。系统夜间模式不影响该壳，必须在 App 内切换外观。</td>
+    <td valign="top">卡片头、分段控件、输入卡、底栏跟随深色 token；胶囊的阴影与 1px 外缘高光改用主题蓝（深色下黑色阴影几乎不可见），顶部 TAB 为灰轨道（<code>bg-layer-1</code>）+ 浅灰滑块（<code>bg-layer-3</code>），轨道与滑块各带 1px 灰描边，选中文字保持主题蓝。对话正文由 DSH 原生主题渲染，插件不再改字号。系统夜间模式不影响该壳，必须在 App 内切换外观。</td>
   </tr>
 </table>
 
@@ -167,98 +161,3 @@
 1. 平板（短边 > 600）走原生布局，本样式完全不激活（已用 `Pixel_Tablet_API_35` 实测：`data-dshm-mode=null`、无胶囊节点）。
 2. 官方页签行宽度由外部给定（769px 量级），无法用 CSS 居中，因此采用「透明化 + 自绘」而不是改造官方那一行。
 3. 深色只能通过 App 内「外观」切换，系统夜间模式不生效。
-
-## 思考链与步骤折叠
-
-思考行（`思考 / Thinking`）与命令行（`运行命令 / 执行了命令`）在视觉上分开：思考行用弱化色 + 左侧细线（13px），命令行保持胶囊。点步骤头「已完成，用时 N 秒」可把这一步的**过程块**（思考行 / 命令行 / 代码块 / 输出块）整体收起，最终回答始终可见。
-
-<table>
-  <tr>
-    <th align="center">展开（v2）</th>
-    <th align="center">收起（v2）</th>
-  </tr>
-  <tr>
-    <td align="center"><img src="assets/screens/capsule/12-thinking-expanded.png" width="240"></td>
-    <td align="center"><img src="assets/screens/capsule/13-thinking-collapsed.png" width="240"></td>
-  </tr>
-  <tr>
-    <td valign="top">思考行弱化、命令行胶囊化、代码块带「收起 / 展开」开关。</td>
-    <td valign="top">过程块收起后只剩「已完成，用时 3 秒」+ <code>output in &lt;path&gt;</code> 一行摘要 + 最终回答。</td>
-  </tr>
-</table>
-
-三档预设共用（样式作用域是 `html[data-dshm-preset]`，由 `apply()` 里的独立轮询 + MutationObserver 驱动，不依赖移动布局的同步链路）：
-
-<table>
-  <tr>
-    <th align="center">default（DSH 原生）</th>
-    <th align="center">classic（融合）</th>
-  </tr>
-  <tr>
-    <td align="center"><img src="assets/screens/capsule/14-thinking-default.png" width="240"></td>
-    <td align="center"><img src="assets/screens/capsule/15-thinking-classic.png" width="240"></td>
-  </tr>
-  <tr>
-    <td valign="top">原生布局下同样能收起过程块（实测 hidden=6）。</td>
-    <td valign="top">融合预设下同样生效（hidden=6、思考行 2、代码块开关 1）。</td>
-  </tr>
-</table>
-
-**实现要点**
-
-- 折叠状态存在模块内的 `Set`（key = 步骤头文本 + 序号），同步时按状态重放，React 重渲染不会把状态冲掉；
-- `MutationObserver`（rAF 去抖）在每次 DOM 提交后立即重放，避免「点了收起又弹回来」；
-- 只藏过程块，不藏整条消息 —— 否则同一条目里的最终回答会一起消失（踩过）；
-- 收起代码块时连外层卡片一起隐藏，不留空壳。
-
-## 与桌面端对齐（进行中）
-
-桌面端的步骤行是「图标 + 标签 · 单行摘要（省略号）」的弱化行，手机端已按此调整：
-
-| 元素 | 桌面端 | 手机端现状 |
-|---|---|---|
-| 步骤头 | `⌄ 执行了命令` | `已完成，用时 3 秒 ⌄`（同款折叠箭头） |
-| 思考行 | `⊠ 思考 · The user says…` | `⊠ 已完成分析`（弱化行、13px；摘要文字官方默认不展开） |
-| 命令行 | `>_ 运行命令 · Watch root attributes…` | `>_ 执行了命令`（已从灰底胶囊改为弱化行） |
-| 代码卡 | 边框卡片 + 复制 | 边框卡片 + 复制 + 「收起 / 展开」 |
-
-截图：`16-thinking-desktop-parity.png`（思考行）、`17-cmd-row-parity.png`（命令行 + 代码卡）。
-
-**仍与桌面端不同的两点**（需要官方组件行为支持，不是纯样式）：
-1. 桌面端行内会显示摘要文字（`· <summary>`），手机端折叠态只显示标签；
-2. 桌面端思考行带分隔点与截断摘要，手机端由官方组件决定是否渲染摘要。
-
-### 桌面端源码调查（本轮）
-
-- 桌面端 UI 在 `D:\Apps\DSH\resources\app.asar`（单文件 213 MB，无 source map），**没有可直接照抄的组件源码**；`app.asar.unpacked` / `runtime` 里只有运行时与文档。
-- 在 asar 里能定位到的是**文案键**：`message.stepProcess.done.thinking = 已完成分析`、`done.commands = 执行了命令`、`prepare.commands = 准备运行命令` 等 —— 说明桌面与手机用的是**同一套 step-process 组件族**，只是构建产物不同。
-- 手机端 DOM 实测也确实存在同族节点：`思考 ×5`、`运行命令 ×1`、`已完成分析 ×3`、`执行了命令 ×3`，结构为「图标 + 标签 + 分隔点 + 摘要」，与桌面截图一致。
-- 因此差异不在「有没有这个组件」，而在**组件何时渲染摘要**：手机端折叠态只渲染标签，桌面端渲染「标签 · 摘要」。
-
-结论：纯 CSS 能对齐的部分（弱化色、13px、透明底、折叠箭头、代码卡边框+复制）已经对齐；再往下要「标签 · 摘要」这一层，只能自绘行内容（从官方节点取摘要文本，风险中等）。
-
-### 行内摘要（本轮）
-
-官方行结构本身就是「图标 + 标签 + 分隔点 + 摘要」（实测 `_row` 下：`_leading` 图标、`_content` 内 `标题 / 分隔点 / 摘要`），只是手机端没有间距与截断。本轮补上：
-
-- 标签与摘要之间 `margin-right: 0.3em`（实测 3.9px），让分隔点两侧有呼吸；
-- 摘要 `overflow: hidden; text-overflow: ellipsis; white-space: nowrap`，长摘要单行截断。
-
-实测：`titleMargin 3.9px`、`summaryEllipsis ellipsis`、摘要宽度 314px（此前 76px，被压缩）。截图 `19-row-summary-parity.png`。
-
-### 照抄桌面端源码（本轮，已定位到源文件）
-
-桌面端源码位置：`C:\Users\lzh17\.dsh\profiles\node_modules\@deepseek-ai\dsh-client-ui-chat\lib\client.js`
-其中 `ReasoningRow.module.css`（`css$8`）与 `ReasoningRow({ text, running, t })` 组件就是「思考行」。
-
-照抄到本插件的数值（用自有属性打标后套用，不依赖官方哈希类名）：
-
-| 桌面端规则 | 取值 | 本插件实现 |
-|---|---|---|
-| `.lcKema_separator` | 2×2、`border-radius:1px`、`margin:0 8px`、背景 `label-caption` | `[data-dshm-row-sep]`：`0.125rem` 方形、`margin: 0 0.5rem`、同色 |
-| `.lcKema_summary` | `min-width:0`、`flex:auto`、`nowrap`、13px、`label-tertiary` | `[data-dshm-row-summary]` 同值 |
-| `.lcKema_summaryText` | `text-overflow:ellipsis`、`display:block`、`overflow:hidden` | `[data-dshm-row-summary] > span` 同值 |
-| `.lcKema_title` | `font-weight:400` | `[data-dshm-row-title]` |
-| 折叠行高 | `calc(24px + …)` | 官方自带，未覆盖 |
-
-AVD 实测（计算值）：分隔点 `2px`、`margin 0 8px`、背景 `rgb(173,178,184)`；摘要 `13px`、`rgb(129,133,140)`、`ellipsis`；标题 `font-weight 400`。

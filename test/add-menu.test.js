@@ -46,7 +46,7 @@ test('接管以 DOM 为准，并有心跳兜底（状态脱节可自愈）', () 
   assert.ok(/countSectionTitles\(listbox\)/.test(body), '结构不符时不得接管（保留官方原生菜单）')
 
   // 心跳：200ms 巡检 + 双向修状态
-  assert.ok(/window\.setInterval\([\s\S]{0,600}tryTakeOverAddMenu\(\);[\s\S]{0,80}\}, 200\)/.test(source), '应每 200ms 巡检一次接管机会')
+  assert.ok(/window\.setInterval\([\s\S]{0,900}tryTakeOverAddMenu\(\);[\s\S]{0,80}\}, 200\)/.test(source), '应每 200ms 巡检一次接管机会')
   assert.ok(/if \(state\.popoverOpen\) setState\(\{ popoverOpen: false \}\)/.test(source), '浮层已消失而状态仍为 true 时应反向自愈')
 })
 

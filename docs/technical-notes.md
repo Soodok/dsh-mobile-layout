@@ -468,4 +468,104 @@ WebView JS **没有**"不弹键盘就知道高度"的 API；来源按优先级�
 | 收起态（浅） | `.tmp-shot/avd/mx-03-collapsed-light.png` | 底栏只剩「权限 · 把手 · 模型」一行，页面让位同步收缩 |
 | 设置页（浅） | `.tmp-shot/avd/p64-01-settings.png` | 五项补位（会话/插件/设置/自动化任务/工作台），内容不被遮挡 |
 
-**深色未能验证**：`adb shell cmd uimode night yes` 后 App 仍为浅色（`data-ds-theme-source=system`、`color-scheme: light`），说明该壳不跟随系统夜间模式；深色需要在 App 设置里切「外观」，脚本没定位到该入口。深色样式本身（`prefers-color-scheme: dark` 下正文 +1px、代码块卡片）已随 CSS 生效，只差一张实拍。
+**深色未能验证**：`adb shell cmd uimode night yes` 后 App 仍为浅色（`data-ds-theme-source=system`、`color-scheme: light`），说明该壳不跟随系统夜间模式；深色需要在 App 设置里切「外观」，脚本没定位到该入口。深色样式本身（卡片头 / 分段控件 / 输入卡 / 底栏跟随 token）已随 CSS 生效，只差一张实拍。对话正文自 0.4.12 起完全交还官方，插件不再做深色 +1px 或代码块卡片。
+
+### 3.19 透明 / 胶囊样式层彻底隔离 + ⊕ 偶现无响应（0.4.12，2026-11-09）
+
+**① 导航项模型必须跟样式层一起分叉。** `32563dc` 把 `slots.map(...)` 换成了 `dockPages(...)` 的「按页换项」，但没按 `data-dshm-dock` 分叉，透明底栏被胶囊的模型覆盖：五键变成 `会话/插件/工作权限/模型/更多`，设置/自动化/工作台被折叠进第二页。修法：新增纯函数 `dockVisibleItems({ capsule, slots, chipFlags, page })`——`capsule !== true` 时原样返回 `navSlots`（无翻页），否则走 `dockPages`；`V2Nav` 先解析 `dockStyle/dockCapsule` 再算项，非胶囊态把 `dockPage` 复位且不挂 Esc 监听。单测锁两边的项集合与顺序。
+
+**② 胶囊的回形针不应注入透明态。** `syncComposerAttach()` 原先无条件把 `[data-dshm-attach-btn]` 插到官方 ⊕ 行，靠同一 tick 的 `cleanupCapsuleArtifacts()` 删掉——窗口内是未加样的裸按钮，且让官方 ⊕ 行发生多余 DOM 变更。修法：插入前判断 `data-dshm-dock === capsule`，否则只清理残留、直接 return。
+
+**③ ⊕「偶现无响应」的三条真因（AVD 可复现）。**
+
+- **幽灵态**：`data-dshm-v2-addmenu` 把官方弹层隐成 `opacity:0`，而 `addMenuTakeOverAllowed()` 在幽灵存在时拒绝接管。只要幽灵比自绘面板多活一拍，点 ⊕ 就是「官方弹层开了但不可见、自绘面板不接管」。注入幽灵后实测 `pop=1, opacity=0, panel=0, phase=suppressed`；清掉幽灵才恢复（`phase=enter, panel=1`）。
+- **延迟收尾误伤新弹层**：`releaseGhost()` 240ms 后无条件 `closeOfficialAddMenu()`。用户在这窗口内重新点 ⊕，新弹层会被旧定时器关掉。
+- **双击 / 连点被遮罩吃掉**：面板一打开遮罩就盖住输入行，第二次点落在遮罩上 = 关闭。实测两次点击间隔 40–600ms，7/7 最终都是「面板关闭」，视觉上就是没反应。
+
+修法（四层）：
+
+1. `document` 捕获阶段监听 `[data-dshm-add-chip]` 的真实 `pointerdown`：记录 `addMenuUserIntentAt`、递增 `addMenuGhostEpoch`、取消旧收尾定时器、调 `ensureAddMenuCoherent(true)`（幽灵在且面板不在 → 摘幽灵；300ms 后仍无可见弹层/面板 → 补一次重开）。胶囊自绘 ⊕ 与 `openOfficialAddMenu()` 也调用同一个修复函数。
+2. `releaseGhost(popAtClose)` 带世代号 + 只关「离开时那一个」弹层；`dispatchAddOption()` 的 200ms 收尾同样带世代号。
+3. 遮罩 `onClick` 在 `v2AddMenuOpenedAt` 后 250ms 内忽略——双击最终保持打开。
+4. 200ms 心跳在无弹层且关闭/派发均超过 500ms 时自愈幽灵属性；`closeAddMenuForComposerTap()` 的 400ms 吞事件放行 `[data-dshm-add-chip]`。
+
+**验证口径**：AVD 上 60 次「点开→点遮罩关」风暴 0 失败；幽灵注入后单击 900ms 内出面板；60/120/200ms 双击全部保持打开；胶囊自绘 ⊕ 仍正常打开面板；`npm run check` 全绿（299 pass）。
+
+
+### 3.20 对话正文交还 DSH 原生渲染（0.4.12，2026-11-09）
+
+0.4.9–0.4.11 为了对齐设计稿，插件在对话正文里做了一整套接管：居中日期分隔（`::before`）、工具调用 chip 胶囊、代码块卡片与「收起 / 展开」按钮、思考行 / 命令行打标、步骤级折叠、消息时间与操作行样式、正文行高 / 段落间距 / 代码块限高，以及深色正文 +1px。
+
+这些做法的问题：① 全靠叶子文本 / 结构启发式认节点，官方一次改文案或结构就可能误伤；② 每次 DOM 提交都要重放，流式输出时等于给对话页加了一层全量子树扫描；③ 注入的按钮 / 属性与官方 React 重渲染互相打架，出现「收起又弹回」「代码块卡片留空壳」等状态问题；④ 用户明确要求正文不要接管。
+
+本轮全部移除：
+
+- JS：删除 `syncMessageMeta` / `syncToolChips` / `syncMessageDates` / `syncCodeBlockToggles` / `syncStepRows` / `syncStepCollapse` / `tagRowParts` / `findMessageItem` 与 `stepCollapsed`；
+- 观察器：`startDialogueWatchers` 改名为 `startCapsuleReclaimWatcher`，只负责回收胶囊自绘控件（根属性变化时触发 + 1.2s 兜底轮询），不再监听 `document.body` 子树（流式输出每帧都会触发它）；
+- CSS：删除 `[data-dshm-center]` 下的正文排版 / pre / 段落 / 列表 / 引用块规则、`[data-dshm-msg-*]`、`[data-dshm-tool-chip]`、`[data-dshm-date-label]`、`[data-dshm-code-*]`、`[data-dshm-think|cmd]`、`[data-dshm-step-hidden]`、`[data-dshm-row-*]`、`.dshm-code-toggle`、深色 +1px；
+- 清理链：`cleanupCapsuleArtifacts` / `clearAnchors` 不再扫对话相关节点与属性。
+
+**边界**：`[data-dshm-center]` 锚点本身保留（布局、hero 位移、统计带、空态分界线仍要用它），但不改它内部任何消息节点的样式或结构。
+
+**验证**：AVD 上对话页 DOM 无任何 `data-dshm-msg-*` / `data-dshm-code-*` / `data-dshm-think|cmd|row-*` 标记，无 `.dshm-code-toggle` 节点；日期、工具行、代码块、操作行与原生预设一致；`npm run check` 全绿。
+
+### 3.21 对话页的命令卡片交还官方；`/` 与 ⊕ 保持一致（0.4.12，2026-11-09）
+
+**① 命令结果卡片（`[data-terminal]`）**：插件曾把 bash / pwsh 命令卡片重排成三列网格（目录 / 退出码 / 复制一行、命令整宽不折行），并在 body 下建一个固定层放「自动换行 / 取消自动换行」按钮（`data-dshm-term-layer` + `data-dshm-terminal-wrap` + `localStorage['dshm-terminal-wrap']`，用官方复制键的 rect 定位）。本轮全部删除，命令卡片的头部布局、命令折行、复制键都由官方渲染；插件不再注入浮层按钮，也不再持久化换行偏好。
+
+**② 指令菜单（输入框敲 `/`）与 ⊕ 保持一致**：官方 `/` 菜单与 ⊕ 加号面板复用同一个 `[role="listbox"]` 浮层，所以两者走同一套接管逻辑——`V2AddPanel` 只凭「有分组标题」就接管，`/` 与 ⊕（含胶囊自绘 ⊕）看到的都是自绘的「附件 + 添加 + 指令」抽屉，内容与交互完全一致。**不按触发来源区分**（曾加过 `addMenuChipIntentAt` 门禁让 `/` 保持官方宫格，按用户要求撤回）：两套外观并存反而更容易让人以为是两套菜单。
+
+**验证（AVD）**：敲 `/` → `addPanel=1, ghost=true`，自绘面板与 ⊕ 相同；胶囊自绘 ⊕ → `addPanel=1`；命令卡片 `[data-dshm-term-layer]=0`、`data-dshm-terminal-wrap` 不存在。
+
+### 3.22 深色胶囊样式的浮起关系（0.4.12，2026-11-10）
+
+**① 深色判定用官方主题标记，不靠 prefers-color-scheme。** 该壳不跟随系统夜间模式（深色在 App 内切），实测：
+- `html[data-ds-theme-source="dark"]`（显式深色；跟随系统时为 `system`）；
+- `body[data-ds-dark-theme]`（深色下存在的空属性，覆盖「跟随系统且系统为深色」）。
+
+两条都登记在 `contracts/official-selectors.json`。CSS 侧用 `html[...][data-ds-theme-source="dark"]` 与 `html[...] body[data-ds-dark-theme]` 两个选择器覆盖。
+
+**② 胶囊阴影改用主题蓝。** 深色底是 `#151517`，黑色阴影几乎不可见。胶囊（卡片头 / 输入卡 / 底栏）的阴影改为 `0 6px 20px color-mix(in srgb, var(--dsw-alias-state-business-primary, #7aaaff) 55%, transparent)`。主题蓝 token 在深色下是 `#7aaaff`，与底栏选中态、发送键同一色号；浅色下该规则不生效。`color-mix` 由当前 WebView（Chrome 156 实测）支持；不支持的宿主会忽略该声明，退回黑色阴影，不会把阴影整条弄没。
+
+**③ 外缘高光。** 「胶囊」是输入卡 + 底栏两块拼成的一个视觉整体，直接给两块各描一圈 1px 会在接缝处画出一条横线。改用**定向 inset 阴影**：输入卡描上 / 左 / 右，底栏描下 / 左 / 右，合成一条连续的外轮廓，接缝处留空。顶部卡片头是独立卡片，没有接缝，描完整四边。颜色为主题蓝 32%。值写进运行时变量（`--dshm-v2-card-rim` / `--dshm-v2-nav-rim` / `--dshm-v2-header-rim`），因为输入卡基规则的 `box-shadow` 带 `!important`，改值比再叠一条 `!important` 稳。
+
+**④ 顶部 TAB 分段控件。** 深色下官方 `--dsw-alias-bg-secondary` 缺席，轨道退回 `rgba(127,127,127,0.09)`（≈ #232325），选中面 `--dsw-alias-bg-layer-2` 是 `#2c2c2e`——两者都贴在近黑底上，没有区分度。改为：
+- 轨道 `--dsw-alias-bg-layer-1`（#232324，灰）+ 1px 内描边 `--dsw-alias-border-l1`；
+- 选中滑块 `--dsw-alias-bg-layer-3`（#353638，浅灰）+ 1px 内描边 `--dsw-alias-border-l2`；
+- 选中文字继续用主题蓝（参考图的配色只取背景与描边，不动文字色）。
+
+描边用 `inset` 阴影而不是 `border`：轨道有 padding、滑块在轨道内，加真实边框会改变盒尺寸并把圆角挤歪；`inset 0 0 0 1px` 不占布局、圆角自动跟随。
+
+**验证（AVD，深色胶囊）**：轨道 `rgb(35,35,36)`、滑块 `rgb(53,54,56)`；输入卡/底栏阴影为「32% 蓝 inset 三边 + 55% 蓝 0 6px 20px」；浅色模拟：轨道 `rgba(127,127,127,0.09)`、滑块 `#fff`、阴影 `rgba(0,0,0,0.12)`；透明底栏模拟：输入卡阴影仍为黑色。`npm run check` 全绿（299 pass）。
+
+### 3.23 设置页三种选择器统一高亮（2026-11-10）
+
+同一张「通用设置」页里现在有三种单选：官方**外观**卡片（浅色 / 深色 / 跟随系统）、插件的**布局模式**（原生 / 融合 / 悬浮）与**底栏样式**（透明 / 胶囊）。官方外观卡片的选中规则是 `._selected { background: var(--dsw-alias-bg-module-platform); border-color: var(--dsw-static-neutral-bluish-400) }`：浅色实测 `#f5f6f7` 底 + `#adb2b8` 描边，深色实测 `#353638` 底 + 同一条 `#adb2b8` 描边。插件原来的选中态用 `interactive-bg-hover` + `border-l2`（深色约 8% 白底 + 12% 白描边），在近黑底上几乎看不出选了谁；只换 `bg-layer-3` / `label-tertiary` 又会在浅色下偏白、描边偏深。
+
+本轮把后两者的选中态改成与外观卡片同一套 token：
+
+- `.dshm-layout-option[data-dshm-checked]`；
+- `.dshm-dock-style-option[aria-checked="true"]`（与原生预设的 `.dshm-native-style-option[aria-checked="true"]` 共规则）。
+
+`background: var(--dsw-alias-bg-module-platform, var(--dsw-alias-bg-layer-3))`、`border-color: var(--dsw-static-neutral-bluish-400, #adb2b8)`。未选中态保持原样（透明底 + 低对比描边），选中项因此有「亮边 + 主题底」两层区分；浅色 / 深色都由官方 token 自动跟随，不需要再按主题写两套。
+
+**验证（AVD）**：浅色下外观「浅色」选中 `bg rgb(245,246,247) / border rgb(173,178,184)`，布局「悬浮」、底栏「胶囊」选中计算值与之一致；切到深色后三者的计算值同步变为 `bg rgb(53,54,56) / border rgb(173,178,184)`。未选中项仍为透明底 + 低对比描边；`npm run check` 全绿。
+
+### 3.24 深色用户消息气泡改为暗蓝（2026-11-10）
+
+官方用户消息气泡是 `[data-message-bubble]`（已登记在 contracts/official-selectors.json），底色走 `var(--dsw-specific-bubble)`。深色下该 token 是 `#2c2c2e`，与页面 `#151517`、卡片面 `#2c2c2e` 几乎同色，发送的消息在长对话里看不出边界。
+
+做法：不碰官方结构，只在该气泡节点上覆盖这一个变量。
+
+```
+html[data-dshm-form="phone"] body[data-ds-dark-theme] [data-message-bubble] {
+  --dsw-specific-bubble: color-mix(in srgb, var(--dsw-alias-state-business-primary, #7aaaff) 30%, var(--dsw-alias-bg-base, #151517));
+}
+```
+
+- 选择器带 `data-dshm-form="phone"`：桌面形态不生效；三个预设都带这个形态属性（原生 `mode=default` 也带），因此「所有模式」共用同一条规则。
+- 只改变量：气泡自己的 `background: var(--dsw-specific-bubble)` 就地生效，不需要给背景加更重的选择器或 `!important`。
+- 颜色 = 主题蓝 30% + 页面底 70%，深色实测 `rgb(51,66,93)`（`color(srgb 0.201 0.258 0.363)`），仍是暗色但和背景有明确区分；浅色下规则不命中，官方气泡保持 `rgb(237,243,254)`。
+- 合约：`data-message-bubble` 与 `data-ds-dark-theme` 都已在官方依赖表登记；`test/ux.test.js` 增加源码契约锁这两点。
+
+**验证（AVD，深色）**：v2 / classic / default 三个预设的气泡计算值均为 `color(srgb 0.201176 0.257647 0.363137)`；浅色模拟为官方 `rgb(237,243,254)`；`npm run check` 全绿（300 pass）。

@@ -192,6 +192,34 @@
       "summary": "悬浮预设阴影净空"
     },
     {
+      "name": "--dshm-v2-capsule-shadow",
+      "layer": "rt",
+      "public": false,
+      "default": null,
+      "summary": "胶囊态（输入卡 + 底栏）的阴影；深色下由主题蓝着色，运行时按主题写入"
+    },
+    {
+      "name": "--dshm-v2-card-rim",
+      "layer": "rt",
+      "public": false,
+      "default": null,
+      "summary": "胶囊态输入卡的外缘高光（只描上/左/右，避开与底栏的接缝）"
+    },
+    {
+      "name": "--dshm-v2-nav-rim",
+      "layer": "rt",
+      "public": false,
+      "default": null,
+      "summary": "胶囊态底栏的外缘高光（只描下/左/右，避开与输入卡的接缝）"
+    },
+    {
+      "name": "--dshm-v2-header-rim",
+      "layer": "rt",
+      "public": false,
+      "default": null,
+      "summary": "胶囊态顶部卡片头的外缘高光（四边，独立卡片无接缝）"
+    },
+    {
       "name": "--dshm-engine-bar",
       "layer": "size",
       "public": true,

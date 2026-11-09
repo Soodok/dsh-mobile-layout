@@ -14,6 +14,16 @@
       "evidence": "宿主 0.2.2-rc.1 三种模态均带该属性，值为 settings / sidebar / shortcut-edit；AVD 实测 settings 弹窗带 data-shortcut-modal=\"settings\""
     },
     {
+      "name": "data-ds-theme-source",
+      "usedFor": "深色模式判定（显式深色）",
+      "evidence": "宿主主题系统：html[data-ds-theme-source=\"dark\"]；AVD 实测切深色后写在 html 上（浅色 / 跟随系统时为 system）"
+    },
+    {
+      "name": "data-ds-dark-theme",
+      "usedFor": "深色模式判定（含跟随系统；body 上的空属性）",
+      "evidence": "宿主主题系统：body[data-ds-dark-theme]；AVD 实测深色下存在，浅色下缺席"
+    },
+    {
       "name": "data-sidebar-collapsed",
       "usedFor": "抽屉开合状态唯一事实来源",
       "evidence": "宿主 AppFrame 属性；真机与 AVD 实测开合时切换"
