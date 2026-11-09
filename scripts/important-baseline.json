@@ -1,6 +1,6 @@
 {
   "_comment": "!important baseline（见 scripts/check-important.mjs）。减量口径：先在真机比对结构度量，再删、再跑 npm run important:baseline 收紧。",
-  "total": 615,
+  "total": 621,
   "rules": [
     {
       "hash": "f2ee765234dc",
@@ -570,7 +570,22 @@
     {
       "hash": "f29567cbf683",
       "selector": "html[data-dshm-mode=\"mobile\"][data-dshm-preset=\"v2\"][data-dshm-dock=\"capsule\"][data-dshm-stats-on] [data-dshm-stats]",
-      "count": 4
+      "count": 6
+    },
+    {
+      "hash": "06eef184c435",
+      "selector": "html[data-dshm-mode=\"mobile\"][data-dshm-preset=\"v2\"][data-dshm-dock=\"capsule\"] [data-dshm-stats]",
+      "count": 1
+    },
+    {
+      "hash": "55059bbd47a1",
+      "selector": "html[data-dshm-mode=\"mobile\"][data-dshm-preset=\"v2\"][data-dshm-dock=\"capsule\"] [data-dshm-stats] button",
+      "count": 2
+    },
+    {
+      "hash": "e375782e8765",
+      "selector": "html[data-dshm-mode=\"mobile\"][data-dshm-preset=\"v2\"][data-dshm-dock=\"capsule\"] [data-dshm-stats] button svg",
+      "count": 2
     },
     {
       "hash": "93751e43ee6d",
@@ -606,11 +621,6 @@
       "hash": "e3176ac69615",
       "selector": "html[data-dshm-mode=\"mobile\"][data-dshm-preset=\"v2\"] [data-dshm-code-block][data-dshm-code-collapsed]",
       "count": 4
-    },
-    {
-      "hash": "03074ef492eb",
-      "selector": "html[data-dshm-mode=\"mobile\"] [data-dshm-step-hidden]",
-      "count": 1
     },
     {
       "hash": "b2cca3f71fe0",
