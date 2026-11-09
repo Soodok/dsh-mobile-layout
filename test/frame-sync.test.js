@@ -34,7 +34,8 @@ test('存在性探测有独立节流常量，且粘性保存', () => {
   assert.match(body, /let overlaysPresent = false/)
   assert.match(body, /let menuPresent = false/)
   assert.match(body, /overlaysPresent \|\| nowAt - lastPresenceProbeAt >= PRESENCE_PROBE_MS/)
-  assert.match(body, /menuPresent \|\| nowAt - menuProbeAt >= PRESENCE_PROBE_MS/)
+  assert.match(body, /menuPresent \|\| menuFresh \|\| nowAt - menuProbeAt >= PRESENCE_PROBE_MS/)
+  assert.match(body, /const menuFresh = menuDueAt !== 0 && nowAt - menuDueAt <= MENU_TAG_WINDOW_MS/)
   // 探到之后必须能继续每帧维护（否则标记被官方重渲染冲掉就停住了）
   assert.match(body, /overlaysPresent = state\.settingsOpen/)
   assert.match(body, /menuPresent = menuVisible \|\| popoverMarks\.size > 0/)

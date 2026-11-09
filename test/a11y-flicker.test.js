@@ -50,7 +50,10 @@ function slice(startMarker, stopMarker) {
 test('统计浮层：observer 回调里就发现新弹窗（不等 120ms 几何链）', () => {
   const body = slice('observer = new win.MutationObserver((records) => {', 'observer.observe(doc.documentElement')
   assert.match(body, /record\.addedNodes/)
-  assert.match(body, /dialogDueAt = Date\.now\(\)/)
+  assert.match(body, /dialogDueAt = stamp/)
+  // 弹层同理：新增节点里出现 role=listbox/menu 时本帧就打标
+  assert.match(body, /menuDueAt = stamp/)
+  assert.match(body, /role === 'listbox' \|\| role === 'menu'/)
   // 深层子树的下探要有限制，别把新会话整棵树扫一遍
   assert.match(body, /childElementCount < 40/)
   // 帧内（绘制前）补打，且窗口有限
