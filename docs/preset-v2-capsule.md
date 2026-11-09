@@ -245,3 +245,20 @@
 - 摘要 `overflow: hidden; text-overflow: ellipsis; white-space: nowrap`，长摘要单行截断。
 
 实测：`titleMargin 3.9px`、`summaryEllipsis ellipsis`、摘要宽度 314px（此前 76px，被压缩）。截图 `19-row-summary-parity.png`。
+
+### 照抄桌面端源码（本轮，已定位到源文件）
+
+桌面端源码位置：`C:\Users\lzh17\.dsh\profiles\node_modules\@deepseek-ai\dsh-client-ui-chat\lib\client.js`
+其中 `ReasoningRow.module.css`（`css$8`）与 `ReasoningRow({ text, running, t })` 组件就是「思考行」。
+
+照抄到本插件的数值（用自有属性打标后套用，不依赖官方哈希类名）：
+
+| 桌面端规则 | 取值 | 本插件实现 |
+|---|---|---|
+| `.lcKema_separator` | 2×2、`border-radius:1px`、`margin:0 8px`、背景 `label-caption` | `[data-dshm-row-sep]`：`0.125rem` 方形、`margin: 0 0.5rem`、同色 |
+| `.lcKema_summary` | `min-width:0`、`flex:auto`、`nowrap`、13px、`label-tertiary` | `[data-dshm-row-summary]` 同值 |
+| `.lcKema_summaryText` | `text-overflow:ellipsis`、`display:block`、`overflow:hidden` | `[data-dshm-row-summary] > span` 同值 |
+| `.lcKema_title` | `font-weight:400` | `[data-dshm-row-title]` |
+| 折叠行高 | `calc(24px + …)` | 官方自带，未覆盖 |
+
+AVD 实测（计算值）：分隔点 `2px`、`margin 0 8px`、背景 `rgb(173,178,184)`；摘要 `13px`、`rgb(129,133,140)`、`ellipsis`；标题 `font-weight 400`。
