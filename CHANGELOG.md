@@ -4,6 +4,47 @@
 
 ## [未发布]
 
+### 性能（无视觉变化）
+
+#### 第二轮：每帧同步链（手机端流式输出时「莫名卡」的主因）
+
+手机上流式输出时，主 observer 每帧都跑一遍全链。真正常驻的开销是**存在性探测**——设置页在不在、官方弹层开没开，各要 1~4 次全文档查询，而绝大多数帧的答案都是「不在」。改造后每帧的全文档查询从约 10 次降到约 0.4 次（稳态下只有节流探测），帧路径上的强制布局读数归零：
+
+| 项 | 改造前（每帧） | 改造后 |
+|---|---|---|
+| 设置页探测 `findSettingsDialog` | 2 次全文档查询 | 每 120ms 1 组（探到即恢复每帧维护） |
+| 弹层探测 `[role="listbox"], [role="menu"]` | 1 次 | 每 120ms 1 次（探到即每帧） |
+| `prunePopoverMarks` | 1 次全文档扫 + 每个标记 1 次 rect | 只遍历 `popoverMarks` 登记表，空表 O(1) |
+| `syncPanelSpace` 取面板根 | 1 次全文档扫 + rect | 从登记表取（O(登记数)） |
+| `syncTerminalWrap` | 2 次全文档扫 + 每张终端卡 1 次 rect | 并入 120ms 几何组 |
+| 输入卡 / 侧栏节点 | 每帧各 1 次全文档扫 | 缓存 + `isConnected` 复核 |
+| 布局选择器回收 | 每帧 1 次全文档扫 | `layoutPickerCount === 0` 时 O(1) |
+
+关键设计是**「探测节流、维护不减速」**：探测结果粘性保存，一旦发现设置页 / 弹层在屏上就立刻恢复成每帧维护，所以官方重渲染冲掉标记时仍能在下一帧补回来——响应性与改造前一致，只有空探测的频率降下来。`clearAnchors()` 会一并清空登记表与两个闸门开关，不留跨实例脏状态。
+
+#### 第一轮：对话区打标链路
+
+对话区打标链路的整理。这三处都不是新功能，而是把「每帧做的全文档扫描」按需化——三档预设的渲染结果与改造前一致。
+
+- **对话区打标器不再每帧重扫**：`startDialogueWatchers` 的 tick 原来挂在「body 任何 childList 变更」上（rAF 合帧 = 每帧一次），每次 tick 跑 2 遍 `[data-dshm-center]` 全量扫描 + 9 次全文档属性扫描。现在 observer 只负责排队，tick 之间至少隔 `DIALOGUE_TICK_MS`（200ms，常量已导出，单测锁上界），1.2s 兜底轮询仍然强制重扫一次，保证没有变更事件时状态也会收敛。流式输出场景下这条链路的扫描次数从「每帧 ~13 次」降到「每 200ms ~3 次」。
+- **时间戳与步骤行合并成一次遍历**：`syncStepRows` 并入 `syncMessageMeta`，一次 `querySelectorAll('span, div, time')` + 一次 `textContent` 读取同时维护两类标记；判定抽成纯函数 `isTimestampText` / `stepRowMarkOf`（`__test` 出口，新增 `test/dialogue-watch.test.js`）。步骤行仍只认叶子 `span`，与原口径逐条一致。
+- **胶囊回收从 9 次全文档扫描降到 O(1)**：`cleanupCapsuleArtifacts` 现在用 `capsuleArtifactsMayExist` 记住「是否真的进过胶囊态」，从未进过（默认 / 融合预设的常态）直接返回；真回收时 8 条属性选择器合成 1 条。此前它被 120ms 几何同步链与对话区 tick 同时高频调用。
+- **每帧同步链去掉一次重复调用**：`syncLayoutPicker()` 在同一帧里被调了两次（同一帧内没有能让选择器变化的中间步骤），保留前置那一次，删除后置那一次。
+
+### 修复
+
+- **统计浮层（Token 用量）闪屏**：点统计胶囊后弹窗先按官方锚定位置画一次，插件等 120ms 的几何链跑完才把 `data-dshm-stats-dialog` 打上、CSS 再把它钉成固定面板——肉眼就是「弹出来、跳一下、刷新两次」。现在「发现官方弹窗」放进主 observer 的**同步回调**（与 DOM 变更同帧），并在紧随其后的 rAF（绘制前）补一次 `syncStatsBar()` + `tagStatsDialog()`；补打窗口 600ms，覆盖 React 异步填充内容的那几帧。稳态下 `dialogDueAt` 为 0，不产生额外开销。
+- **底部表焦点陷阱**：新增 `trapFocus()`，Tab / Shift+Tab 在面板内循环。此前焦点虽然被送进面板，但 Tab 会走到遮罩下面的底部条上。
+- **读屏播报**：新增常驻的视觉隐藏 `role="status"` 播报区（`announce()`），底部表与抽屉开合各播一次（文案走 `STRINGS` 的 `a11yOpened` / `a11yClosed`，中英成对，只在状态真的变化时播）；清场时连同节点一并摘掉。
+- **对话区打标器永不回收**：`startDialogueWatchers` 的 `setInterval` 与两个 `MutationObserver` 没有任何 teardown，插件禁用后仍然活到页面刷新、并继续在每次 DOM 变更时排队 rAF。现在返回 `release` 并进入 `teardowns`，`dispose()` 会清掉 interval / 定时器 / 两个 observer，下次 apply 可重新启动。
+- **测试门禁静默漏跑**：`npm test` 用的 `node --test --test-force-exit` 会提前结束，实际跑到的用例数每次都不同（同一份代码实测 282 / 290 / 297，而全量是 308）——`--test-force-exit` 在用例还没结束时就把子进程按掉了。去掉该参数后连续三次都是稳定的全量（用时不变，也没有挂住）。`npm run check` 走同一脚本，CI 一并修正。
+- **注释重复**：`syncStepRows` 的孤儿文档注释（同一段说明在 `syncStepCollapse` 之前重复出现两次）随合并一并删除。
+
+### 文档
+
+- `docs/technical-notes.md` 新增 §3.19「对话区打标链的性能约定」，记录节流窗口、合并遍历与回收闸门的取舍依据。
+- 校正 `docs/architecture.md` 与 `docs/technical-notes.md` 里过期的规模口径（行数、单测项数）。
+
 ---
 
 ## [0.4.11] - 2026-11-09

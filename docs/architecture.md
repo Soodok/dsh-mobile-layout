@@ -60,7 +60,7 @@ dsh-mobile-layout 是一个 Cordis 插件，把 DSH Web 客户端在**手机竖�
 
 ## 4. 分层结构
 
-`lib/client.js` 约 10000 行，自上而下分六层。依赖方向单向向下：
+`lib/client.js` 约 15900 行，自上而下分六层。依赖方向单向向下：
 
 ```
 ┌──────────────────────────────────────────────────────┐
@@ -182,7 +182,7 @@ dispose()
 
 ## 8. 测试与质量边界
 
-- **纯函数 + 源码契约单测**（129 项）：所有几何决策、分页、配色、状态机判定都抽成纯函数，经 `module.exports.__test` 出口在 Node 单测中覆盖（vm 沙箱隔离，测试不碰 DOM）。
+- **纯函数 + 源码契约单测**（308 项）：所有几何决策、分页、配色、状态机判定都抽成纯函数，经 `module.exports.__test` 出口在 Node 单测中覆盖（vm 沙箱隔离，测试不碰 DOM）；另有 `test/ux.test.js` / `test/tokens.test.js` 等源码契约用例，把「样式必须挂在哪个作用域」「哪个标记必须随 dispose 清掉」写成扫描断言。
 - **包契约自检**：`verify-package` 校验 bundle 内 `VERSION` 与 package.json 一致、发布文件清单完整。
 - **硬编码守卫**：`check-hardcoded.mjs` 扫描注入 CSS 的「布局属性 + 纯 px」，新增违规 CI 失败；自适应表达式（`var()/clamp()/env()/%`）自动放行，存量 221 处进 baseline 渐进收紧。
 - **真机验收**：MuMu 模拟器（720×1280）+ Redmi K70 真机两档；验证矩阵与 adb 部署方法见《技术说明》第 6 节。

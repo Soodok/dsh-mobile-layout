@@ -9,12 +9,14 @@
 - **测试出口**：`module.exports.__test` 导出全部纯函数与常量（`classify`、`swipeDirection`、`drawerStartLimit`、`decideDrawerGesture`、`drawerSettle`、`scrollerConsumes`、`planAddPages`、`tintHash`、`sessionRows`、`shouldCloseSheetByDrag`、`STRINGS` 等），供 `test/*.test.js` 使用。注意 `__test` 对象出自 vm 沙箱（跨 realm），断言对象值时先逐字段取值或转本域数组，**不要直接 `deepEqual` 沙箱对象**（原型不同必挂）。
 
 ```sh
-npm run check             # node --check → 129 项单测 → verify-package → 硬编码守卫
+npm run check             # node --check → 308 项单测 → verify-package → 硬编码守卫
 npm test                  # 仅单测
 npm run hardcode:check    # 仅硬编码守卫（新增违规即失败）
 npm run hardcode:baseline # 消除违规后收紧 baseline
 npm run pack:dry          # 预览发布文件清单
 ```
+
+> ⚠️ **不要给 `node --test` 加 `--test-force-exit`**（2026-11 移除）。它会在用例还没跑完时按掉测试子进程，同一份代码每次跑到的用例数都不一样（实测 282 / 290 / 297，全量 308），门禁看起来「通过」其实少跑了一截。去掉后三次连跑都是 308 / 300 pass / 8 skipped，用时不变也不挂住。
 
 - **硬编码守卫**：`scripts/check-hardcoded.mjs` 扫描 `lib/client.js` 注入 CSS 字符串行里「布局属性（width/height/margin/padding/top…/gap/border-radius）+ 纯 px」。值含 `var()/clamp()/env()/min()/max()/%` 自动放行，0.5 / 1px 细线豁免，行上方注释 `HARDCODE-OK: 理由` 可豁免；与 `scripts/hardcoded-baseline.json`（sha1 哈希集）比对，**新增违规即失败**、消除违规提示收紧。跨机型适配问题在源头被 CI 拦截。
 
@@ -469,3 +471,68 @@ WebView JS **没有**"不弹键盘就知道高度"的 API；来源按优先级�
 | 设置页（浅） | `.tmp-shot/avd/p64-01-settings.png` | 五项补位（会话/插件/设置/自动化任务/工作台），内容不被遮挡 |
 
 **深色未能验证**：`adb shell cmd uimode night yes` 后 App 仍为浅色（`data-ds-theme-source=system`、`color-scheme: light`），说明该壳不跟随系统夜间模式；深色需要在 App 设置里切「外观」，脚本没定位到该入口。深色样式本身（`prefers-color-scheme: dark` 下正文 +1px、代码块卡片）已随 CSS 生效，只差一张实拍。
+
+### 3.19 对话区打标链的性能约定（2026-11 整理）
+
+对话区（时间戳 / 步骤行 / 代码块开关 / 步骤折叠 / 日期分隔 / 工具 chip）这套打标有三个驱动源，整理前它们互相不知道对方的频率：
+
+| 驱动源 | 频率 | 原来一次要做的事 |
+|---|---|---|
+| `MutationObserver(body, childList+subtree)` → rAF | 每帧（流式输出时 60 次/秒） | `syncMessageMeta`（center 全量 `span,div,time`）+ `syncStepRows`（center 全量 `span`）+ `syncCodeBlockToggles` + `syncStepCollapse` + `cleanupCapsuleArtifacts`（9 次全文档属性扫描） |
+| `syncComposerChips`（几何同步链，120ms 节流） | 每 120ms | `.center` 扫描 + 上面同一组打标（经 `syncViewTabsRow` 再跑一遍） |
+| `setInterval(1200)` + `setTimeout(600)` | 1.2s | 同一组打标（兜底） |
+
+这套组合的代价不在于单个函数，而在于**同一份幂等打标被按渲染帧的频率重复执行**。整理后的三条约定：
+
+1. **observer 只排队，不等价于执行**。tick 之间至少隔 `DIALOGUE_TICK_MS`（200ms）；`force` 只给兜底轮询与根属性（预设 / 模式 / 底栏样式）变化用。选 200ms 的理由：打标只影响「新出现的节点长什么样」，晚 200ms 重放对新消息的可见影响低于一次滚动帧；而扫描次数直接降到 1/12。
+2. **同一件事只扫一遍**。时间戳与步骤行合并进 `syncMessageMeta`（判定抽成 `isTimestampText` / `stepRowMarkOf`，`__test` 可测）；步骤行仍然只认叶子 `span`——合并遍历不能顺手放宽口径，否则 `<div>思考</div>` 这类节点会被误标。
+3. **回收要有闸门**。`cleanupCapsuleArtifacts` 只在「真的进过胶囊态」之后才可能有事可做，用 `capsuleArtifactsMayExist` 记住这一点，从未进过就 O(1) 返回；真回收时 8 条属性选择器合成 1 条。此前它是被两条高频路径同时调用的 9 次全文档扫描。
+
+对应的生命周期修正是独立的另一件事：`startDialogueWatchers()` 现在返回 `release` 并进 `teardowns`——整理前 interval 与两个 observer 没有任何卸载路径，插件禁用后仍活到页面刷新。
+
+**验证方式**：`test/dialogue-watch.test.js` 锁纯判定、节流常量上界与四条源码契约（不再有 `syncStepRows`、合并后只查一次、回收闸门存在、打标器可回收且进 teardowns）。真机侧仍按 §6.2 的探针法看几何，帧率差异用 DevTools Performance 面板录「流式输出期间」的 10 秒剖面比对。
+
+### 3.20 每帧同步链：探测节流、维护不减速（2026-11 性能整理）
+
+手机端「流式输出时莫名卡」的根因不是某个 sync 写得慢，而是**主 observer 的每帧链里混着一堆存在性探测**：设置页在不在（`findSettingsDialog` 2 次全文档查询）、官方弹层开没开（1 次）、弹层标记是否失效（全文档扫 + 每个标记 1 次 rect）、终端卡片要不要放按钮（2 次 + 每卡 1 次 rect）。这些查询在 99% 的帧里答案都是「没有」，但它们照样每帧付钱——合计约 10 次全文档查询 + 2~4 次强制布局/帧。
+
+整理原则：**探测节流，维护不减速**。
+
+```js
+// 没有东西在屏上：探测降到 120ms 一次，中间帧连维护一起跳过
+// 探到东西：立刻恢复成每帧维护（官方重渲染冲掉标记下一帧就能补回）
+if (overlaysPresent || nowAt - lastPresenceProbeAt >= PRESENCE_PROBE_MS) { … }
+```
+
+粘性（`overlaysPresent` / `menuPresent`）是这条设计的核心：只用时间闸门会牺牲维护及时性（设置页刚打开时全屏样式要晚 120ms 才生效，肉眼可见），而「探到就粘住」把时间闸门限制在**空探测**上，两边都保住。
+
+配套的四项把「每帧都要扫」变成「扫一次就够」：
+
+| 位置 | 改法 |
+|---|---|
+| `prunePopoverMarks` | 只遍历 `popoverMarks`（`tagComposerMenus` 打标时登记），空表 O(1)；节点丢失靠 `isConnected` / `hasAttribute` 自清 |
+| `syncPanelSpace` | 面板根从登记表取，不再 `querySelector('[data-dshm-popover]')` |
+| `syncTerminalWrap` | 它要量每张终端卡的 rect，整体挪进 120ms 的 `runLayoutSync` |
+| 输入卡 / 侧栏 / 选择器份数 | `composerCardCache` / `sidebarNodeCache`（`isConnected` 复核）、`layoutPickerCount` 计数闸门 |
+
+约束：`clearAnchors()` 必须同时清空 `popoverMarks`、`capsuleArtifactsMayExist`、`layoutPickerCount`，否则同一个页面上换实例后，闸门会认为「已经干净」而跳过回收。
+
+验证：`test/frame-sync.test.js` 7 项源码契约（探测节流与粘性、终端同步归属、登记表而非全文档扫、缓存存在、清场覆盖闸门）。真机侧建议用 DevTools Performance 录「长会话流式输出」10 秒剖面，对比 `Recalculate Style` / `Layout` 的调用次数。
+
+### 3.21 统计浮层的「闪屏」与两处无障碍补完（2026-11）
+
+**① 点统计胶囊 → 弹窗跳一下（用户实报）。**
+
+链路还原：官方弹窗插入 DOM → 浏览器按官方锚定位置画第一帧 → 插件的 `tagStatsDialog()` 挂在 `syncComposerChips` 里，而那条链是 120ms 节流的 → 标记晚到 → CSS 把它钉成「状态带下方固定面板」→ 第二次绘制。用户看到的就是「先出现、然后突然变成自适应大小，刷新两次」。
+
+修法不是缩短节流（几何链必须节流，否则每帧强制布局）：**把「发现弹窗」从几何链里摘出来，放进主 observer 的同步回调**——MutationObserver 回调本身就跑在绘制之前，逐条看 `record.addedNodes` 是不是 `[role="dialog"]`（深层子树只在 `childElementCount < 40` 时下探，避免新会话整棵树被扫），命中就记 `dialogDueAt`，紧随其后的 rAF（仍在同一帧、绘制前）补 `syncStatsBar()` + `tagStatsDialog()`。补打窗口 `DIALOG_TAG_WINDOW_MS = 600` 覆盖 React 异步填充内容的那几帧；稳态下 `dialogDueAt === 0`，这层完全空转。
+
+为什么不能只靠 `syncStatsBar` 的变量：`--dshm-stats-top` / `--dshm-stats-height` 由同一条几何链写，弹窗打开前它们通常已经是正确值，闪屏的主因是**标记晚到**而不是几何晚到。
+
+**② 无障碍：焦点陷阱 + 播报。**
+
+- `trapFocus(container)`：Tab / Shift+Tab 在面板内循环；空可达项时把焦点拉回容器。底部表此前只有「把焦点送进去」和「关闭时还回来」，中间 Tab 会走到遮罩下面的底部条。
+- `announce(message)`：常驻的视觉隐藏 `role="status" aria-live="polite"` 区域。三个约束：节点常驻（每次新建再写入，部分读屏漏读）、**同一句重复播报要先清空**、隐藏方式必须是 `clip` + `1px` 而不是 `display:none` / `visibility:hidden`（后者会让读屏整段跳过）。底部表与抽屉各在开 / 合时播一次，文案走 `STRINGS.a11yOpened / a11yClosed`（`{name}` 模板，中英成对）。
+- `clearAnchors()` 会摘掉播报区节点，避免卸载后残留。
+
+验证：`test/a11y-flicker.test.js` 8 项（observer 内发现弹窗、补打窗口上界、文案成对且英文无中文、播报区属性与隐藏方式、Tab 双向循环、底部表开合接线、抽屉仅变化时播报、清场摘节点）。
