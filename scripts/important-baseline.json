@@ -1,6 +1,6 @@
 {
   "_comment": "!important baseline（见 scripts/check-important.mjs）。减量口径：先在真机比对结构度量，再删、再跑 npm run important:baseline 收紧。",
-  "total": 591,
+  "total": 609,
   "rules": [
     {
       "hash": "f2ee765234dc",
@@ -186,6 +186,16 @@
       "hash": "e42ec4c4102c",
       "selector": "html[data-dshm-mode=\"mobile\"][data-dshm-header-menu-open] [data-dshm-center] header[data-window-drag]",
       "count": 2
+    },
+    {
+      "hash": "226e0c7b5a0e",
+      "selector": "html[data-dshm-mode=\"mobile\"][data-dshm-preset=\"v2\"][data-dshm-dock=\"capsule\"] [data-dshm-header-menu] button",
+      "count": 6
+    },
+    {
+      "hash": "49e6190c7467",
+      "selector": "html[data-dshm-mode=\"mobile\"][data-dshm-preset=\"v2\"][data-dshm-dock=\"capsule\"] [data-dshm-header-menu] button span",
+      "count": 3
     },
     {
       "hash": "6b021124e1f2",
@@ -605,7 +615,17 @@
     {
       "hash": "a8a52c23fe96",
       "selector": "html[data-dshm-mode=\"mobile\"][data-dshm-preset=\"v2\"][data-dshm-dock=\"capsule\"] [data-dshm-header-title]",
-      "count": 1
+      "count": 5
+    },
+    {
+      "hash": "276ebfee97eb",
+      "selector": "html[data-dshm-mode=\"mobile\"][data-dshm-preset=\"v2\"][data-dshm-dock=\"capsule\"] [data-dshm-header-title] nav",
+      "count": 3
+    },
+    {
+      "hash": "12bd69b6db92",
+      "selector": "html[data-dshm-mode=\"mobile\"][data-dshm-preset=\"v2\"][data-dshm-dock=\"capsule\"] [data-dshm-header-toggle]",
+      "count": 2
     },
     {
       "hash": "b2cca3f71fe0",
