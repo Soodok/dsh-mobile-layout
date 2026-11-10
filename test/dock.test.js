@@ -362,9 +362,11 @@ test('CSS 契约：胶囊是合并形态——卡片下侧压平、底栏只留�
     source.includes("'  --dshm-v2-card-radius-bottom: 0px;'"),
     '胶囊态必须把输入卡下侧圆角压成 0，否则接缝处是两个圆角对不上',
   )
+  // 键盘态反过来：底栏收掉后卡片下沿直接贴键盘，下角必须归零，
+  // 否则真机上就是「输入框底部变圆角、与键盘之间露出两个缺口」。
   assert.ok(
-    source.includes("'  --dshm-v2-card-radius-bottom: var(--dshm-v2-dock-radius);'"),
-    '键盘态（底栏收掉）要把下侧圆角圆回来，否则卡片贴着键盘是直角',
+    /\[data-dshm-ime\] \{[\s\S]{0,120}--dshm-v2-card-radius-bottom: 0px;/.test(source),
+    '键盘态（底栏收掉）下侧圆角要归零，卡片才与键盘齐平',
   )
   assert.ok(
     source.includes("'  border-radius: 0 0 var(--dshm-v2-dock-radius) var(--dshm-v2-dock-radius);'"),
