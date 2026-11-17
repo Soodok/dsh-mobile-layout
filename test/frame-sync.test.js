@@ -75,3 +75,33 @@ test('clearAnchors 清空登记表与闸门（不留跨实例脏状态）', () =
   assert.match(body, /popoverMarks\.clear\(\)/)
   assert.match(body, /layoutPickerCount = 0/)
 })
+
+test('插入即隐藏：只在手机形态、跳过插件自绘浮层、按布局几何判稳', () => {
+  const body = slice('const OWN_OVERLAY_SELECTOR = ', 'observer.observe(doc.documentElement')
+  // 只在手机形态里接管：桌面/平板藏官方弹窗是纯拖慢。
+  assert.match(body, /if \(records && records\.length && state\.mode === MODE_MOBILE\) \{/)
+  // 底部表 / 附件菜单 / 快速菜单是自绘的，不参与「插入即隐藏」。
+  assert.match(body, /const OWN_OVERLAY_SELECTOR = /)
+  assert.match(body, /isPanel && !isOwnOverlay\(node\) && node\.style\.visibility !== 'hidden'/)
+  // justify 用 offset*（不受 transform 影响），不能再用 rect 判稳。
+  assert.match(body, /node\.offsetLeft \+ ',' \+ node\.offsetTop/)
+  assert.equal(/const r = node\.getBoundingClientRect\(\);/.test(body), false)
+  // 藏的时间有上限，且不能是 500ms 这种「动画都放完了」的窗口。
+  assert.match(body, /frames > 8/)
+  assert.equal(/win\.setTimeout\(reveal, 500\)/.test(body), false)
+})
+
+test('不残留调试探针', () => {
+  assert.equal(source.includes('TEMP-PROBE'), false)
+  assert.equal(source.includes('dshm-geo'), false)
+})
+
+test('clearAnchors 先还原内联行高再摘 header 标记，并清掉布局选择器节点', () => {
+  const body = slice('function clearAnchors(doc) {', 'function ')
+  const restoreAt = body.indexOf("removeProperty('grid-template-rows')")
+  const stripAt = body.indexOf('ATTR_HEADER_CARD')
+  assert.notEqual(restoreAt, -1, 'clearAnchors 里应有内联行高还原')
+  assert.notEqual(stripAt, -1, 'clearAnchors 里应摘 header-card 标记')
+  assert.ok(restoreAt < stripAt, '必须先还原内联行高，摘掉标记后就找不到 header 了')
+  assert.match(body, /\[data-dshm-layout-picker\]/)
+})
